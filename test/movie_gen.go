@@ -1,6 +1,6 @@
 // gen models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 13 Oct 2013 20:24:20 UTC
+// Sun, 13 Oct 2013 23:54:35 UTC
 
 package models
 
@@ -21,6 +21,14 @@ func (movies Movies) Any(fn func(movie *Movie) bool) bool {
 		}
 	}
 	return false
+}
+func (movies Movies) Count(fn func(movie *Movie) bool) (result int) {
+	for _, m := range movies {
+		if fn(m) {
+			result++
+		}
+	}
+	return result
 }
 func (movies Movies) Where(fn func(movie *Movie) bool) (result Movies) {
 	for _, m := range movies {

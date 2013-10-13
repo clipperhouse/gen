@@ -53,6 +53,18 @@ func TestMovies(t *testing.T) {
 		t.Fail()
 	}
 
+	var count_first_or_third = some.Count(is_first_or_third)
+	if count_first_or_third != 2 {
+		log.Println(count_first_or_third)
+		t.Fail()
+	}
+
+	var count_none = none.Count(is_first_or_third)
+	if count_none != 0 {
+		log.Println(count_none)
+		t.Fail()
+	}
+
 	var is_true = func(movie *Movie) bool {
 		return true
 	}

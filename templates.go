@@ -32,6 +32,15 @@ func getTemplates() (templates map[string]string) {
 	return false
 }
 `
+	templates["count"] = `func ({{.PluralLocal}} {{.Plural}}) Count(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result int) {
+	for _, m := range {{.PluralLocal}} {
+		if fn(m) {
+			result++
+		}
+	}
+	return result
+}
+`
 	templates["where"] = `func ({{.PluralLocal}} {{.Plural}}) Where(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, m := range {{.PluralLocal}} {
 		if fn(m) {
