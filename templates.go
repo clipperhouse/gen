@@ -15,6 +15,9 @@ func getTemplates() (templates map[string]string) {
 
 `
 	templates["all"] = `func ({{.PluralLocal}} {{.Plural}}) All(fn func({{.SingularLocal}} *{{.Singular}}) bool) bool {
+	if fn == nil {
+		return true
+	}
 	for _, m := range {{.PluralLocal}} {
 		if !fn(m) {
 			return false
@@ -24,6 +27,9 @@ func getTemplates() (templates map[string]string) {
 }
 `
 	templates["any"] = `func ({{.PluralLocal}} {{.Plural}}) Any(fn func({{.SingularLocal}} *{{.Singular}}) bool) bool {
+	if fn == nil {
+		return true
+	}
 	for _, m := range {{.PluralLocal}} {
 		if fn(m) {
 			return true
@@ -33,6 +39,9 @@ func getTemplates() (templates map[string]string) {
 }
 `
 	templates["count"] = `func ({{.PluralLocal}} {{.Plural}}) Count(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result int) {
+	if fn == nil {
+		return len({{.PluralLocal}})
+	}
 	for _, m := range {{.PluralLocal}} {
 		if fn(m) {
 			result++
@@ -43,7 +52,7 @@ func getTemplates() (templates map[string]string) {
 `
 	templates["where"] = `func ({{.PluralLocal}} {{.Plural}}) Where(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, m := range {{.PluralLocal}} {
-		if fn(m) {
+		if fn == nil || fn(m) {
 			result = append(result, m)
 		}
 	}

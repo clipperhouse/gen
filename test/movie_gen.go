@@ -1,12 +1,15 @@
 // gen models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 13 Oct 2013 23:54:35 UTC
+// Mon, 14 Oct 2013 02:46:18 UTC
 
 package models
 
 type Movies []*Movie
 
 func (movies Movies) All(fn func(movie *Movie) bool) bool {
+	if fn == nil {
+		return true
+	}
 	for _, m := range movies {
 		if !fn(m) {
 			return false
@@ -15,6 +18,9 @@ func (movies Movies) All(fn func(movie *Movie) bool) bool {
 	return true
 }
 func (movies Movies) Any(fn func(movie *Movie) bool) bool {
+	if fn == nil {
+		return true
+	}
 	for _, m := range movies {
 		if fn(m) {
 			return true
@@ -23,6 +29,9 @@ func (movies Movies) Any(fn func(movie *Movie) bool) bool {
 	return false
 }
 func (movies Movies) Count(fn func(movie *Movie) bool) (result int) {
+	if fn == nil {
+		return len(movies)
+	}
 	for _, m := range movies {
 		if fn(m) {
 			result++
@@ -32,7 +41,7 @@ func (movies Movies) Count(fn func(movie *Movie) bool) (result int) {
 }
 func (movies Movies) Where(fn func(movie *Movie) bool) (result Movies) {
 	for _, m := range movies {
-		if fn(m) {
+		if fn == nil || fn(m) {
 			result = append(result, m)
 		}
 	}
