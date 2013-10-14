@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-type Movie struct {
-	Id    int
-	Title string
-}
-
 func TestMovies(t *testing.T) {
 	var some = Movies{
 		&Movie{Title: "first"},
