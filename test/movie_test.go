@@ -127,3 +127,22 @@ func TestWhere(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestNil(t *testing.T) {
+	if some.Count(nil) != len(some) {
+		t.Error("count")
+	}
+
+	var where = some.Where(nil)
+	if len(where) != len(some) {
+		t.Error("where")
+	}
+
+	if !some.All(nil) {
+		t.Error("all")
+	}
+
+	if !some.Any(nil) {
+		t.Errorf("any")
+	}
+}
