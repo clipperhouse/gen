@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 17 Oct 2013 19:56:53 UTC
+// Thu, 17 Oct 2013 20:05:11 UTC
 
 package models
 
@@ -44,6 +44,13 @@ func (m Movies) Each(fn func(*Movie)) {
 	for _, _m := range m {
 		fn(_m)
 	}
+}
+
+func (m Movies) SumInt(fn func(*Movie) int) (result int) {
+	var sum = func(_m *Movie, acc int) int {
+		return acc + fn(_m)
+	}
+	return m.AggregateInt(sum)
 }
 
 func (m Movies) Where(fn func(*Movie) bool) (result Movies) {

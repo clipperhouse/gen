@@ -31,6 +31,9 @@ var is_true = func(movie *Movie) bool {
 var is_false = func(movie *Movie) bool {
 	return false
 }
+var get_theaters = func(movie *Movie) int {
+	return movie.Theaters
+}
 var sum_theaters = func(movie *Movie, acc int) int {
 	return acc + movie.Theaters
 }
@@ -122,6 +125,14 @@ func TestCount(t *testing.T) {
 	if none.Count(is_true) != 0 {
 		log.Println(none.Count(is_true))
 		t.Fail()
+	}
+}
+
+func TestSumInt(t *testing.T) {
+	expected := 6 + 9 + 5
+
+	if expected != some.SumInt(get_theaters) {
+		t.Error(some.SumInt(get_theaters))
 	}
 }
 
