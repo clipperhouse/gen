@@ -28,6 +28,9 @@ var is_dummy = func(movie *Movie) bool {
 var is_true = func(movie *Movie) bool {
 	return true
 }
+var is_false = func(movie *Movie) bool {
+	return false
+}
 
 func TestAll(t *testing.T) {
 	if false != some.All(is_first) {
@@ -45,7 +48,16 @@ func TestAll(t *testing.T) {
 		t.Fail()
 	}
 
-	// TODO: what's the right behavior on empty set?
+	// All is always true on empty collection
+	if true != none.All(is_true) {
+		log.Println(some.All(is_true))
+		t.Fail()
+	}
+
+	if true != none.All(is_false) {
+		log.Println(some.All(is_false))
+		t.Fail()
+	}
 }
 
 func TestAny(t *testing.T) {
