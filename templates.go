@@ -1,20 +1,22 @@
 package main
 
-func getTemplates() (templates map[string]string) {
-	templates = make(map[string]string)
+import (
+	"text/template"
+)
 
-	templates["header"] = `// {{.Command}}
+func getTemplate() *template.Template {
+	return template.Must(template.New("gen").Parse(tmpl))
+}
+
+const tmpl = `// {{.Command}}
 // this file was auto-generated using github.com/clipperhouse/gen
 // {{.Generated}}
 
-`
-	templates["package"] = `package {{.Package}}
+package {{.Package}}
 
-`
-	templates["type"] = `type {{.Plural}} []{{.Pointer}}{{.Singular}}
+type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
-`
-	templates["all"] = `func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
+func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if !fn({{.Loop}}) {
 			return false
@@ -22,8 +24,8 @@ func getTemplates() (templates map[string]string) {
 	}
 	return true
 }
-`
-	templates["any"] = `func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
+
+func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
 			return true
@@ -31,8 +33,8 @@ func getTemplates() (templates map[string]string) {
 	}
 	return false
 }
-`
-	templates["count"] = `func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
+
+func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
 			result++
@@ -40,14 +42,14 @@ func getTemplates() (templates map[string]string) {
 	}
 	return result
 }
-`
-	templates["each"] = `func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
+
+func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		fn({{.Loop}})
 	}
 }
-`
-	templates["where"] = `func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
+
+func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
 			result = append(result, {{.Loop}})
@@ -56,5 +58,3 @@ func getTemplates() (templates map[string]string) {
 	return result
 }
 `
-	return
-}

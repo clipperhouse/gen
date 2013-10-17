@@ -30,9 +30,9 @@ func main() {
 		return
 	}
 
-	t := getTemplates()
 	v := getValues()
-	writeTemplates(t, v)
+	t := getTemplate()
+	writeFile(t, v)
 }
 
 var arg = regexp.MustCompile(`(\*?)([a-zA-Z]+)\.([a-zA-Z]+)`)
@@ -61,17 +61,14 @@ func getValues() (v *Values) {
 	}
 }
 
-func writeTemplates(templates map[string]string, v *Values) {
+func writeFile(t *template.Template, v *Values) {
 	f, err := os.Create(v.FileName)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	for key, val := range templates {
-		t := template.Must(template.New(key).Parse(val))
-		t.Execute(f, v)
-	}
+	t.Execute(f, v)
 }
 
 const usage = `Usage: [*]package.TypeName
