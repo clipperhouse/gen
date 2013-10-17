@@ -41,13 +41,14 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	return false
 }
 
-func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
-	for _, {{.Loop}} := range {{.Receiver}} {
+func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) int {
+	var count = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		if fn({{.Loop}}) {
-			result++
+			acc++
 		}
+		return acc
 	}
-	return result
+	return {{.Receiver}}.AggregateInt(count)
 }
 
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {

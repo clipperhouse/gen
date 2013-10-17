@@ -31,13 +31,14 @@ func (m Movies) Any(fn func(*Movie) bool) bool {
 	return false
 }
 
-func (m Movies) Count(fn func(*Movie) bool) (result int) {
-	for _, _m := range m {
+func (m Movies) Count(fn func(*Movie) bool) int {
+	var count = func(_m *Movie, acc int) int {
 		if fn(_m) {
-			result++
+			acc++
 		}
+		return acc
 	}
-	return result
+	return m.AggregateInt(count)
 }
 
 func (m Movies) Each(fn func(*Movie)) {
