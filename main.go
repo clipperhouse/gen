@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/pkg/inflect"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -23,6 +24,12 @@ type Values struct {
 }
 
 func main() {
+	has_args := len(os.Args) > 1
+	if !has_args {
+		fmt.Print(usage)
+		return
+	}
+
 	t := getTemplates()
 	v := getValues()
 	writeTemplates(t, v)
@@ -66,3 +73,10 @@ func writeTemplates(templates map[string]string, v *Values) {
 		t.Execute(f, v)
 	}
 }
+
+const usage = `Usage: [*]package.TypeName
+
+* is recommended but optional, and indicates that generated code should use pointers to the type.
+
+This preference is best for implementing 'expected' and more performant behavior; the non-pointer version will copy structs by value with each function call.
+`
