@@ -6,9 +6,9 @@ import (
 )
 
 var some = Movies{
-	&Movie{Title: "first"},
-	&Movie{Title: "second"},
-	&Movie{Title: "third"},
+	&Movie{Title: "first", Theaters: 6},
+	&Movie{Title: "second", Theaters: 9},
+	&Movie{Title: "third", Theaters: 5},
 }
 
 var none = Movies{}
@@ -30,6 +30,17 @@ var is_true = func(movie *Movie) bool {
 }
 var is_false = func(movie *Movie) bool {
 	return false
+}
+var sum_theaters = func(movie *Movie, acc int) int {
+	return acc + movie.Theaters
+}
+
+func TestAggregate(t *testing.T) {
+	expected := 6 + 9 + 5
+
+	if expected != some.AggregateInt(sum_theaters) {
+		t.Error(some.AggregateInt(sum_theaters))
+	}
 }
 
 func TestAll(t *testing.T) {

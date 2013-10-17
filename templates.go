@@ -16,6 +16,13 @@ package {{.Package}}
 
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
+func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}}, int) int) (result int) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		result = fn({{.Loop}}, result)
+	}
+	return result
+}
+
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if !fn({{.Loop}}) {

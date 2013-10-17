@@ -1,6 +1,6 @@
 package models
 
 type Movie struct {
-	Id    int
-	Title string
+	Title    string
+	Theaters int
 }
