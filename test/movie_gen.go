@@ -1,12 +1,19 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 17 Oct 2013 20:11:55 UTC
+// Thu, 17 Oct 2013 21:21:29 UTC
 
 package models
 
 type Movies []*Movie
 
 func (m Movies) AggregateInt(fn func(*Movie, int) int) (result int) {
+	for _, _m := range m {
+		result = fn(_m, result)
+	}
+	return result
+}
+
+func (m Movies) AggregateString(fn func(*Movie, string) string) (result string) {
 	for _, _m := range m {
 		result = fn(_m, result)
 	}
@@ -45,6 +52,16 @@ func (m Movies) Each(fn func(*Movie)) {
 	for _, _m := range m {
 		fn(_m)
 	}
+}
+
+func (m Movies) JoinString(fn func(*Movie) string, delimiter string) string {
+	var join = func(_m *Movie, acc string) string {
+		if _m != m[0] {
+			acc += delimiter
+		}
+		return acc + fn(_m)
+	}
+	return m.AggregateString(join)
 }
 
 func (m Movies) SumInt(fn func(*Movie) int) int {

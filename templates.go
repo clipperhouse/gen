@@ -23,6 +23,13 @@ func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}},
 	return result
 }
 
+func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular}}, string) string) (result string) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		result = fn({{.Loop}}, result)
+	}
+	return result
+}
+
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if !fn({{.Loop}}) {
@@ -55,6 +62,16 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		fn({{.Loop}})
 	}
+}
+
+func ({{.Receiver}} {{.Plural}}) JoinString(fn func({{.Pointer}}{{.Singular}}) string, delimiter string) string {
+	var join = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc string) string {
+		if {{.Loop}} != m[0] {
+			acc += delimiter
+		}
+		return acc + fn({{.Loop}})
+	}
+	return m.AggregateString(join)
 }
 
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {

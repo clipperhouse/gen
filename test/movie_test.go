@@ -37,12 +37,26 @@ var get_theaters = func(movie *Movie) int {
 var sum_theaters = func(movie *Movie, acc int) int {
 	return acc + movie.Theaters
 }
+var get_title = func(movie *Movie) string {
+	return movie.Title
+}
+var concat_title = func(movie *Movie, acc string) string {
+	return acc + movie.Title
+}
 
-func TestAggregate(t *testing.T) {
+func TestAggregateInt(t *testing.T) {
 	expected := 6 + 9 + 5
 
 	if expected != some.AggregateInt(sum_theaters) {
 		t.Error(some.AggregateInt(sum_theaters))
+	}
+}
+
+func TestAggregateString(t *testing.T) {
+	expected := "first" + "second" + "third"
+
+	if expected != some.AggregateString(concat_title) {
+		t.Error(some.AggregateString(concat_title))
 	}
 }
 
@@ -125,6 +139,14 @@ func TestCount(t *testing.T) {
 	if none.Count(is_true) != 0 {
 		log.Println(none.Count(is_true))
 		t.Fail()
+	}
+}
+
+func TestJoinString(t *testing.T) {
+	expected := "first, second, third"
+
+	if expected != some.JoinString(get_title, ", ") {
+		t.Error(some.JoinString(get_title, ", "))
 	}
 }
 
