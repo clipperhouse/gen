@@ -57,7 +57,7 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	}
 }
 
-func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) (result int) {
+func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
 	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		return acc + fn({{.Loop}})
 	}

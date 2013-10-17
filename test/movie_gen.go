@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 17 Oct 2013 20:05:11 UTC
+// Thu, 17 Oct 2013 20:11:55 UTC
 
 package models
 
@@ -47,7 +47,7 @@ func (m Movies) Each(fn func(*Movie)) {
 	}
 }
 
-func (m Movies) SumInt(fn func(*Movie) int) (result int) {
+func (m Movies) SumInt(fn func(*Movie) int) int {
 	var sum = func(_m *Movie, acc int) int {
 		return acc + fn(_m)
 	}
