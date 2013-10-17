@@ -8,7 +8,7 @@ We’re starting with proof-of-concept basics like Any, Where, and Count, later 
 
 Clone this repo, and cd into the directory. Then, `go install`, which will create a binary called `gen` that you can invoke from the command line (assuming you’ve [set up](http://golang.org/doc/install) your paths, etc).
 
-`cd` into the /test directory and type `gen models.*Movie`. This should overwrite the [movie_gen.go](/clipperhouse/gen/blob/master/test/movie_gen.go) file that came with the repo. Have a look at the header comments.
+`cd` into the /test directory and type `gen *models.Movie`. This should overwrite the [movie_gen.go](/clipperhouse/gen/blob/master/test/movie_gen.go) file that came with the repo. Have a look at the header comments.
 
 Then, `go test`.
 

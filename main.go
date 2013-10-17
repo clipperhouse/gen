@@ -28,7 +28,7 @@ func main() {
 	writeTemplates(t, v)
 }
 
-var arg = regexp.MustCompile(`([a-zA-Z]+)\.(\*?)([a-zA-Z]+)`)
+var arg = regexp.MustCompile(`(\*?)([a-zA-Z]+)\.([a-zA-Z]+)`)
 
 func getValues() (v *Values) {
 	matches := arg.FindStringSubmatch(os.Args[1])
@@ -37,8 +37,8 @@ func getValues() (v *Values) {
 		log.Fatalln("The first argument must be in the form of package.TypeName")
 	}
 
-	pkg := matches[1]
-	ptr := matches[2]
+	ptr := matches[1]
+	pkg := matches[2]
 	typ := inflect.Singularize(matches[3])
 
 	return &Values{
