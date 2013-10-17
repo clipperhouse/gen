@@ -11,40 +11,46 @@ func getTemplates() (templates map[string]string) {
 	templates["package"] = `package {{.Package}}
 
 `
-	templates["type"] = `type {{.Plural}} []*{{.Singular}}
+	templates["type"] = `type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
 `
-	templates["all"] = `func ({{.PluralLocal}} {{.Plural}}) All(fn func({{.SingularLocal}} *{{.Singular}}) bool) bool {
-	for _, m := range {{.PluralLocal}} {
-		if !fn(m) {
+	templates["all"] = `func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if !fn({{.Loop}}) {
 			return false
 		}
 	}
 	return true
 }
 `
-	templates["any"] = `func ({{.PluralLocal}} {{.Plural}}) Any(fn func({{.SingularLocal}} *{{.Singular}}) bool) bool {
-	for _, m := range {{.PluralLocal}} {
-		if fn(m) {
+	templates["any"] = `func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if fn({{.Loop}}) {
 			return true
 		}
 	}
 	return false
 }
 `
-	templates["count"] = `func ({{.PluralLocal}} {{.Plural}}) Count(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result int) {
-	for _, m := range {{.PluralLocal}} {
-		if fn(m) {
+	templates["count"] = `func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if fn({{.Loop}}) {
 			result++
 		}
 	}
 	return result
 }
 `
-	templates["where"] = `func ({{.PluralLocal}} {{.Plural}}) Where(fn func({{.SingularLocal}} *{{.Singular}}) bool) (result {{.Plural}}) {
-	for _, m := range {{.PluralLocal}} {
-		if fn(m) {
-			result = append(result, m)
+	templates["each"] = `func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		fn({{.Loop}})
+	}
+}
+`
+	templates["where"] = `func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if fn({{.Loop}}) {
+			result = append(result, {{.Loop}})
 		}
 	}
 	return result

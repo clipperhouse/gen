@@ -1,39 +1,44 @@
-// gen models.Movie
+// gen models.*Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 13 Oct 2013 23:54:35 UTC
+// Thu, 17 Oct 2013 17:56:59 UTC
 
 package models
 
 type Movies []*Movie
 
-func (movies Movies) All(fn func(movie *Movie) bool) bool {
-	for _, m := range movies {
-		if !fn(m) {
+func (m Movies) All(fn func(*Movie) bool) bool {
+	for _, _m := range m {
+		if !fn(_m) {
 			return false
 		}
 	}
 	return true
 }
-func (movies Movies) Any(fn func(movie *Movie) bool) bool {
-	for _, m := range movies {
-		if fn(m) {
+func (m Movies) Any(fn func(*Movie) bool) bool {
+	for _, _m := range m {
+		if fn(_m) {
 			return true
 		}
 	}
 	return false
 }
-func (movies Movies) Count(fn func(movie *Movie) bool) (result int) {
-	for _, m := range movies {
-		if fn(m) {
+func (m Movies) Count(fn func(*Movie) bool) (result int) {
+	for _, _m := range m {
+		if fn(_m) {
 			result++
 		}
 	}
 	return result
 }
-func (movies Movies) Where(fn func(movie *Movie) bool) (result Movies) {
-	for _, m := range movies {
-		if fn(m) {
-			result = append(result, m)
+func (m Movies) Each(fn func(*Movie)) {
+	for _, _m := range m {
+		fn(_m)
+	}
+}
+func (m Movies) Where(fn func(*Movie) bool) (result Movies) {
+	for _, _m := range m {
+		if fn(_m) {
+			result = append(result, _m)
 		}
 	}
 	return result
