@@ -5,10 +5,111 @@ import (
 	"testing"
 )
 
+type genTest struct {
+	in    Movies
+	fn    func(*Movie) bool
+	all   bool
+	any   bool
+	count int
+	where Movies
+}
+
+var genTests = []genTest{
+	genTest{
+		some,
+		is_first,
+		false,
+		true,
+		1,
+		Movies{_first},
+	},
+	genTest{
+		some,
+		is_first_or_second_or_third,
+		true,
+		true,
+		3,
+		Movies{_first, _second, _third},
+	},
+	genTest{
+		some,
+		is_first_or_third,
+		false,
+		true,
+		2,
+		Movies{_first, _third},
+	},
+	genTest{
+		some,
+		is_dummy,
+		false,
+		false,
+		0,
+		nil,
+	},
+	genTest{
+		none,
+		is_true,
+		true,
+		false,
+		0,
+		nil,
+	},
+	genTest{
+		none,
+		is_false,
+		true,
+		false,
+		0,
+		nil,
+	},
+	genTest{
+		none,
+		is_first,
+		true,
+		false,
+		0,
+		nil,
+	},
+}
+
+func TestGen(t *testing.T) {
+	for _, v := range genTests {
+		if o := v.in.All(v.fn); o != v.all {
+			t.Errorf("all error: expected %v, got %v", v.all, o)
+		}
+		if o := v.in.Any(v.fn); o != v.any {
+			t.Errorf("any error: expected %v, got %v", v.any, o)
+		}
+		if o := v.in.Count(v.fn); o != v.count {
+			t.Errorf("count error: expected %v, got %v", v.count, o)
+		}
+		if o := v.in.Where(v.fn); !same(o, v.where) {
+			t.Errorf("where error: expected %v, got %v", v.where, o)
+		}
+	}
+}
+
+func same(a, b Movies) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if *v != *b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+var _first = &Movie{Title: "first", Theaters: 6}
+var _second = &Movie{Title: "second", Theaters: 9}
+var _third = &Movie{Title: "third", Theaters: 5}
+
 var some = Movies{
-	&Movie{Title: "first", Theaters: 6},
-	&Movie{Title: "second", Theaters: 9},
-	&Movie{Title: "third", Theaters: 5},
+	_first,
+	_second,
+	_third,
 }
 
 var none = Movies{}
@@ -60,88 +161,6 @@ func TestAggregateString(t *testing.T) {
 	}
 }
 
-func TestAll(t *testing.T) {
-	if false != some.All(is_first) {
-		log.Println(some.All(is_first))
-		t.Fail()
-	}
-
-	if false != some.All(is_first_or_third) {
-		log.Println(some.All(is_first))
-		t.Fail()
-	}
-
-	if true != some.All(is_first_or_second_or_third) {
-		log.Println(some.All(is_first_or_second_or_third))
-		t.Fail()
-	}
-
-	// All is always true on empty collection
-	if true != none.All(is_true) {
-		log.Println(some.All(is_true))
-		t.Fail()
-	}
-
-	if true != none.All(is_false) {
-		log.Println(some.All(is_false))
-		t.Fail()
-	}
-}
-
-func TestAny(t *testing.T) {
-	if true != some.Any(is_first) {
-		log.Println(some.Any(is_first))
-		t.Fail()
-	}
-
-	if true != some.Any(is_first_or_third) {
-		log.Println(some.Any(is_first))
-		t.Fail()
-	}
-
-	if false != some.Any(is_dummy) {
-		log.Println(some.Any(is_dummy))
-		t.Fail()
-	}
-
-	if false != none.Any(is_first) {
-		log.Println(some.Any(is_first))
-		t.Fail()
-	}
-
-	if false != none.Any(is_true) {
-		log.Println(some.Any(is_true))
-		t.Fail()
-	}
-}
-
-func TestCount(t *testing.T) {
-	if some.Count(is_first) != 1 {
-		log.Println(some.Count(is_first))
-		t.Fail()
-	}
-
-	if some.Count(is_first_or_third) != 2 {
-		log.Println(some.Count(is_first_or_third))
-		t.Fail()
-	}
-
-	if some.Count(is_dummy) != 0 {
-		log.Println(some.Count(is_dummy))
-		t.Fail()
-	}
-
-	if none.Count(is_first) != 0 {
-		log.Println(none.Count(is_first))
-		t.Fail()
-	}
-
-	if none.Count(is_true) != 0 {
-		log.Println(none.Count(is_true))
-		t.Fail()
-	}
-}
-
 func TestJoinString(t *testing.T) {
 	expected := "first, second, third"
 
@@ -155,31 +174,5 @@ func TestSumInt(t *testing.T) {
 
 	if expected != some.SumInt(get_theaters) {
 		t.Error(some.SumInt(get_theaters))
-	}
-}
-
-func TestWhere(t *testing.T) {
-	var where_first = some.Where(is_first)
-	if len(where_first) != 1 || where_first[0].Title != "first" {
-		log.Println(len(where_first))
-		t.Fail()
-	}
-
-	var where_first_or_third = some.Where(is_first_or_third)
-	if len(where_first_or_third) != 2 || where_first_or_third[1].Title != "third" {
-		log.Println(len(where_first_or_third))
-		t.Fail()
-	}
-
-	var where_dummy = some.Where(is_dummy)
-	if len(where_dummy) != 0 {
-		log.Println(len(where_dummy))
-		t.Fail()
-	}
-
-	var where_none = none.Where(is_true)
-	if len(where_none) != 0 {
-		log.Println(len(where_none))
-		t.Fail()
 	}
 }
