@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"unicode/utf8"
 )
 
 type Values struct {
@@ -35,7 +36,7 @@ func main() {
 	writeFile(t, v)
 }
 
-var arg = regexp.MustCompile(`(\*?)([a-zA-Z]+)\.([a-zA-Z]+)`)
+var arg = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
 
 func getValues() (v *Values) {
 	matches := arg.FindStringSubmatch(os.Args[1])
@@ -47,13 +48,15 @@ func getValues() (v *Values) {
 	ptr := matches[1]
 	pkg := matches[2]
 	typ := inflect.Singularize(matches[3])
+	first, _ := utf8.DecodeRuneInString(typ)
+	rcv := strings.ToLower(string(first))
 
 	return &Values{
 		Package:   pkg,
 		Singular:  typ,
 		Plural:    inflect.Pluralize(typ),
-		Receiver:  string(strings.ToLower(typ)[0]),
-		Loop:      "_" + string(strings.ToLower(typ)[0]),
+		Receiver:  rcv,
+		Loop:      "_" + rcv,
 		Pointer:   ptr,
 		Generated: time.Now().UTC().Format(time.RFC1123),
 		Command:   strings.Join(os.Args, " "),
