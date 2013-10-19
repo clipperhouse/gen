@@ -4,101 +4,246 @@ import (
 	"testing"
 )
 
-type genTest struct {
-	in    Movies
-	fn    func(*Movie) bool
-	all   bool
-	any   bool
-	count int
-	where Movies
+type test struct {
+	Exec     func() interface{}
+	Expected interface{}
 }
 
-var genTests = []genTest{
-	genTest{
-		some,
-		is_first,
-		false,
-		true,
-		1,
-		Movies{_first},
-	},
-	genTest{
-		some,
-		is_first_or_second_or_third,
-		true,
-		true,
-		3,
-		Movies{_first, _second, _third},
-	},
-	genTest{
-		some,
-		is_first_or_third,
-		false,
-		true,
-		2,
-		Movies{_first, _third},
-	},
-	genTest{
-		some,
-		is_dummy,
-		false,
-		false,
-		0,
-		nil,
-	},
-	genTest{
-		none,
-		is_true,
-		true,
-		false,
-		0,
-		nil,
-	},
-	genTest{
-		none,
-		is_false,
-		true,
-		false,
-		0,
-		nil,
-	},
-	genTest{
-		none,
-		is_first,
-		true,
-		false,
-		0,
-		nil,
-	},
+func getTests() map[string][]test {
+	// the basic pattern for tests is zero/one/many for 'some' slice & sanity checks on 'none' slice
+	tests := make(map[string][]test)
+
+	tests["AggregateInt"] = []test{
+		test{
+			func() interface{} {
+				return some.AggregateInt(sum_theaters)
+			},
+			6 + 9 + 5,
+		},
+		test{
+			func() interface{} {
+				return none.AggregateInt(sum_theaters)
+			},
+			0,
+		},
+	}
+
+	tests["AggregateString"] = []test{
+		test{
+			func() interface{} {
+				return some.AggregateString(concat_title)
+			},
+			"first" + "second" + "third",
+		},
+		test{
+			func() interface{} {
+				return none.AggregateString(concat_title)
+			},
+			"",
+		},
+	}
+
+	tests["All"] = []test{
+		test{
+			func() interface{} {
+				return some.All(is_dummy)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				return some.All(is_first)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				return some.All(is_first_or_second_or_third)
+			},
+			true,
+		},
+		test{
+			func() interface{} {
+				return none.All(is_false)
+			},
+			true,
+		},
+		test{
+			func() interface{} {
+				return none.All(is_true)
+			},
+			true,
+		},
+	}
+
+	tests["Any"] = []test{
+		test{
+			func() interface{} {
+				return some.Any(is_dummy)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				return some.Any(is_first)
+			},
+			true,
+		},
+		test{
+			func() interface{} {
+				return some.Any(is_first_or_third)
+			},
+			true,
+		},
+		test{
+			func() interface{} {
+				return none.Any(is_false)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				return none.Any(is_true)
+			},
+			false,
+		},
+	}
+
+	tests["Count"] = []test{
+		test{
+			func() interface{} {
+				return some.Count(is_dummy)
+			},
+			0,
+		},
+		test{
+			func() interface{} {
+				return some.Count(is_first)
+			},
+			1,
+		},
+		test{
+			func() interface{} {
+				return some.Count(is_first_or_third)
+			},
+			2,
+		},
+		test{
+			func() interface{} {
+				return some.Count(is_true)
+			},
+			len(some),
+		},
+		test{
+			func() interface{} {
+				return none.Count(is_false)
+			},
+			0,
+		},
+		test{
+			func() interface{} {
+				return none.Count(is_true)
+			},
+			0,
+		},
+	}
+
+	tests["JoinString"] = []test{
+		test{
+			func() interface{} {
+				return some.JoinString(get_title, ", ")
+			},
+			"first, second, third",
+		},
+		test{
+			func() interface{} {
+				return none.JoinString(get_title, ", ")
+			},
+			"",
+		},
+	}
+
+	tests["SumInt"] = []test{
+		test{
+			func() interface{} {
+				return some.SumInt(get_theaters)
+			},
+			6 + 9 + 5,
+		},
+		test{
+			func() interface{} {
+				return none.SumInt(get_theaters)
+			},
+			0,
+		},
+	}
+
+	tests["Where"] = []test{
+		test{
+			func() interface{} {
+				return some.Where(is_dummy)
+			},
+			Movies{},
+		},
+		test{
+			func() interface{} {
+				return some.Where(is_first)
+			},
+			Movies{_first},
+		},
+		test{
+			func() interface{} {
+				return some.Where(is_first_or_third)
+			},
+			Movies{_first, _third},
+		},
+		test{
+			func() interface{} {
+				return some.Where(is_true)
+			},
+			some,
+		},
+		test{
+			func() interface{} {
+				return none.Where(is_false)
+			},
+			Movies{},
+		},
+		test{
+			func() interface{} {
+				return none.Where(is_true)
+			},
+			Movies{},
+		},
+	}
+
+	return tests
 }
 
-func TestGen(t *testing.T) {
-	for _, v := range genTests {
-		if o := v.in.All(v.fn); o != v.all {
-			t.Errorf("all error: expected %v, got %v", v.all, o)
-		}
-		if o := v.in.Any(v.fn); o != v.any {
-			t.Errorf("any error: expected %v, got %v", v.any, o)
-		}
-		if o := v.in.Count(v.fn); o != v.count {
-			t.Errorf("count error: expected %v, got %v", v.count, o)
-		}
-		if o := v.in.Where(v.fn); !same(o, v.where) {
-			t.Errorf("where error: expected %v, got %v", v.where, o)
-		}
-	}
-}
-
-func same(a, b Movies) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if *v != *b[i] {
-			return false
+func TestAll(t *testing.T) {
+	for _, tests := range getTests() {
+		for _, test := range tests {
+			switch test.Expected.(type) {
+			default:
+				got := test.Exec()
+				if got != test.Expected {
+					t.Errorf("Expected %v, got %v", test.Expected, got)
+				}
+			case Movies:
+				got := test.Exec().(Movies)
+				exp := test.Expected.(Movies)
+				if len(got) != len(exp) {
+					t.Errorf("Expected %v Movies, got %v", len(exp), len(got))
+					break
+				}
+				for i := range got {
+					if got[i] != exp[i] {
+						t.Errorf("Expected %v, got %v", exp[i], got[i])
+					}
+				}
+			}
 		}
 	}
-	return true
 }
 
 var _first = &Movie{Title: "first", Theaters: 6}
@@ -142,36 +287,4 @@ var get_title = func(movie *Movie) string {
 }
 var concat_title = func(movie *Movie, acc string) string {
 	return acc + movie.Title
-}
-
-func TestAggregateInt(t *testing.T) {
-	expected := 6 + 9 + 5
-
-	if expected != some.AggregateInt(sum_theaters) {
-		t.Error(some.AggregateInt(sum_theaters))
-	}
-}
-
-func TestAggregateString(t *testing.T) {
-	expected := "first" + "second" + "third"
-
-	if expected != some.AggregateString(concat_title) {
-		t.Error(some.AggregateString(concat_title))
-	}
-}
-
-func TestJoinString(t *testing.T) {
-	expected := "first, second, third"
-
-	if expected != some.JoinString(get_title, ", ") {
-		t.Error(some.JoinString(get_title, ", "))
-	}
-}
-
-func TestSumInt(t *testing.T) {
-	expected := 6 + 9 + 5
-
-	if expected != some.SumInt(get_theaters) {
-		t.Error(some.SumInt(get_theaters))
-	}
 }
