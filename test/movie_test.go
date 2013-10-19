@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"testing"
 )
 
