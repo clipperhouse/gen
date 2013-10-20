@@ -74,6 +74,13 @@ func ({{.Receiver}} {{.Plural}}) JoinString(fn func({{.Pointer}}{{.Singular}}) s
 	return {{.Receiver}}.AggregateString(join)
 }
 
+func ({{.Receiver}} {{.Plural}}) Skip(n int) {{.Plural}} {
+	if len({{.Receiver}}) > n {
+		return {{.Receiver}}[n:]
+	}
+	return {{.Plural}}{}
+}
+
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
 	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		return acc + fn({{.Loop}})

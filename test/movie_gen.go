@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Fri, 18 Oct 2013 02:41:16 UTC
+// Sun, 20 Oct 2013 03:28:37 UTC
 
 package models
 
@@ -62,6 +62,13 @@ func (m Movies) JoinString(fn func(*Movie) string, delimiter string) string {
 		return acc + fn(_m)
 	}
 	return m.AggregateString(join)
+}
+
+func (m Movies) Skip(n int) Movies {
+	if len(m) > n {
+		return m[n:]
+	}
+	return Movies{}
 }
 
 func (m Movies) SumInt(fn func(*Movie) int) int {
