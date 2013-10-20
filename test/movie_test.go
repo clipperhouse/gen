@@ -217,6 +217,45 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Take"] = []test{
+		test{
+			func() interface{} {
+				return some.Take(0)
+			},
+			Movies{},
+		},
+		test{
+			func() interface{} {
+				return some.Take(1)
+			},
+			Movies{_first},
+		},
+		test{
+			func() interface{} {
+				return some.Take(2)
+			},
+			Movies{_first, _second},
+		},
+		test{
+			func() interface{} {
+				return some.Take(3)
+			},
+			some,
+		},
+		test{
+			func() interface{} {
+				return some.Take(4)
+			},
+			some,
+		},
+		test{
+			func() interface{} {
+				return none.Take(1)
+			},
+			Movies{},
+		},
+	}
+
 	tests["Where"] = []test{
 		test{
 			func() interface{} {

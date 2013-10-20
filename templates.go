@@ -88,6 +88,13 @@ func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) 
 	return {{.Receiver}}.AggregateInt(sum)
 }
 
+func ({{.Receiver}} {{.Plural}}) Take(n int) {{.Plural}} {
+	if len({{.Receiver}}) > n {
+		return {{.Receiver}}[:n]
+	}
+	return {{.Receiver}}
+}
+
 func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
