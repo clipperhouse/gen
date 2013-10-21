@@ -178,45 +178,6 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["Skip"] = []test{
-		test{
-			func() interface{} {
-				return some.Skip(0)
-			},
-			some,
-		},
-		test{
-			func() interface{} {
-				return some.Skip(1)
-			},
-			Movies{_second, _third},
-		},
-		test{
-			func() interface{} {
-				return some.Skip(2)
-			},
-			Movies{_third},
-		},
-		test{
-			func() interface{} {
-				return some.Skip(3)
-			},
-			Movies{},
-		},
-		test{
-			func() interface{} {
-				return some.Skip(99)
-			},
-			Movies{},
-		},
-		test{
-			func() interface{} {
-				return none.Skip(1)
-			},
-			Movies{},
-		},
-	}
-
 	tests["Where"] = []test{
 		test{
 			func() interface{} {
