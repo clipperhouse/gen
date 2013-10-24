@@ -4,13 +4,6 @@
 
 package models
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func swap(data Movies, a, b int) {
 	data[a], data[b] = data[b], data[a]
 }
@@ -145,6 +138,13 @@ func doPivot(data Movies, fn func(*Movie) string, lo, hi int) (midlo, midhi int)
 		swap(data, b, c-1)
 		b++
 		c--
+	}
+
+	min := func(a, b int) int {
+		if a < b {
+			return a
+		}
+		return b
 	}
 
 	n := min(b-a, a-lo)
