@@ -163,6 +163,15 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Sort"] = []test{
+		test{
+			func() interface{} {
+				return many.SortBy(get_title)
+			},
+			Movies{_fifth, _first, _fourth, _second, _third},
+		},
+	}
+
 	tests["SumInt"] = []test{
 		test{
 			func() interface{} {
@@ -249,6 +258,8 @@ func TestAll(t *testing.T) {
 var _first = &Movie{Title: "first", Theaters: 6}
 var _second = &Movie{Title: "second", Theaters: 9}
 var _third = &Movie{Title: "third", Theaters: 5}
+var _fourth = &Movie{Title: "fourth", Theaters: 20}
+var _fifth = &Movie{Title: "fifth", Theaters: 50}
 
 var some = Movies{
 	_first,
@@ -257,6 +268,14 @@ var some = Movies{
 }
 
 var none = Movies{}
+
+var many = Movies{
+	_first,
+	_second,
+	_third,
+	_fourth,
+	_fifth,
+}
 
 var is_first = func(movie *Movie) bool {
 	return movie.Title == "first"
