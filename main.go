@@ -9,7 +9,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"unicode/utf8"
 )
 
 type Values struct {
@@ -48,15 +47,14 @@ func getValues() (v *Values) {
 	ptr := matches[1]
 	pkg := matches[2]
 	typ := inflect.Singularize(matches[3])
-	first, _ := utf8.DecodeRuneInString(typ)
-	rcv := strings.ToLower(string(first))
+	rcv := "rcv"
 
 	return &Values{
 		Package:   pkg,
 		Singular:  typ,
 		Plural:    inflect.Pluralize(typ),
 		Receiver:  rcv,
-		Loop:      "_" + rcv,
+		Loop:      "_item",
 		Pointer:   ptr,
 		Generated: time.Now().UTC().Format(time.RFC1123),
 		Command:   strings.Join(os.Args, " "),
