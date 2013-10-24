@@ -163,10 +163,10 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["Sort"] = []test{
+	tests["SortByString"] = []test{
 		test{
 			func() interface{} {
-				return many.SortBy(get_title)
+				return many.SortByString(get_title)
 			},
 			Movies{_fifth, _first, _fourth, _second, _third},
 		},
