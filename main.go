@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bitbucket.org/pkg/inflect"
+	"bitbucket.org/clipperhouse/inflect"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -33,10 +33,12 @@ type options struct {
 	All          bool
 	AllPointer   string
 	ExportedOnly bool
+	Force        bool
 }
 
 var opts = options{}
 var errors = make([]string, 0)
+var notes = make([]string, 0)
 var knownTypes = make(map[string]bool)
 
 type ArgHandler struct {
@@ -45,6 +47,8 @@ type ArgHandler struct {
 
 var allOption = regexp.MustCompile(`-(\*?)a(ll)?`)
 var exportedOption = regexp.MustCompile(`-e(xported)?`)
+var forceOption = regexp.MustCompile(`-f(orce)?`)
+
 var structArg = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
 
 var optionHandlers = []ArgHandler{
@@ -65,6 +69,13 @@ var optionHandlers = []ArgHandler{
 			}
 		},
 	},
+	ArgHandler{
+		Handle: func(s string) {
+			if forceOption.MatchString(s) {
+				opts.Force = true
+			}
+		},
+	},
 }
 
 var structHandlers = []ArgHandler{
@@ -82,13 +93,17 @@ var structHandlers = []ArgHandler{
 
 			if opts.ExportedOnly {
 				if ast.IsExported(typ) {
-					fmt.Printf("  note: the %s type is already exported; the -e[xported] flag is redundant (ignored)\n", typ)
+					notes = append(notes, fmt.Sprintf("  note: the %s type is already exported; the -e[xported] flag is redundant (ignored)", typ))
 				} else {
 					errors = append(errors, fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", typ))
 				}
 			}
 			if !knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] {
-				errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type", pkg, typ))
+				if opts.Force {
+					notes = append(notes, fmt.Sprintf("%s.%s is not a known struct type; forced", pkg, typ))
+				} else {
+					errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type; use -force flag to generate it anyway", pkg, typ))
+				}
 			}
 			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
 		},
@@ -115,6 +130,12 @@ func main() {
 	getOptions(args)
 	getAllStructs()
 	getStructs(args)
+
+	if len(notes) > 0 {
+		for _, n := range notes {
+			fmt.Println("  note: " + n)
+		}
+	}
 
 	if len(errors) > 0 {
 		for _, e := range errors {

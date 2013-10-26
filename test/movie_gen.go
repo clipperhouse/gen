@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 26 Oct 2013 20:20:26 UTC
+// Sat, 26 Oct 2013 20:54:04 UTC
 
 package models
 
