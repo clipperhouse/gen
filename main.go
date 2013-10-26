@@ -36,6 +36,7 @@ type options struct {
 }
 
 var opts = options{}
+var errors = make([]string, 0)
 
 type ArgHandler struct {
 	Handle func(string)
@@ -78,6 +79,13 @@ var structHandlers = []ArgHandler{
 			pkg := matches[2]
 			typ := matches[3]
 
+			if opts.ExportedOnly {
+				if ast.IsExported(typ) {
+					fmt.Printf("  note: the %s type is already exported; the -e[xported] flag is redundant (ignored)\n", typ)
+				} else {
+					errors = append(errors, fmt.Sprintf("  error: the %s type is not exported; the -e[xported] flag conflicts, operation canceled", typ))
+				}
+			}
 			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
 		},
 	},
@@ -107,6 +115,12 @@ func main() {
 		getAllStructs()
 	}
 
+	if len(errors) > 0 {
+		for _, e := range errors {
+			fmt.Println(e)
+		}
+		return
+	}
 	t := getTemplate()
 	writeFile(t, genSpecs)
 }
@@ -121,7 +135,7 @@ func getOptions(args []string) {
 
 func getStructs(args []string) {
 	for _, a := range args {
-		for _, h := range optionHandlers {
+		for _, h := range structHandlers {
 			h.Handle(a)
 		}
 	}
