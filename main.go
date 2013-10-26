@@ -30,7 +30,57 @@ func (g genSpec) String() string {
 }
 
 type options struct {
+	All          bool
+	AllPointer   string
 	ExportedOnly bool
+}
+
+var opts = options{}
+
+type ArgHandler struct {
+	Handle func(string)
+}
+
+var allOption = regexp.MustCompile(`-(\*?)a(ll)?`)
+var exportedOption = regexp.MustCompile(`-e(xported)?`)
+var structArg = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
+
+var optionHandlers = []ArgHandler{
+	ArgHandler{
+		Handle: func(s string) {
+			matches := allOption.FindStringSubmatch(s)
+			if matches == nil {
+				return
+			}
+			opts.All = true
+			opts.AllPointer = matches[1]
+		},
+	},
+	ArgHandler{
+		Handle: func(s string) {
+			if exportedOption.MatchString(s) {
+				opts.ExportedOnly = true
+			}
+		},
+	},
+}
+
+var structHandlers = []ArgHandler{
+	ArgHandler{
+		Handle: func(s string) {
+			matches := structArg.FindStringSubmatch(s)
+
+			if matches == nil {
+				return
+			}
+
+			ptr := matches[1]
+			pkg := matches[2]
+			typ := matches[3]
+
+			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
+		},
+	},
 }
 
 var genSpecs = make([]*genSpec, 0)
@@ -42,22 +92,39 @@ func main() {
 		return
 	}
 
-	first := os.Args[1]
+	args := os.Args[1:]
+
+	first := args[0]
 	if first == "-help" || first == "help" || first == "?" {
 		fmt.Println(usage)
 		return
 	}
 
-	for _, arg := range os.Args[1:] {
-		valid := handleArg(arg)
-		if !valid {
-			fmt.Printf("Invalid argument: %s\n", arg)
-			return
-		}
+	getOptions(args)
+	getStructs(args)
+
+	if opts.All {
+		getAllStructs()
 	}
 
 	t := getTemplate()
 	writeFile(t, genSpecs)
+}
+
+func getOptions(args []string) {
+	for _, a := range args {
+		for _, h := range optionHandlers {
+			h.Handle(a)
+		}
+	}
+}
+
+func getStructs(args []string) {
+	for _, a := range args {
+		for _, h := range optionHandlers {
+			h.Handle(a)
+		}
+	}
 }
 
 func newGenSpec(ptr, pkg, typ string) *genSpec {
@@ -75,46 +142,12 @@ func newGenSpec(ptr, pkg, typ string) *genSpec {
 	}
 }
 
-func handleArg(arg string) (valid bool) {
-	genSpec, success := genSpecFromStructArg(arg)
-	if success {
-		genSpecs = append(genSpecs, genSpec)
-		return true
-	}
-
-	all := allRegex.MatchString(arg)
-	if all {
-		genSpecs = append(genSpecs, genSpecsForAllStructs()...)
-		return true
-	}
-
-	return false
-}
-
-var structRegex = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
-
-func genSpecFromStructArg(arg string) (*genSpec, bool) {
-	matches := structRegex.FindStringSubmatch(arg)
-
-	if matches == nil {
-		return nil, false
-	}
-
-	ptr := matches[1]
-	pkg := matches[2]
-	typ := matches[3]
-
-	return newGenSpec(ptr, pkg, typ), true
-}
-
-var allRegex = regexp.MustCompile(`-(\*?)a(ll)?`)
-
 var goFiles = func(f os.FileInfo) bool {
 	return strings.HasSuffix(f.Name(), ".go")
 }
 
-func genSpecsForAllStructs() (g []*genSpec) {
-	fset := token.NewFileSet() // positions are relative to fset
+func getAllStructs() {
+	fset := token.NewFileSet()
 
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
@@ -130,13 +163,14 @@ func genSpecsForAllStructs() (g []*genSpec) {
 				case *ast.StructType:
 					_ = y
 					typ := x.Name.String()
-					g = append(g, newGenSpec("*", pkg, typ))
+					if !opts.ExportedOnly || ast.IsExported(typ) {
+						genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, typ))
+					}
 				}
 			}
 			return true
 		})
 	}
-	return
 }
 
 func writeFile(t *template.Template, genSpecs []*genSpec) {
@@ -152,8 +186,9 @@ func writeFile(t *template.Template, genSpecs []*genSpec) {
 	}
 }
 
-const usage = `Usage: gen [[*]package.TypeName] [-all]
+const usage = `Usage: gen [[*]package.TypeName] [-[*]all] [-exported]
 
   *package.TypeName    # generate funcs for specified struct type; use leading * to specify pointer type (recommended)
-  -all                 # generates all structs in current directory; shortcut -a
+  -all                 # generate all structs in current directory; use leading * to specify pointer type (recommended); shortcut -a or -*a
+  -exported            # only generate exported structs; shortcut -e
 `
