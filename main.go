@@ -37,6 +37,7 @@ type options struct {
 
 var opts = options{}
 var errors = make([]string, 0)
+var knownTypes = make(map[string]bool)
 
 type ArgHandler struct {
 	Handle func(string)
@@ -83,8 +84,11 @@ var structHandlers = []ArgHandler{
 				if ast.IsExported(typ) {
 					fmt.Printf("  note: the %s type is already exported; the -e[xported] flag is redundant (ignored)\n", typ)
 				} else {
-					errors = append(errors, fmt.Sprintf("  error: the %s type is not exported; the -e[xported] flag conflicts, operation canceled", typ))
+					errors = append(errors, fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", typ))
 				}
+			}
+			if !knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] {
+				errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type", pkg, typ))
 			}
 			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
 		},
@@ -109,16 +113,14 @@ func main() {
 	}
 
 	getOptions(args)
+	getAllStructs()
 	getStructs(args)
-
-	if opts.All {
-		getAllStructs()
-	}
 
 	if len(errors) > 0 {
 		for _, e := range errors {
-			fmt.Println(e)
+			fmt.Println("  error: " + e)
 		}
+		fmt.Println("  operation canceled")
 		return
 	}
 	t := getTemplate()
@@ -177,8 +179,11 @@ func getAllStructs() {
 				case *ast.StructType:
 					_ = y
 					typ := x.Name.String()
-					if !opts.ExportedOnly || ast.IsExported(typ) {
-						genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, typ))
+					knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] = true
+					if opts.All {
+						if !opts.ExportedOnly || ast.IsExported(typ) {
+							genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, typ))
+						}
 					}
 				}
 			}
