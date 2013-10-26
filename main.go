@@ -29,6 +29,12 @@ func (g genSpec) String() string {
 	return fmt.Sprintf("%s.%s", g.Package, g.Plural)
 }
 
+type options struct {
+	ExportedOnly bool
+}
+
+var genSpecs = make([]*genSpec, 0)
+
 func main() {
 	has_args := len(os.Args) > 1
 	if !has_args {
@@ -42,13 +48,9 @@ func main() {
 		return
 	}
 
-	var genSpecs []*genSpec
-
 	for _, arg := range os.Args[1:] {
-		g, valid := genSpecsFromArg(arg)
-		if valid {
-			genSpecs = append(genSpecs, g...)
-		} else {
+		valid := handleArg(arg)
+		if !valid {
 			fmt.Printf("Invalid argument: %s\n", arg)
 			return
 		}
@@ -73,18 +75,20 @@ func newGenSpec(ptr, pkg, typ string) *genSpec {
 	}
 }
 
-func genSpecsFromArg(arg string) (genSpecs []*genSpec, valid bool) {
+func handleArg(arg string) (valid bool) {
 	genSpec, success := genSpecFromStructArg(arg)
 	if success {
-		return append(genSpecs, genSpec), true
+		genSpecs = append(genSpecs, genSpec)
+		return true
 	}
 
 	all := allRegex.MatchString(arg)
 	if all {
-		return append(genSpecs, genSpecsForAllStructs()...), true
+		genSpecs = append(genSpecs, genSpecsForAllStructs()...)
+		return true
 	}
 
-	return nil, false
+	return false
 }
 
 var structRegex = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
