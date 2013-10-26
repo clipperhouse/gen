@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type Values struct {
+type genSpec struct {
 	Package   string
 	Singular  string
 	Plural    string
@@ -25,8 +25,8 @@ type Values struct {
 	FileName  string
 }
 
-func (v Values) String() string {
-	return fmt.Sprintf("%s.%s", v.Package, v.Plural)
+func (g genSpec) String() string {
+	return fmt.Sprintf("%s.%s", g.Package, g.Plural)
 }
 
 func main() {
@@ -42,12 +42,12 @@ func main() {
 		return
 	}
 
-	var values []*Values
+	var genSpecs []*genSpec
 
 	for _, arg := range os.Args[1:] {
-		v, valid := getValuesFromArg(arg)
+		g, valid := genSpecsFromArg(arg)
 		if valid {
-			values = append(values, v...)
+			genSpecs = append(genSpecs, g...)
 		} else {
 			fmt.Printf("Invalid argument: %s\n", arg)
 			return
@@ -55,12 +55,12 @@ func main() {
 	}
 
 	t := getTemplate()
-	writeFile(t, values)
+	writeFile(t, genSpecs)
 }
 
-func newValues(ptr, pkg, typ string) *Values {
+func newGenSpec(ptr, pkg, typ string) *genSpec {
 	typ = inflect.Singularize(typ)
-	return &Values{
+	return &genSpec{
 		Pointer:   ptr,
 		Package:   pkg,
 		Singular:  typ,
@@ -73,15 +73,15 @@ func newValues(ptr, pkg, typ string) *Values {
 	}
 }
 
-func getValuesFromArg(arg string) (values []*Values, valid bool) {
-	value, success := getStructFromArg(arg)
+func genSpecsFromArg(arg string) (genSpecs []*genSpec, valid bool) {
+	genSpec, success := genSpecFromStructArg(arg)
 	if success {
-		return append(values, value), true
+		return append(genSpecs, genSpec), true
 	}
 
 	all := allRegex.MatchString(arg)
 	if all {
-		return append(values, getAllStructs()...), true
+		return append(genSpecs, genSpecsForAllStructs()...), true
 	}
 
 	return nil, false
@@ -89,7 +89,7 @@ func getValuesFromArg(arg string) (values []*Values, valid bool) {
 
 var structRegex = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
 
-func getStructFromArg(arg string) (*Values, bool) {
+func genSpecFromStructArg(arg string) (*genSpec, bool) {
 	matches := structRegex.FindStringSubmatch(arg)
 
 	if matches == nil {
@@ -100,7 +100,7 @@ func getStructFromArg(arg string) (*Values, bool) {
 	pkg := matches[2]
 	typ := matches[3]
 
-	return newValues(ptr, pkg, typ), true
+	return newGenSpec(ptr, pkg, typ), true
 }
 
 var allRegex = regexp.MustCompile(`-(\*?)a(ll)?`)
@@ -109,7 +109,7 @@ var goFiles = func(f os.FileInfo) bool {
 	return strings.HasSuffix(f.Name(), ".go")
 }
 
-func getAllStructs() (v []*Values) {
+func genSpecsForAllStructs() (g []*genSpec) {
 	fset := token.NewFileSet() // positions are relative to fset
 
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
@@ -126,7 +126,7 @@ func getAllStructs() (v []*Values) {
 				case *ast.StructType:
 					_ = y
 					typ := x.Name.String()
-					v = append(v, newValues("*", pkg, typ))
+					g = append(g, newGenSpec("*", pkg, typ))
 				}
 			}
 			return true
@@ -135,8 +135,8 @@ func getAllStructs() (v []*Values) {
 	return
 }
 
-func writeFile(t *template.Template, values []*Values) {
-	for _, v := range values {
+func writeFile(t *template.Template, genSpecs []*genSpec) {
+	for _, v := range genSpecs {
 		f, err := os.Create(v.FileName)
 		if err != nil {
 			panic(err)
