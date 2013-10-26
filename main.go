@@ -193,9 +193,9 @@ const usage = `Usage: gen [[*]package.TypeName] [-[*]all] [-exported]
   -exported            # only generate exported structs; shortcut -e
 
 Examples:
-  gen -*models.Movie   # generates funcs for Movie type in the models package; generated Movies type will be []*Movie
-  gen -models.Movie    # generates funcs for Movie type; generated Movies type will be []Movie
-  gen -*all            # generates funcs for all struct types in current directory, using pointers
-  gen -all             # generates funcs for all struct types in current directory, using values
-  gen -*a -e           # generates funcs for all exported struct types in current directory, using pointers
+  gen -*models.Movie   # generates funcs for Movie type in the models package; generated Movies type is []*Movie
+  gen -models.Movie    # generates funcs for Movie type; generated Movies type is []Movie
+  gen -*all            # generates funcs for all struct types in current directory, as pointers
+  gen -all             # generates funcs for all struct types in current directory, as values
+  gen -*a -e           # generates funcs for all exported struct types in current directory, as pointers
 `
