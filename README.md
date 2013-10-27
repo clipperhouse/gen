@@ -24,10 +24,10 @@ It’s probably a bit early for pull requests, we’re still designing the API. 
 
 ## Implemented so far:
 
-- **`Aggregate`**: loop over a slice and operate each element, accumulating along the way; useful for e.g. concatenation or summing; comparable to underscore’s `reduce` or Linq’s `Aggregate`; implemented for `string` and `int` types
-- **`All`**: determine if all elements of a slice return true for a passed func; comparable to underscore’s `every` or Linq’s `All`.
-- **`Any`**: determine if one or more elements of a slice return true for a passed func; comparable to underscore’s `some` or Linq’s `Any`.
-- **`Count`**: count elements of a slice that return true for a passed func; comparable to Linq’s `Count`.
-- **`Each`**: apply a passed func to every element of a slice; comparable to underscore’s `each` or Linq’s `ForEach`.
-- **`Sort + IsSorted`**: reorder a slice based on passed comparer func; comparable to Linq’s `OrderBy`, with some of Go’s sort idiom; `IsSorted` func to determine if a slice is sorted; *Desc versions too
-- **`Where`**: returns slice of elements that return true for a passed func. Comparable to underscore’s `filter` or Linq’s `Where`.
+- **Aggregate**: loop over a slice and operate each element, accumulating along the way; useful for e.g. concatenation or summing; comparable to underscore’s `reduce` or Linq’s `Aggregate`; implemented for `string` and `int` types
+- **All**: determine if all elements of a slice return true for a passed func; comparable to underscore’s `every` or Linq’s `All`.
+- **Any**: determine if one or more elements of a slice return true for a passed func; comparable to underscore’s `some` or Linq’s `Any`.
+- **Count**: count elements of a slice that return true for a passed func; comparable to Linq’s `Count`.
+- **Each**: apply a passed func to every element of a slice; comparable to underscore’s `each` or Linq’s `ForEach`.
+- **Sort + IsSorted**: reorder a slice based on passed comparer func; comparable to Linq’s `OrderBy`, with some of Go’s sort idiom; `IsSorted` func to determine if a slice is sorted; *Desc versions too
+- **Where**: returns slice of elements that return true for a passed func. Comparable to underscore’s `filter` or Linq’s `Where`.
