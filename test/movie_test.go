@@ -148,6 +148,19 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["GroupBy"] = []test{
+		test{
+			func() interface{} {
+				return many.GroupByString(get_studio)
+			},
+			map[string]Movies{
+				"Miramax":     Movies{_first, _fifth},
+				"Universal":   Movies{_third, _fourth},
+				"Warner Bros": Movies{_second},
+			},
+		},
+	}
+
 	tests["Sort"] = []test{
 		test{
 			func() interface{} {
@@ -229,6 +242,26 @@ func TestAll(t *testing.T) {
 				if got != test.Expected {
 					t.Errorf("Expected %v, got %v", test.Expected, got)
 				}
+			case map[string]Movies:
+				got := test.Exec().(map[string]Movies)
+				exp := test.Expected.(map[string]Movies)
+				if len(got) != len(exp) {
+					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
+					break
+				}
+				for k, _ := range got {
+					got2 := got[k]
+					exp2 := exp[k]
+					if len(got2) != len(exp2) {
+						t.Errorf("Expected %v Movies in %s element, got %v", len(exp2), k, len(got2))
+						break
+					}
+					for i := range got2 {
+						if got2[i] != exp2[i] {
+							t.Errorf("Expected %v, got %v", exp2[i], got2[i])
+						}
+					}
+				}
 			case Movies:
 				got := test.Exec().(Movies)
 				exp := test.Expected.(Movies)
@@ -246,11 +279,11 @@ func TestAll(t *testing.T) {
 	}
 }
 
-var _first = &Movie{Title: "first", Theaters: 6}
-var _second = &Movie{Title: "second", Theaters: 9}
-var _third = &Movie{Title: "third", Theaters: 5}
-var _fourth = &Movie{Title: "fourth", Theaters: 50}
-var _fifth = &Movie{Title: "fifth", Theaters: 20}
+var _first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax"}
+var _second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros"}
+var _third = &Movie{Title: "third", Theaters: 5, Studio: "Universal"}
+var _fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal"}
+var _fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax"}
 
 var some = Movies{
 	_first,
@@ -294,6 +327,9 @@ var sum_theaters = func(movie *Movie, acc int) int {
 }
 var get_title = func(movie *Movie) string {
 	return movie.Title
+}
+var get_studio = func(movie *Movie) string {
+	return movie.Studio
 }
 var by_title = func(movies Movies, a, b int) bool {
 	return movies[a].Title < movies[b].Title
