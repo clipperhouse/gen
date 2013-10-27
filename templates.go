@@ -126,6 +126,13 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 	return true
 }
 
+func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool) {{.Plural}} {
+	more := func(z {{.Plural}}, a int, b int) bool {
+		return !less(z, a, b)
+	}
+	return {{.Receiver}}.Sort(more)
+}
+
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
 	{{.Receiver}}[a], {{.Receiver}}[b] = {{.Receiver}}[b], {{.Receiver}}[a]
 }

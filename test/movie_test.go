@@ -183,6 +183,18 @@ func getTests() map[string][]test {
 			},
 			Movies{_third, _first, _second, _fifth, _fourth},
 		},
+		test{
+			func() interface{} {
+				return many.SortDesc(by_title)
+			},
+			Movies{_third, _second, _fourth, _first, _fifth},
+		},
+		test{
+			func() interface{} {
+				return many.SortDesc(by_theaters)
+			},
+			Movies{_fourth, _fifth, _second, _first, _third},
+		},
 	}
 
 	tests["SumInt"] = []test{

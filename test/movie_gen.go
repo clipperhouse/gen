@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 27 Oct 2013 20:38:25 UTC
+// Sun, 27 Oct 2013 22:12:12 UTC
 
 package models
 
@@ -114,6 +114,13 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 		}
 	}
 	return true
+}
+
+func (rcv Movies) SortDesc(less func(Movies, int, int) bool) Movies {
+	more := func(z Movies, a int, b int) bool {
+		return !less(z, a, b)
+	}
+	return rcv.Sort(more)
 }
 
 func swapMovies(rcv Movies, a, b int) {
