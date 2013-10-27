@@ -8,6 +8,8 @@ We’re starting with proof-of-concept basics like Any, Where, and Count, later 
 
 Clone this repo, and cd into the directory. Then, `go install`, which will create a binary called `gen` that you can invoke from the command line (assuming you’ve [set up](http://golang.org/doc/install) your paths, etc).
 
+Type `gen` to see usage.
+
 `cd` into the /test directory and type `gen *models.Movie`. This should overwrite the [movie_gen.go](/clipperhouse/gen/blob/master/test/movie_gen.go) file that came with the repo. Have a look at the header comments.
 
 Then, `go test`.
@@ -22,8 +24,7 @@ It’s probably a bit early for pull requests, we’re still designing the API. 
 
 ## Implemented so far:
 
-- **AggregateInt**: loop over a slice and operate on one of its integer fields, accumulating along the way; comparable to underscore’s `reduce` or Linq’s `Aggregate`. 
-- **AggregateString**: see above, for string
+- **Aggregate(String|Int)**: loop over a slice and operate on one of its fields, accumulating along the way; comparable to underscore’s `reduce` or Linq’s `Aggregate`.
 - **All**: determine if all elements of a slice return true for a passed func; comparable to underscore’s `every` or Linq’s `All`.
 - **Any**: determine if one or more elements of a slice return true for a passed func; comparable to underscore’s `some` or Linq’s `Any`.
 - **Count**: count elements of a slice that return true for a passed func; comparable to Linq’s `Count`.
