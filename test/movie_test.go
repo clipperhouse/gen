@@ -170,6 +170,12 @@ func getTests() map[string][]test {
 			},
 			Movies{_fifth, _first, _fourth, _second, _third},
 		},
+		test{
+			func() interface{} {
+				return many.Sort(by_theaters)
+			},
+			Movies{_third, _first, _second, _fifth, _fourth},
+		},
 	}
 
 	tests["SumInt"] = []test{
@@ -258,8 +264,8 @@ func TestAll(t *testing.T) {
 var _first = &Movie{Title: "first", Theaters: 6}
 var _second = &Movie{Title: "second", Theaters: 9}
 var _third = &Movie{Title: "third", Theaters: 5}
-var _fourth = &Movie{Title: "fourth", Theaters: 20}
-var _fifth = &Movie{Title: "fifth", Theaters: 50}
+var _fourth = &Movie{Title: "fourth", Theaters: 50}
+var _fifth = &Movie{Title: "fifth", Theaters: 20}
 
 var some = Movies{
 	_first,
@@ -306,6 +312,9 @@ var get_title = func(movie *Movie) string {
 }
 var by_title = func(movies Movies, a, b int) bool {
 	return movies[a].Title < movies[b].Title
+}
+var by_theaters = func(movies Movies, a, b int) bool {
+	return movies[a].Theaters < movies[b].Theaters
 }
 var concat_title = func(movie *Movie, acc string) string {
 	return acc + movie.Title
