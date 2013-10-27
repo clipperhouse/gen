@@ -163,10 +163,10 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["SortByString"] = []test{
+	tests["Sort"] = []test{
 		test{
 			func() interface{} {
-				return many.SortByString(get_title)
+				return many.Sort(by_title)
 			},
 			Movies{_fifth, _first, _fourth, _second, _third},
 		},
@@ -303,6 +303,9 @@ var sum_theaters = func(movie *Movie, acc int) int {
 }
 var get_title = func(movie *Movie) string {
 	return movie.Title
+}
+var by_title = func(movies Movies, a, b int) bool {
+	return movies[a].Title < movies[b].Title
 }
 var concat_title = func(movie *Movie, acc string) string {
 	return acc + movie.Title

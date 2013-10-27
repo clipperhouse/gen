@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 26 Oct 2013 20:54:04 UTC
+// Sun, 27 Oct 2013 04:24:40 UTC
 
 package models
 
@@ -84,7 +84,7 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-func (rcv Movies) SortByString(fn func(*Movie) string) Movies {
+func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
 
@@ -95,32 +95,29 @@ func (rcv Movies) SortByString(fn func(*Movie) string) Movies {
 		maxDepth++
 	}
 	maxDepth *= 2
-	quickSortMovies(result, fn, 0, n, maxDepth)
+	quickSortMovies(result, less, 0, n, maxDepth)
 	return result
 }
 
 // IsSorted reports whether rcv is sorted.
-func (rcv Movies) IsSorted(fn func(*Movie) string) bool {
+func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
-		if lessMovies(rcv, fn, i, i-1) {
+		if less(rcv, i, i-1) {
 			return false
 		}
 	}
 	return true
 }
+
 func swapMovies(rcv Movies, a, b int) {
 	rcv[a], rcv[b] = rcv[b], rcv[a]
 }
 
-func lessMovies(rcv Movies, fn func(*Movie) string, a, b int) bool {
-	return fn(rcv[a]) < fn(rcv[b])
-}
-
 // Insertion sort
-func insertionSortMovies(rcv Movies, fn func(*Movie) string, a, b int) {
+func insertionSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int) {
 	for i := a + 1; i < b; i++ {
-		for j := i; j > a && lessMovies(rcv, fn, j, j-1); j-- {
+		for j := i; j > a && less(rcv, j, j-1); j-- {
 			swapMovies(rcv, j, j-1)
 		}
 	}
@@ -128,17 +125,17 @@ func insertionSortMovies(rcv Movies, fn func(*Movie) string, a, b int) {
 
 // siftDown implements the heap property on rcv[lo, hi).
 // first is an offset into the array where the root of the heap lies.
-func siftDownMovies(rcv Movies, fn func(*Movie) string, lo, hi, first int) {
+func siftDownMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi, first int) {
 	root := lo
 	for {
 		child := 2*root + 1
 		if child >= hi {
 			break
 		}
-		if child+1 < hi && lessMovies(rcv, fn, first+child, first+child+1) {
+		if child+1 < hi && less(rcv, first+child, first+child+1) {
 			child++
 		}
-		if !lessMovies(rcv, fn, first+root, first+child) {
+		if !less(rcv, first+root, first+child) {
 			return
 		}
 		swapMovies(rcv, first+root, first+child)
@@ -146,20 +143,20 @@ func siftDownMovies(rcv Movies, fn func(*Movie) string, lo, hi, first int) {
 	}
 }
 
-func heapSortMovies(rcv Movies, fn func(*Movie) string, a, b int) {
+func heapSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int) {
 	first := a
 	lo := 0
 	hi := b - a
 
 	// Build heap with greatest element at top.
 	for i := (hi - 1) / 2; i >= 0; i-- {
-		siftDownMovies(rcv, fn, i, hi, first)
+		siftDownMovies(rcv, less, i, hi, first)
 	}
 
 	// Pop elements, largest first, into end of rcv.
 	for i := hi - 1; i >= 0; i-- {
 		swapMovies(rcv, first, first+i)
-		siftDownMovies(rcv, fn, lo, i, first)
+		siftDownMovies(rcv, less, lo, i, first)
 	}
 }
 
@@ -167,18 +164,18 @@ func heapSortMovies(rcv Movies, fn func(*Movie) string, a, b int) {
 // Engineering a Sort Function, SP&E November 1993.
 
 // medianOfThree moves the median of the three values rcv[a], rcv[b], rcv[c] into rcv[a].
-func medianOfThreeMovies(rcv Movies, fn func(*Movie) string, a, b, c int) {
+func medianOfThreeMovies(rcv Movies, less func(Movies, int, int) bool, a, b, c int) {
 	m0 := b
 	m1 := a
 	m2 := c
 	// bubble sort on 3 elements
-	if lessMovies(rcv, fn, m1, m0) {
+	if less(rcv, m1, m0) {
 		swapMovies(rcv, m1, m0)
 	}
-	if lessMovies(rcv, fn, m2, m1) {
+	if less(rcv, m2, m1) {
 		swapMovies(rcv, m2, m1)
 	}
-	if lessMovies(rcv, fn, m1, m0) {
+	if less(rcv, m1, m0) {
 		swapMovies(rcv, m1, m0)
 	}
 	// now rcv[m0] <= rcv[m1] <= rcv[m2]
@@ -190,16 +187,16 @@ func swapRangeMovies(rcv Movies, a, b, n int) {
 	}
 }
 
-func doPivotMovies(rcv Movies, fn func(*Movie) string, lo, hi int) (midlo, midhi int) {
+func doPivotMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi int) (midlo, midhi int) {
 	m := lo + (hi-lo)/2 // Written like this to avoid integer overflow.
 	if hi-lo > 40 {
 		// Tukey's Ninther, median of three medians of three.
 		s := (hi - lo) / 8
-		medianOfThreeMovies(rcv, fn, lo, lo+s, lo+2*s)
-		medianOfThreeMovies(rcv, fn, m, m-s, m+s)
-		medianOfThreeMovies(rcv, fn, hi-1, hi-1-s, hi-1-2*s)
+		medianOfThreeMovies(rcv, less, lo, lo+s, lo+2*s)
+		medianOfThreeMovies(rcv, less, m, m-s, m+s)
+		medianOfThreeMovies(rcv, less, hi-1, hi-1-s, hi-1-2*s)
 	}
-	medianOfThreeMovies(rcv, fn, lo, m, hi-1)
+	medianOfThreeMovies(rcv, less, lo, m, hi-1)
 
 	// Invariants are:
 	//	rcv[lo] = pivot (set up by ChoosePivot)
@@ -215,9 +212,9 @@ func doPivotMovies(rcv Movies, fn func(*Movie) string, lo, hi int) (midlo, midhi
 	a, b, c, d := lo+1, lo+1, hi, hi
 	for {
 		for b < c {
-			if lessMovies(rcv, fn, b, pivot) { // rcv[b] < pivot
+			if less(rcv, b, pivot) { // rcv[b] < pivot
 				b++
-			} else if !lessMovies(rcv, fn, pivot, b) { // rcv[b] = pivot
+			} else if !less(rcv, pivot, b) { // rcv[b] = pivot
 				swapMovies(rcv, a, b)
 				a++
 				b++
@@ -226,9 +223,9 @@ func doPivotMovies(rcv Movies, fn func(*Movie) string, lo, hi int) (midlo, midhi
 			}
 		}
 		for b < c {
-			if lessMovies(rcv, fn, pivot, c-1) { // rcv[c-1] > pivot
+			if less(rcv, pivot, c-1) { // rcv[c-1] > pivot
 				c--
-			} else if !lessMovies(rcv, fn, c-1, pivot) { // rcv[c-1] = pivot
+			} else if !less(rcv, c-1, pivot) { // rcv[c-1] = pivot
 				swapMovies(rcv, c-1, d-1)
 				c--
 				d--
@@ -261,25 +258,25 @@ func doPivotMovies(rcv Movies, fn func(*Movie) string, lo, hi int) (midlo, midhi
 	return lo + b - a, hi - (d - c)
 }
 
-func quickSortMovies(rcv Movies, fn func(*Movie) string, a, b, maxDepth int) {
+func quickSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b, maxDepth int) {
 	for b-a > 7 {
 		if maxDepth == 0 {
-			heapSortMovies(rcv, fn, a, b)
+			heapSortMovies(rcv, less, a, b)
 			return
 		}
 		maxDepth--
-		mlo, mhi := doPivotMovies(rcv, fn, a, b)
+		mlo, mhi := doPivotMovies(rcv, less, a, b)
 		// Avoiding recursion on the larger subproblem guarantees
 		// a stack depth of at most lg(b-a).
 		if mlo-a < b-mhi {
-			quickSortMovies(rcv, fn, a, mlo, maxDepth)
+			quickSortMovies(rcv, less, a, mlo, maxDepth)
 			a = mhi // i.e., quickSortMovies(rcv, mhi, b)
 		} else {
-			quickSortMovies(rcv, fn, mhi, b, maxDepth)
+			quickSortMovies(rcv, less, mhi, b, maxDepth)
 			b = mlo // i.e., quickSortMovies(rcv, a, mlo)
 		}
 	}
 	if b-a > 1 {
-		insertionSortMovies(rcv, fn, a, b)
+		insertionSortMovies(rcv, less, a, b)
 	}
 }

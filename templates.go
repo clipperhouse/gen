@@ -94,7 +94,7 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-func ({{.Receiver}} {{.Plural}}) SortByString(fn func({{.Pointer}}{{.Singular}}) string) {{.Plural}} {
+func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.Plural}} {
 	result := make({{.Plural}}, len({{.Receiver}}))
 	copy(result, {{.Receiver}})
 
@@ -105,32 +105,29 @@ func ({{.Receiver}} {{.Plural}}) SortByString(fn func({{.Pointer}}{{.Singular}})
 		maxDepth++
 	}
 	maxDepth *= 2
-	quickSort{{.Plural}}(result, fn, 0, n, maxDepth)
+	quickSort{{.Plural}}(result, less, 0, n, maxDepth)
 	return result
 }
 
 // IsSorted reports whether {{.Receiver}} is sorted.
-func ({{.Receiver}} {{.Plural}}) IsSorted(fn func({{.Pointer}}{{.Singular}}) string) bool {
+func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool) bool {
 	n := len({{.Receiver}})
 	for i := n - 1; i > 0; i-- {
-		if less{{.Plural}}({{.Receiver}}, fn, i, i-1) {
+		if less({{.Receiver}}, i, i-1) {
 			return false
 		}
 	}
 	return true
 }
+
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
 	{{.Receiver}}[a], {{.Receiver}}[b] = {{.Receiver}}[b], {{.Receiver}}[a]
 }
 
-func less{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, a, b int) bool {
-	return fn({{.Receiver}}[a]) < fn({{.Receiver}}[b])
-}
-
 // Insertion sort
-func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, a, b int) {
+func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b int) {
 	for i := a + 1; i < b; i++ {
-		for j := i; j > a && less{{.Plural}}({{.Receiver}}, fn, j, j-1); j-- {
+		for j := i; j > a && less({{.Receiver}}, j, j-1); j-- {
 			swap{{.Plural}}({{.Receiver}}, j, j-1)
 		}
 	}
@@ -138,17 +135,17 @@ func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.
 
 // siftDown implements the heap property on {{.Receiver}}[lo, hi).
 // first is an offset into the array where the root of the heap lies.
-func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, lo, hi, first int) {
+func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, lo, hi, first int) {
 	root := lo
 	for {
 		child := 2*root + 1
 		if child >= hi {
 			break
 		}
-		if child+1 < hi && less{{.Plural}}({{.Receiver}}, fn, first+child, first+child+1) {
+		if child+1 < hi && less({{.Receiver}}, first+child, first+child+1) {
 			child++
 		}
-		if !less{{.Plural}}({{.Receiver}}, fn, first+root, first+child) {
+		if !less({{.Receiver}}, first+root, first+child) {
 			return
 		}
 		swap{{.Plural}}({{.Receiver}}, first+root, first+child)
@@ -156,20 +153,20 @@ func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singu
 	}
 }
 
-func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, a, b int) {
+func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b int) {
 	first := a
 	lo := 0
 	hi := b - a
 
 	// Build heap with greatest element at top.
 	for i := (hi - 1) / 2; i >= 0; i-- {
-		siftDown{{.Plural}}({{.Receiver}}, fn, i, hi, first)
+		siftDown{{.Plural}}({{.Receiver}}, less, i, hi, first)
 	}
 
 	// Pop elements, largest first, into end of {{.Receiver}}.
 	for i := hi - 1; i >= 0; i-- {
 		swap{{.Plural}}({{.Receiver}}, first, first+i)
-		siftDown{{.Plural}}({{.Receiver}}, fn, lo, i, first)
+		siftDown{{.Plural}}({{.Receiver}}, less, lo, i, first)
 	}
 }
 
@@ -177,18 +174,18 @@ func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singu
 // Engineering a Sort Function, SP&E November 1993.
 
 // medianOfThree moves the median of the three values {{.Receiver}}[a], {{.Receiver}}[b], {{.Receiver}}[c] into {{.Receiver}}[a].
-func medianOfThree{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, a, b, c int) {
+func medianOfThree{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b, c int) {
 	m0 := b
 	m1 := a
 	m2 := c
 	// bubble sort on 3 elements
-	if less{{.Plural}}({{.Receiver}}, fn, m1, m0) {
+	if less({{.Receiver}}, m1, m0) {
 		swap{{.Plural}}({{.Receiver}}, m1, m0)
 	}
-	if less{{.Plural}}({{.Receiver}}, fn, m2, m1) {
+	if less({{.Receiver}}, m2, m1) {
 		swap{{.Plural}}({{.Receiver}}, m2, m1)
 	}
-	if less{{.Plural}}({{.Receiver}}, fn, m1, m0) {
+	if less({{.Receiver}}, m1, m0) {
 		swap{{.Plural}}({{.Receiver}}, m1, m0)
 	}
 	// now {{.Receiver}}[m0] <= {{.Receiver}}[m1] <= {{.Receiver}}[m2]
@@ -200,16 +197,16 @@ func swapRange{{.Plural}}({{.Receiver}} {{.Plural}}, a, b, n int) {
 	}
 }
 
-func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, lo, hi int) (midlo, midhi int) {
+func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, lo, hi int) (midlo, midhi int) {
 	m := lo + (hi-lo)/2 // Written like this to avoid integer overflow.
 	if hi-lo > 40 {
 		// Tukey's Ninther, median of three medians of three.
 		s := (hi - lo) / 8
-		medianOfThree{{.Plural}}({{.Receiver}}, fn, lo, lo+s, lo+2*s)
-		medianOfThree{{.Plural}}({{.Receiver}}, fn, m, m-s, m+s)
-		medianOfThree{{.Plural}}({{.Receiver}}, fn, hi-1, hi-1-s, hi-1-2*s)
+		medianOfThree{{.Plural}}({{.Receiver}}, less, lo, lo+s, lo+2*s)
+		medianOfThree{{.Plural}}({{.Receiver}}, less, m, m-s, m+s)
+		medianOfThree{{.Plural}}({{.Receiver}}, less, hi-1, hi-1-s, hi-1-2*s)
 	}
-	medianOfThree{{.Plural}}({{.Receiver}}, fn, lo, m, hi-1)
+	medianOfThree{{.Plural}}({{.Receiver}}, less, lo, m, hi-1)
 
 	// Invariants are:
 	//	{{.Receiver}}[lo] = pivot (set up by ChoosePivot)
@@ -225,9 +222,9 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singul
 	a, b, c, d := lo+1, lo+1, hi, hi
 	for {
 		for b < c {
-			if less{{.Plural}}({{.Receiver}}, fn, b, pivot) { // {{.Receiver}}[b] < pivot
+			if less({{.Receiver}}, b, pivot) { // {{.Receiver}}[b] < pivot
 				b++
-			} else if !less{{.Plural}}({{.Receiver}}, fn, pivot, b) { // {{.Receiver}}[b] = pivot
+			} else if !less({{.Receiver}}, pivot, b) { // {{.Receiver}}[b] = pivot
 				swap{{.Plural}}({{.Receiver}}, a, b)
 				a++
 				b++
@@ -236,9 +233,9 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singul
 			}
 		}
 		for b < c {
-			if less{{.Plural}}({{.Receiver}}, fn, pivot, c-1) { // {{.Receiver}}[c-1] > pivot
+			if less({{.Receiver}}, pivot, c-1) { // {{.Receiver}}[c-1] > pivot
 				c--
-			} else if !less{{.Plural}}({{.Receiver}}, fn, c-1, pivot) { // {{.Receiver}}[c-1] = pivot
+			} else if !less({{.Receiver}}, c-1, pivot) { // {{.Receiver}}[c-1] = pivot
 				swap{{.Plural}}({{.Receiver}}, c-1, d-1)
 				c--
 				d--
@@ -271,26 +268,26 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singul
 	return lo + b - a, hi - (d - c)
 }
 
-func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, fn func({{.Pointer}}{{.Singular}}) string, a, b, maxDepth int) {
+func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b, maxDepth int) {
 	for b-a > 7 {
 		if maxDepth == 0 {
-			heapSort{{.Plural}}({{.Receiver}}, fn, a, b)
+			heapSort{{.Plural}}({{.Receiver}}, less, a, b)
 			return
 		}
 		maxDepth--
-		mlo, mhi := doPivot{{.Plural}}({{.Receiver}}, fn, a, b)
+		mlo, mhi := doPivot{{.Plural}}({{.Receiver}}, less, a, b)
 		// Avoiding recursion on the larger subproblem guarantees
 		// a stack depth of at most lg(b-a).
 		if mlo-a < b-mhi {
-			quickSort{{.Plural}}({{.Receiver}}, fn, a, mlo, maxDepth)
+			quickSort{{.Plural}}({{.Receiver}}, less, a, mlo, maxDepth)
 			a = mhi // i.e., quickSort{{.Plural}}({{.Receiver}}, mhi, b)
 		} else {
-			quickSort{{.Plural}}({{.Receiver}}, fn, mhi, b, maxDepth)
+			quickSort{{.Plural}}({{.Receiver}}, less, mhi, b, maxDepth)
 			b = mlo // i.e., quickSort{{.Plural}}({{.Receiver}}, a, mlo)
 		}
 	}
 	if b-a > 1 {
-		insertionSort{{.Plural}}({{.Receiver}}, fn, a, b)
+		insertionSort{{.Plural}}({{.Receiver}}, less, a, b)
 	}
 }
 `
