@@ -185,6 +185,19 @@ func getTests() map[string][]test {
 		},
 		test{
 			func() interface{} {
+				return many.IsSorted(by_title)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				sorted := many.Sort(by_title)
+				return sorted.IsSorted(by_title)
+			},
+			true,
+		},
+		test{
+			func() interface{} {
 				return many.SortDesc(by_title)
 			},
 			Movies{_third, _second, _fourth, _first, _fifth},
@@ -194,6 +207,19 @@ func getTests() map[string][]test {
 				return many.SortDesc(by_theaters)
 			},
 			Movies{_fourth, _fifth, _second, _first, _third},
+		},
+		test{
+			func() interface{} {
+				return many.IsSortedDesc(by_title)
+			},
+			false,
+		},
+		test{
+			func() interface{} {
+				sorted := many.SortDesc(by_title)
+				return sorted.IsSortedDesc(by_title)
+			},
+			true,
 		},
 	}
 

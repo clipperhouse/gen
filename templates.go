@@ -115,7 +115,7 @@ func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.
 	return result
 }
 
-// IsSorted reports whether {{.Receiver}} is sorted.
+// Reports whether an instance of {{.Plural}} is sorted.
 func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool) bool {
 	n := len({{.Receiver}})
 	for i := n - 1; i > 0; i-- {
@@ -131,6 +131,14 @@ func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool)
 		return !less(z, a, b)
 	}
 	return {{.Receiver}}.Sort(more)
+}
+
+// Reports whether an instance of {{.Plural}} is sorted in descending order.
+func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Plural}}, int, int) bool) bool {
+	more := func(z {{.Plural}}, a int, b int) bool {
+		return !less(z, a, b)
+	}
+	return {{.Receiver}}.IsSorted(more)
 }
 
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
