@@ -159,6 +159,15 @@ func getTests() map[string][]test {
 				"Warner Bros": Movies{_second},
 			},
 		},
+		test{
+			func() interface{} {
+				return many.GroupByInt(get_box_office)
+			},
+			map[int]Movies{
+				90:  Movies{_first, _fourth},
+				100: Movies{_second, _third, _fifth},
+			},
+		},
 	}
 
 	tests["Sort"] = []test{
@@ -242,6 +251,26 @@ func TestAll(t *testing.T) {
 				if got != test.Expected {
 					t.Errorf("Expected %v, got %v", test.Expected, got)
 				}
+			case map[int]Movies:
+				got := test.Exec().(map[int]Movies)
+				exp := test.Expected.(map[int]Movies)
+				if len(got) != len(exp) {
+					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
+					break
+				}
+				for k, _ := range got {
+					got2 := got[k]
+					exp2 := exp[k]
+					if len(got2) != len(exp2) {
+						t.Errorf("Expected %v Movies in %d element, got %v", len(exp2), k, len(got2))
+						break
+					}
+					for i := range got2 {
+						if got2[i] != exp2[i] {
+							t.Errorf("Expected %v, got %v", exp2[i], got2[i])
+						}
+					}
+				}
 			case map[string]Movies:
 				got := test.Exec().(map[string]Movies)
 				exp := test.Expected.(map[string]Movies)
@@ -279,11 +308,11 @@ func TestAll(t *testing.T) {
 	}
 }
 
-var _first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax"}
-var _second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros"}
-var _third = &Movie{Title: "third", Theaters: 5, Studio: "Universal"}
-var _fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal"}
-var _fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax"}
+var _first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax", BoxOfficeMillions: 90}
+var _second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros", BoxOfficeMillions: 100}
+var _third = &Movie{Title: "third", Theaters: 5, Studio: "Universal", BoxOfficeMillions: 100}
+var _fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal", BoxOfficeMillions: 90}
+var _fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax", BoxOfficeMillions: 100}
 
 var some = Movies{
 	_first,
@@ -330,6 +359,9 @@ var get_title = func(movie *Movie) string {
 }
 var get_studio = func(movie *Movie) string {
 	return movie.Studio
+}
+var get_box_office = func(movie *Movie) int {
+	return movie.BoxOfficeMillions
 }
 var by_title = func(movies Movies, a, b int) bool {
 	return movies[a].Title < movies[b].Title

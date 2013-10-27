@@ -64,6 +64,14 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	}
 }
 
+func ({{.Receiver}} {{.Plural}}) GroupByInt(fn func({{.Pointer}}{{.Singular}}) int) map[int]{{.Plural}} {
+	result := make(map[int]{{.Plural}})
+	for _, _item := range {{.Receiver}} {
+		result[fn(_item)] = append(result[fn(_item)], _item)
+	}
+	return result
+}
+
 func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}) string) map[string]{{.Plural}} {
 	result := make(map[string]{{.Plural}})
 	for _, _item := range {{.Receiver}} {
