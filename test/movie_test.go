@@ -148,21 +148,6 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["JoinString"] = []test{
-		test{
-			func() interface{} {
-				return some.JoinString(get_title, ", ")
-			},
-			"first, second, third",
-		},
-		test{
-			func() interface{} {
-				return none.JoinString(get_title, ", ")
-			},
-			"",
-		},
-	}
-
 	tests["Sort"] = []test{
 		test{
 			func() interface{} {

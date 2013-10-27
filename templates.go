@@ -64,16 +64,6 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	}
 }
 
-func ({{.Receiver}} {{.Plural}}) JoinString(fn func({{.Pointer}}{{.Singular}}) string, delimiter string) string {
-	var join = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc string) string {
-		if {{.Loop}} != {{.Receiver}}[0] {
-			acc += delimiter
-		}
-		return acc + fn({{.Loop}})
-	}
-	return {{.Receiver}}.AggregateString(join)
-}
-
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
 	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		return acc + fn({{.Loop}})

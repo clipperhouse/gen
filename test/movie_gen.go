@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 27 Oct 2013 04:24:40 UTC
+// Sun, 27 Oct 2013 19:30:07 UTC
 
 package models
 
@@ -52,16 +52,6 @@ func (rcv Movies) Each(fn func(*Movie)) {
 	for _, _item := range rcv {
 		fn(_item)
 	}
-}
-
-func (rcv Movies) JoinString(fn func(*Movie) string, delimiter string) string {
-	var join = func(_item *Movie, acc string) string {
-		if _item != rcv[0] {
-			acc += delimiter
-		}
-		return acc + fn(_item)
-	}
-	return rcv.AggregateString(join)
 }
 
 func (rcv Movies) SumInt(fn func(*Movie) int) int {
