@@ -170,6 +170,27 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Min"] = []test{
+		test{
+			func() interface{} {
+				return many.Min(by_theaters)
+			},
+			_third,
+		},
+		test{
+			func() interface{} {
+				return many.Min(by_title)
+			},
+			_fifth,
+		},
+		test{
+			func() interface{} {
+				return none.Min(by_theaters)
+			},
+			_nil,
+		},
+	}
+
 	tests["Sort"] = []test{
 		test{
 			func() interface{} {
@@ -345,6 +366,8 @@ func TestAll(t *testing.T) {
 		}
 	}
 }
+
+var _nil *Movie
 
 var _first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax", BoxOfficeMillions: 90}
 var _second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros", BoxOfficeMillions: 100}

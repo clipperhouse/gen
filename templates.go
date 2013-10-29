@@ -80,6 +80,21 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 	return result
 }
 
+func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
+	var _nil {{.Pointer}}{{.Singular}}
+	l := len({{.Receiver}})
+	if l == 0 {
+		return _nil
+	}
+	m := 0
+	for i := 1; i < l; i++ {
+		if less({{.Receiver}}, i, m) {
+			m = i
+		}
+	}
+	return {{.Receiver}}[m]
+}
+
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
 	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		return acc + fn({{.Loop}})
