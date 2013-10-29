@@ -191,6 +191,27 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Max"] = []test{
+		test{
+			func() interface{} {
+				return many.Max(by_theaters)
+			},
+			_fourth,
+		},
+		test{
+			func() interface{} {
+				return many.Max(by_title)
+			},
+			_third,
+		},
+		test{
+			func() interface{} {
+				return none.Max(by_theaters)
+			},
+			_nil,
+		},
+	}
+
 	tests["Sort"] = []test{
 		test{
 			func() interface{} {

@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Tue, 29 Oct 2013 01:09:48 UTC
+// Tue, 29 Oct 2013 01:25:06 UTC
 
 package models
 
@@ -68,6 +68,13 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 		result[fn(_item)] = append(result[fn(_item)], _item)
 	}
 	return result
+}
+
+func (rcv Movies) Max(less func(Movies, int, int) bool) *Movie {
+	more := func(z Movies, a int, b int) bool {
+		return !less(z, a, b)
+	}
+	return rcv.Min(more)
 }
 
 func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {

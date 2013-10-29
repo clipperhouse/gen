@@ -80,6 +80,13 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 	return result
 }
 
+func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
+	more := func(z {{.Plural}}, a int, b int) bool {
+		return !less(z, a, b)
+	}
+	return rcv.Min(more)
+}
+
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
 	var _nil {{.Pointer}}{{.Singular}}
 	l := len({{.Receiver}})
