@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Tue, 29 Oct 2013 01:25:06 UTC
+// Tue, 29 Oct 2013 01:29:56 UTC
 
 package models
 
@@ -71,10 +71,7 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 }
 
 func (rcv Movies) Max(less func(Movies, int, int) bool) *Movie {
-	more := func(z Movies, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return rcv.Min(more)
+	return rcv.Min(not(less))
 }
 
 func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {
@@ -139,18 +136,12 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 }
 
 func (rcv Movies) SortDesc(less func(Movies, int, int) bool) Movies {
-	more := func(z Movies, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return rcv.Sort(more)
+	return rcv.Sort(not(less))
 }
 
 // Reports whether an instance of Movies is sorted in descending order.
 func (rcv Movies) IsSortedDesc(less func(Movies, int, int) bool) bool {
-	more := func(z Movies, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return rcv.IsSorted(more)
+	return rcv.IsSorted(not(less))
 }
 
 func swapMovies(rcv Movies, a, b int) {
@@ -321,5 +312,11 @@ func quickSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b, maxDept
 	}
 	if b-a > 1 {
 		insertionSortMovies(rcv, less, a, b)
+	}
+}
+
+func not(less func(Movies, int, int) bool) func(Movies, int, int) bool {
+	return func(z Movies, a int, b int) bool {
+		return !less(z, a, b)
 	}
 }

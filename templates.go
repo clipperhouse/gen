@@ -81,10 +81,7 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 }
 
 func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
-	more := func(z {{.Plural}}, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return rcv.Min(more)
+	return rcv.Min(not(less))
 }
 
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
@@ -149,18 +146,12 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 }
 
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool) {{.Plural}} {
-	more := func(z {{.Plural}}, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return {{.Receiver}}.Sort(more)
+	return {{.Receiver}}.Sort(not(less))
 }
 
 // Reports whether an instance of {{.Plural}} is sorted in descending order.
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Plural}}, int, int) bool) bool {
-	more := func(z {{.Plural}}, a int, b int) bool {
-		return !less(z, a, b)
-	}
-	return {{.Receiver}}.IsSorted(more)
+	return {{.Receiver}}.IsSorted(not(less))
 }
 
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
@@ -331,6 +322,12 @@ func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int,
 	}
 	if b-a > 1 {
 		insertionSort{{.Plural}}({{.Receiver}}, less, a, b)
+	}
+}
+
+func not(less func({{.Plural}}, int, int) bool) func({{.Plural}}, int, int) bool {
+	return func(z {{.Plural}}, a int, b int) bool {
+		return !less(z, a, b)
 	}
 }
 `
