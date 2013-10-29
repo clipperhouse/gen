@@ -2,6 +2,10 @@
 
 `gen` is an attempt to bring some generics-like functionality to Go, with some inspiration from C#’s Linq and JavaScript’s underscore libraries.
 
+`gen` generates code for your types (at the command line), which implements the methods described below. This gives you static, compile-time assurances and perhaps some code-completion depending on your [editor](https://github.com/DisposaBoy/GoSublime).
+
+The basic pattern is to pass func’s as you would pass lambdas to Linq or functions to underscore.
+
 We’re starting with proof-of-concept basics like Any, Where, and Count, later intending to fill out the ‘family’ of map-reduce functions. This is an early prototype, caveat emptor and suggestions welcome.
 
 # Getting Started
@@ -16,7 +20,7 @@ Then, `go test`.
 
 # Design goals
 
-We want this library to be idiomatic, fast and as lightweight as possible. We are looking to bring a bit of terseness and clarity to operations that might otherwise require verbose loops.
+We want this library to be idiomatic, fast and as lightweight as possible. We are looking to bring a bit of terseness and clarity to operations that might otherwise require verbose loops. We also will refrain from implementing functionality that would compete for problems that Go already solves cleanly.
 
 # Helping out
 
@@ -29,5 +33,7 @@ It’s probably a bit early for pull requests, we’re still designing the API. 
 - **Any**: determine if one or more elements of a slice return true for a passed func; comparable to underscore’s `some` or Linq’s `Any`.
 - **Count**: count elements of a slice that return true for a passed func; comparable to Linq’s `Count`.
 - **Each**: apply a passed func to every element of a slice; comparable to underscore’s `each` or Linq’s `ForEach`.
-- **Sort + IsSorted**: reorder a slice based on passed comparer func; comparable to Linq’s `OrderBy`, with some of Go’s sort idiom; `IsSorted` func to determine if a slice is sorted; *Desc versions too
+- **GroupBy**: group elements into a `map[string|int]slice` based on a passed func; implemented for `string` and `int`
+- **Min/Max**: return *element* with greatest/least value based on passed comparer func; comparable to underscore’s `max/min`; not like Linq’s `Max/Min`, which return the least value (not the element with the value)
+- **Sort** (+ IsSorted): reorder a slice based on passed comparer func; comparable to Linq’s `OrderBy`, with some of Go’s sort idiom; ***Desc** versions too
 - **Where**: returns slice of elements that return true for a passed func. Comparable to underscore’s `filter` or Linq’s `Where`.
