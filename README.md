@@ -33,7 +33,7 @@ It’s probably a bit early for pull requests, we’re still designing the API. 
 - **Any**: determine if one or more elements of a slice return true for a passed func; comparable to underscore’s `some` or Linq’s `Any`.
 - **Count**: count elements of a slice that return true for a passed func; comparable to Linq’s `Count`.
 - **Each**: apply a passed func to every element of a slice; comparable to underscore’s `each` or Linq’s `ForEach`.
-- **GroupBy**: group elements into a `map[string|int]slice` based on a passed func; implemented for `string` and `int`
+- **GroupBy**: group elements into a map of slices based on a passed func; implemented for `string` and `int` as keys
 - **Min/Max**: return *element* with greatest/least value based on passed comparer func; comparable to underscore’s `max/min`; not like Linq’s `Max/Min`, which return the least value (not the element with the value)
 - **Sort** (+ IsSorted): reorder a slice based on passed comparer func; comparable to Linq’s `OrderBy`, with some of Go’s sort idiom; ***Desc** versions too
 - **Where**: returns slice of elements that return true for a passed func. Comparable to underscore’s `filter` or Linq’s `Where`.
