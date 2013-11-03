@@ -10,15 +10,15 @@ type test struct {
 }
 
 func getTests() map[string][]test {
-	// the basic pattern for tests is zero/one/many for 'some' slice & sanity checks on 'none' slice
+	// the basic pattern for tests is zero/many for 'many' slice & sanity checks on 'none' slice
 	tests := make(map[string][]test)
 
 	tests["AggregateInt"] = []test{
 		test{
 			func() interface{} {
-				return some.AggregateInt(sum_theaters)
+				return many.AggregateInt(sum_theaters)
 			},
-			6 + 9 + 5,
+			6 + 9 + 5 + 50 + 20,
 		},
 		test{
 			func() interface{} {
@@ -31,9 +31,9 @@ func getTests() map[string][]test {
 	tests["AggregateString"] = []test{
 		test{
 			func() interface{} {
-				return some.AggregateString(concat_title)
+				return many.AggregateString(concat_title)
 			},
-			"first" + "second" + "third",
+			"first" + "second" + "third" + "fourth" + "fifth",
 		},
 		test{
 			func() interface{} {
@@ -46,19 +46,19 @@ func getTests() map[string][]test {
 	tests["All"] = []test{
 		test{
 			func() interface{} {
-				return some.All(is_dummy)
+				return many.All(is_dummy)
 			},
 			false,
 		},
 		test{
 			func() interface{} {
-				return some.All(is_first)
+				return many.All(is_first)
 			},
 			false,
 		},
 		test{
 			func() interface{} {
-				return some.All(is_first_or_second_or_third)
+				return many.All(is_first_or_second_or_third_or_fourth_or_fifth)
 			},
 			true,
 		},
@@ -79,19 +79,19 @@ func getTests() map[string][]test {
 	tests["Any"] = []test{
 		test{
 			func() interface{} {
-				return some.Any(is_dummy)
+				return many.Any(is_dummy)
 			},
 			false,
 		},
 		test{
 			func() interface{} {
-				return some.Any(is_first)
+				return many.Any(is_first)
 			},
 			true,
 		},
 		test{
 			func() interface{} {
-				return some.Any(is_first_or_third)
+				return many.Any(is_first_or_third)
 			},
 			true,
 		},
@@ -112,27 +112,27 @@ func getTests() map[string][]test {
 	tests["Count"] = []test{
 		test{
 			func() interface{} {
-				return some.Count(is_dummy)
+				return many.Count(is_dummy)
 			},
 			0,
 		},
 		test{
 			func() interface{} {
-				return some.Count(is_first)
+				return many.Count(is_first)
 			},
 			1,
 		},
 		test{
 			func() interface{} {
-				return some.Count(is_first_or_third)
+				return many.Count(is_first_or_third)
 			},
 			2,
 		},
 		test{
 			func() interface{} {
-				return some.Count(is_true)
+				return many.Count(is_true)
 			},
-			len(some),
+			len(many),
 		},
 		test{
 			func() interface{} {
@@ -268,9 +268,9 @@ func getTests() map[string][]test {
 	tests["SumInt"] = []test{
 		test{
 			func() interface{} {
-				return some.SumInt(get_theaters)
+				return many.SumInt(get_theaters)
 			},
-			6 + 9 + 5,
+			6 + 9 + 5 + 50 + 20,
 		},
 		test{
 			func() interface{} {
@@ -283,27 +283,27 @@ func getTests() map[string][]test {
 	tests["Where"] = []test{
 		test{
 			func() interface{} {
-				return some.Where(is_dummy)
+				return many.Where(is_dummy)
 			},
 			Movies{},
 		},
 		test{
 			func() interface{} {
-				return some.Where(is_first)
+				return many.Where(is_first)
 			},
 			Movies{_first},
 		},
 		test{
 			func() interface{} {
-				return some.Where(is_first_or_third)
+				return many.Where(is_first_or_third)
 			},
 			Movies{_first, _third},
 		},
 		test{
 			func() interface{} {
-				return some.Where(is_true)
+				return many.Where(is_true)
 			},
-			some,
+			many,
 		},
 		test{
 			func() interface{} {
@@ -396,12 +396,6 @@ var _third = &Movie{Title: "third", Theaters: 5, Studio: "Universal", BoxOfficeM
 var _fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal", BoxOfficeMillions: 90}
 var _fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax", BoxOfficeMillions: 100}
 
-var some = Movies{
-	_first,
-	_second,
-	_third,
-}
-
 var none = Movies{}
 
 var many = Movies{
@@ -415,8 +409,8 @@ var many = Movies{
 var is_first = func(movie *Movie) bool {
 	return movie.Title == "first"
 }
-var is_first_or_second_or_third = func(movie *Movie) bool {
-	return movie.Title == "first" || movie.Title == "second" || movie.Title == "third"
+var is_first_or_second_or_third_or_fourth_or_fifth = func(movie *Movie) bool {
+	return movie.Title == "first" || movie.Title == "second" || movie.Title == "third" || movie.Title == "fourth" || movie.Title == "fifth"
 }
 var is_first_or_third = func(movie *Movie) bool {
 	return movie.Title == "first" || movie.Title == "third"
