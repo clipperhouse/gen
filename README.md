@@ -8,6 +8,8 @@ The basic pattern is to pass func’s as you would pass lambdas to Linq or funct
 
 We’re starting with proof-of-concept basics like Any, Where, and Count, later intending to fill out the ‘family’ of map-reduce functions. This is an early prototype, caveat emptor and suggestions welcome.
 
+(I’m using the early bits in production on [piracydata.org](http://piracydata.org).)
+
 # Getting Started
 
 Clone this repo, and cd into the directory. Then, `go install`, which will create a binary called `gen` that you can invoke from the command line (assuming you’ve [set up](http://golang.org/doc/install) your paths, etc).
