@@ -1,18 +1,42 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Tue, 29 Oct 2013 01:29:56 UTC
+// Sun, 03 Nov 2013 17:31:24 UTC
 
 package models
 
+// The plural (slice) type of *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
 type Movies []*Movie
 
-func (rcv Movies) AggregateInt(fn func(*Movie, int) int) (result int) {
+// Iterates over Movies, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
+//	sum := func(_item *Movie, accumulated int) int {
+//		return accumulated + _item.Something
+//	}
+//	sumOfSomething := myMovies.AggregateInt(sum)
+//
+//	min := func(_item *Movie, accumulated int) int {
+//		if _item.AnotherThing < accumulated {
+//			return _item.AnotherThing
+//		}
+//		return accumulated
+//	}
+//	minOfAnotherThing := myMovies.AggregateInt(min)
+func (rcv Movies) AggregateInt(fn func(*Movie, int) int) int {
+	result := 0
 	for _, _item := range rcv {
 		result = fn(_item, result)
 	}
 	return result
 }
 
+// Iterates over Movies, operating on each element while accumulating results. For example, you might join strings like:
+//	myMovies := GetSomeMovies()
+//	join := func(_item *Movie, accumulated string) string {
+//		if _item != myMovies[0] {
+//			accumulated += ", "
+//		}
+//		return accumulated + _item.Title
+//	}
+//	myList := myMovies.AggregateString(join)
 func (rcv Movies) AggregateString(fn func(*Movie, string) string) (result string) {
 	for _, _item := range rcv {
 		result = fn(_item, result)
@@ -20,6 +44,11 @@ func (rcv Movies) AggregateString(fn func(*Movie, string) string) (result string
 	return result
 }
 
+// Tests that all elements of Movies are true for the passed func. Example:
+//	good := func(_item *Movie) bool {
+//		return _item.Something > 42
+//	}
+//	allGood := myMovies.All(good)
 func (rcv Movies) All(fn func(*Movie) bool) bool {
 	for _, _item := range rcv {
 		if !fn(_item) {
@@ -29,6 +58,11 @@ func (rcv Movies) All(fn func(*Movie) bool) bool {
 	return true
 }
 
+// Tests that one or more elements of Movies are true for the passed func. Example:
+//	winner := func(_item *Movie) bool {
+//		return _item.Placement == "winner"
+//	}
+//	weHaveAWinner := myMovies.Any(winner)
 func (rcv Movies) Any(fn func(*Movie) bool) bool {
 	for _, _item := range rcv {
 		if fn(_item) {
@@ -38,6 +72,11 @@ func (rcv Movies) Any(fn func(*Movie) bool) bool {
 	return false
 }
 
+// Counts the number elements of Movies that are true for the passed func. Example:
+//	dracula := func(_item *Movie) bool {
+//		return _item.IsDracula()
+//	}
+//	countDracula := myMovies.Count(dracula)
 func (rcv Movies) Count(fn func(*Movie) bool) int {
 	var count = func(_item *Movie, acc int) int {
 		if fn(_item) {
@@ -48,12 +87,18 @@ func (rcv Movies) Count(fn func(*Movie) bool) int {
 	return rcv.AggregateInt(count)
 }
 
+// Iterates over Movies and executes the passed func against each element.
 func (rcv Movies) Each(fn func(*Movie)) {
 	for _, _item := range rcv {
 		fn(_item)
 	}
 }
 
+// Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
+//	year := func(_item *Movie) int {
+//		return _item.CreationDate.Year()
+//	}
+//	yearlyReport := myMovies.GroupByInt(year)
 func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
 	result := make(map[int]Movies)
 	for _, _item := range rcv {
@@ -62,6 +107,11 @@ func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
 	return result
 }
 
+// Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
+//	dept := func(_item *Movie) string {
+//		return _item.DepartmentName
+//	}
+//	byDepartment := myMovies.GroupByString(dept)
 func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 	result := make(map[string]Movies)
 	for _, _item := range rcv {
@@ -70,10 +120,25 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 	return result
 }
 
+// Returns the element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
+//	byArea := func(_items Movies, a int, b int) bool {
+//		return _items[a].Area() < _items[b].Area()
+//	}
+//	roomiest := myMovies.Max(byArea)
+//
+// In the case of multiple items being equally maximal, the last such element is returned.
+// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) Max(less func(Movies, int, int) bool) *Movie {
 	return rcv.Min(not(less))
 }
 
+// Returns the element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
+//	byPrice := func(_items Movies, a int, b int) bool {
+//		return _items[a].Price < _items[b].Price
+//	}
+//	cheapest := myMovies.Min(byPrice)
+//
+// In the case of multiple items being equally minimal, the first such element is returned.
 func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {
 	var _nil *Movie
 	l := len(rcv)
@@ -89,6 +154,11 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {
 	return rcv[m]
 }
 
+// Returns the sum of ints returned by passed func. Example:
+//	itemTotal := func(_item *Movie) int {
+//		return _item.Quantity * _item.UnitPrice
+//	}
+//	orderTotal := myMovies.SumInt(itemTotal)
 func (rcv Movies) SumInt(fn func(*Movie) int) int {
 	var sum = func(_item *Movie, acc int) int {
 		return acc + fn(_item)
@@ -96,6 +166,11 @@ func (rcv Movies) SumInt(fn func(*Movie) int) int {
 	return rcv.AggregateInt(sum)
 }
 
+// Returns a new Movies slice whose elements return true for func. Example:
+//	incredible := func(_item *Movie) bool {
+//		return _item.Manufacturer == "Apple"
+//	}
+//	wishList := myMovies.Where(incredible)
 func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	for _, _item := range rcv {
 		if fn(_item) {
@@ -105,10 +180,16 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	return result
 }
 
+// Sort functions below are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Returns a new ordered Movies slice, determined by a func defining ‘less’. Example:
+//	byName := func(_items Movies, a int, b int) bool {
+//		return _items[a].LastName < _items[b].LastName
+//	}
+//	roster := myMovies.Sort(byName)
 func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
@@ -124,7 +205,7 @@ func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
 	return result
 }
 
-// Reports whether an instance of Movies is sorted.
+// Reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See Sort method below.
 func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
@@ -135,11 +216,17 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 	return true
 }
 
+// Returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. Example:
+//	byPoints := func(_items Movies, a int, b int) bool {
+//		return _items[a].Points < _items[b].Points
+//	}
+//	leaderboard := myMovies.SortDesc(byPoints)
+// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) SortDesc(less func(Movies, int, int) bool) Movies {
 	return rcv.Sort(not(less))
 }
 
-// Reports whether an instance of Movies is sorted in descending order.
+// Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
 func (rcv Movies) IsSortedDesc(less func(Movies, int, int) bool) bool {
 	return rcv.IsSorted(not(less))
 }

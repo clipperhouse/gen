@@ -14,15 +14,39 @@ const tmpl = `// {{.Command}}
 
 package {{.Package}}
 
+// The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
-func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}}, int) int) (result int) {
+// Iterates over {{.Plural}}, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
+//	sum := func(_item {{.Pointer}}{{.Singular}}, accumulated int) int {
+//		return accumulated + _item.Something
+//	}
+//	sumOfSomething := my{{.Plural}}.AggregateInt(sum)
+//
+//	min := func(_item {{.Pointer}}{{.Singular}}, accumulated int) int {
+//		if _item.AnotherThing < accumulated {
+//			return _item.AnotherThing
+//		}
+//		return accumulated
+//	}
+//	minOfAnotherThing := my{{.Plural}}.AggregateInt(min)
+func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}}, int) int) int {
+	result := 0
 	for _, {{.Loop}} := range {{.Receiver}} {
 		result = fn({{.Loop}}, result)
 	}
 	return result
 }
 
+// Iterates over {{.Plural}}, operating on each element while accumulating results. For example, you might join strings like:
+//	my{{.Plural}} := GetSome{{.Plural}}()
+//	join := func(_item {{.Pointer}}{{.Singular}}, accumulated string) string {
+//		if _item != my{{.Plural}}[0] {
+//			accumulated += ", "
+//		}
+//		return accumulated + _item.Title
+//	}
+//	myList := my{{.Plural}}.AggregateString(join)
 func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular}}, string) string) (result string) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		result = fn({{.Loop}}, result)
@@ -30,6 +54,11 @@ func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular
 	return result
 }
 
+// Tests that all elements of {{.Plural}} are true for the passed func. Example:
+//	good := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.Something > 42
+//	}
+//	allGood := my{{.Plural}}.All(good)
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if !fn({{.Loop}}) {
@@ -39,6 +68,11 @@ func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	return true
 }
 
+// Tests that one or more elements of {{.Plural}} are true for the passed func. Example:
+//	winner := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.Placement == "winner"
+//	}
+//	weHaveAWinner := my{{.Plural}}.Any(winner)
 func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -48,6 +82,11 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	return false
 }
 
+// Counts the number elements of {{.Plural}} that are true for the passed func. Example:
+//	dracula := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.IsDracula()
+//	}
+//	countDracula := my{{.Plural}}.Count(dracula)
 func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) int {
 	var count = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		if fn({{.Loop}}) {
@@ -58,12 +97,18 @@ func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return {{.Receiver}}.AggregateInt(count)
 }
 
+// Iterates over {{.Plural}} and executes the passed func against each element.
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		fn({{.Loop}})
 	}
 }
 
+// Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
+//	year := func(_item {{.Pointer}}{{.Singular}}) int {
+//		return _item.CreationDate.Year()
+//	}
+//	yearlyReport := my{{.Plural}}.GroupByInt(year)
 func ({{.Receiver}} {{.Plural}}) GroupByInt(fn func({{.Pointer}}{{.Singular}}) int) map[int]{{.Plural}} {
 	result := make(map[int]{{.Plural}})
 	for _, _item := range {{.Receiver}} {
@@ -72,6 +117,11 @@ func ({{.Receiver}} {{.Plural}}) GroupByInt(fn func({{.Pointer}}{{.Singular}}) i
 	return result
 }
 
+// Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
+//	dept := func(_item {{.Pointer}}{{.Singular}}) string {
+//		return _item.DepartmentName
+//	}
+//	byDepartment := my{{.Plural}}.GroupByString(dept)
 func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}) string) map[string]{{.Plural}} {
 	result := make(map[string]{{.Plural}})
 	for _, _item := range {{.Receiver}} {
@@ -80,10 +130,25 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 	return result
 }
 
+// Returns the element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
+//	byArea := func(_items {{.Plural}}, a int, b int) bool {
+//		return _items[a].Area() < _items[b].Area()
+//	}
+//	roomiest := my{{.Plural}}.Max(byArea)
+//
+// In the case of multiple items being equally maximal, the last such element is returned.
+// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
 	return rcv.Min(not(less))
 }
 
+// Returns the element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
+//	byPrice := func(_items {{.Plural}}, a int, b int) bool {
+//		return _items[a].Price < _items[b].Price
+//	}
+//	cheapest := my{{.Plural}}.Min(byPrice)
+//
+// In the case of multiple items being equally minimal, the first such element is returned.
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
 	var _nil {{.Pointer}}{{.Singular}}
 	l := len({{.Receiver}})
@@ -99,6 +164,11 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.P
 	return {{.Receiver}}[m]
 }
 
+// Returns the sum of ints returned by passed func. Example:
+//	itemTotal := func(_item {{.Pointer}}{{.Singular}}) int {
+//		return _item.Quantity * _item.UnitPrice
+//	}
+//	orderTotal := my{{.Plural}}.SumInt(itemTotal)
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
 	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
 		return acc + fn({{.Loop}})
@@ -106,6 +176,11 @@ func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) 
 	return {{.Receiver}}.AggregateInt(sum)
 }
 
+// Returns a new {{.Plural}} slice whose elements return true for func. Example:
+//	incredible := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.Manufacturer == "Apple"
+//	}
+//	wishList := my{{.Plural}}.Where(incredible)
 func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -115,10 +190,16 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return result
 }
 
+// Sort functions below are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
+//	byName := func(_items {{.Plural}}, a int, b int) bool {
+//		return _items[a].LastName < _items[b].LastName
+//	}
+//	roster := my{{.Plural}}.Sort(byName)
 func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.Plural}} {
 	result := make({{.Plural}}, len({{.Receiver}}))
 	copy(result, {{.Receiver}})
@@ -134,7 +215,7 @@ func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.
 	return result
 }
 
-// Reports whether an instance of {{.Plural}} is sorted.
+// Reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See Sort method below.
 func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool) bool {
 	n := len({{.Receiver}})
 	for i := n - 1; i > 0; i-- {
@@ -145,11 +226,17 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 	return true
 }
 
+// Returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
+//	byPoints := func(_items {{.Plural}}, a int, b int) bool {
+//		return _items[a].Points < _items[b].Points
+//	}
+//	leaderboard := my{{.Plural}}.SortDesc(byPoints)
+// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool) {{.Plural}} {
 	return {{.Receiver}}.Sort(not(less))
 }
 
-// Reports whether an instance of {{.Plural}} is sorted in descending order.
+// Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Plural}}, int, int) bool) bool {
 	return {{.Receiver}}.IsSorted(not(less))
 }
