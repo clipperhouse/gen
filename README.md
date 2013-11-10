@@ -8,6 +8,8 @@ The basic pattern is to pass func’s as you would pass lambdas to Linq or funct
 
 We’re starting with proof-of-concept basics like Any, Where, and Count, later intending to fill out the ‘family’ of map-reduce functions. This is an early prototype, caveat emptor and suggestions welcome.
 
+<a href="http://clipperhouse.github.io/gen/">Nice docs.</a>
+
 # Getting Started
 
 Clone this repo, and cd into the directory. Then, `go install`, which will create a binary called `gen` that you can invoke from the command line (assuming you’ve [set up](http://golang.org/doc/install) your paths, etc).
@@ -21,10 +23,6 @@ Then, `go test`.
 # Design goals
 
 We want this library to be idiomatic, fast and as lightweight as possible. We are looking to bring a bit of terseness and clarity to operations that might otherwise require verbose loops. We also will refrain from implementing functionality that would compete for problems that Go already solves cleanly.
-
-# Helping out
-
-It’s probably a bit early for pull requests, we’re still designing the API. You can always find me @clipperhouse on GitHub and Twitter, your ideas are welcome.
 
 ## Implemented so far:
 
