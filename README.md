@@ -8,7 +8,11 @@ The basic pattern is to pass func’s as you would pass lambdas to Linq or funct
 
 We’re starting with proof-of-concept basics like Any, Where, and Count, later intending to fill out the ‘family’ of map-reduce functions. This is an early prototype, caveat emptor and suggestions welcome.
 
+<<<<<<< HEAD
 <a href="http://clipperhouse.github.io/gen/">Nice docs.</a>
+=======
+(I’m using the early bits in production on [piracydata.org](http://piracydata.org).)
+>>>>>>> aad06614b6f47b581904f810006556c2bc5605d4
 
 # Getting Started
 
