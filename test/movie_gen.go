@@ -1,8 +1,10 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 03 Nov 2013 17:31:24 UTC
+// Tue, 12 Nov 2013 02:04:53 UTC
 
 package models
+
+import "errors"
 
 // The plural (slice) type of *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
 type Movies []*Movie
@@ -128,7 +130,10 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) Max(less func(Movies, int, int) bool) *Movie {
+func (rcv Movies) Max(less func(Movies, int, int) bool) (*Movie, error) {
+	if len(rcv) == 0 {
+		return nil, errors.New("Cannot determine the Max of an empty slice")
+	}
 	return rcv.Min(not(less))
 }
 
@@ -139,11 +144,10 @@ func (rcv Movies) Max(less func(Movies, int, int) bool) *Movie {
 //	cheapest := myMovies.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {
-	var _nil *Movie
+func (rcv Movies) Min(less func(Movies, int, int) bool) (*Movie, error) {
 	l := len(rcv)
 	if l == 0 {
-		return _nil
+		return nil, errors.New("Cannot determine the Min of an empty slice")
 	}
 	m := 0
 	for i := 1; i < l; i++ {
@@ -151,7 +155,7 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) *Movie {
 			m = i
 		}
 	}
-	return rcv[m]
+	return rcv[m], nil
 }
 
 // Returns the sum of ints returned by passed func. Example:

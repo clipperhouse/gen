@@ -14,6 +14,8 @@ const tmpl = `// {{.Command}}
 
 package {{.Package}}
 
+import "errors"
+
 // The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
@@ -138,7 +140,10 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
+func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) ({{.Pointer}}{{.Singular}}, error) {
+	if len(rcv) == 0 {
+		return nil, errors.New("Cannot determine the Max of an empty slice")
+	}
 	return rcv.Min(not(less))
 }
 
@@ -149,11 +154,10 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) {{.P
 //	cheapest := my{{.Plural}}.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.Pointer}}{{.Singular}} {
-	var _nil {{.Pointer}}{{.Singular}}
+func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.Pointer}}{{.Singular}}, error) {
 	l := len({{.Receiver}})
 	if l == 0 {
-		return _nil
+		return nil, errors.New("Cannot determine the Min of an empty slice")
 	}
 	m := 0
 	for i := 1; i < l; i++ {
@@ -161,7 +165,7 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) {{.P
 			m = i
 		}
 	}
-	return {{.Receiver}}[m]
+	return {{.Receiver}}[m], nil
 }
 
 // Returns the sum of ints returned by passed func. Example:

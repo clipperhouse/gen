@@ -196,48 +196,48 @@ func getTests() map[string][]test {
 	tests["Min"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Min(by_theaters), nil
+				return many.Min(by_theaters)
 			},
 			_third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Min(by_title), nil
+				return many.Min(by_title)
 			},
 			_fifth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Min(by_theaters), nil
+				return none.Min(by_theaters)
 			},
 			_nil,
-			false,
+			true,
 		},
 	}
 
 	tests["Max"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Max(by_theaters), nil
+				return many.Max(by_theaters)
 			},
 			_fourth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Max(by_title), nil
+				return many.Max(by_title)
 			},
 			_third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Max(by_theaters), nil
+				return none.Max(by_theaters)
 			},
 			_nil,
-			false,
+			true,
 		},
 	}
 
