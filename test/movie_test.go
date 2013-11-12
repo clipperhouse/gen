@@ -5,8 +5,9 @@ import (
 )
 
 type test struct {
-	Exec     func() interface{}
-	Expected interface{}
+	Exec          func() (interface{}, error)
+	Expected      interface{}
+	ErrorExpected bool
 }
 
 func getTests() map[string][]test {
@@ -15,307 +16,351 @@ func getTests() map[string][]test {
 
 	tests["AggregateInt"] = []test{
 		test{
-			func() interface{} {
-				return many.AggregateInt(sum_theaters)
+			func() (interface{}, error) {
+				return many.AggregateInt(sum_theaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.AggregateInt(sum_theaters)
+			func() (interface{}, error) {
+				return none.AggregateInt(sum_theaters), nil
 			},
 			0,
+			false,
 		},
 	}
 
 	tests["AggregateString"] = []test{
 		test{
-			func() interface{} {
-				return many.AggregateString(concat_title)
+			func() (interface{}, error) {
+				return many.AggregateString(concat_title), nil
 			},
 			"first" + "second" + "third" + "fourth" + "fifth",
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.AggregateString(concat_title)
+			func() (interface{}, error) {
+				return none.AggregateString(concat_title), nil
 			},
 			"",
+			false,
 		},
 	}
 
 	tests["All"] = []test{
 		test{
-			func() interface{} {
-				return many.All(is_dummy)
+			func() (interface{}, error) {
+				return many.All(is_dummy), nil
 			},
+			false,
 			false,
 		},
 		test{
-			func() interface{} {
-				return many.All(is_first)
+			func() (interface{}, error) {
+				return many.All(is_first), nil
 			},
+			false,
 			false,
 		},
 		test{
-			func() interface{} {
-				return many.All(is_first_or_second_or_third_or_fourth_or_fifth)
+			func() (interface{}, error) {
+				return many.All(is_first_or_second_or_third_or_fourth_or_fifth), nil
 			},
 			true,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.All(is_false)
+			func() (interface{}, error) {
+				return none.All(is_false), nil
 			},
 			true,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.All(is_true)
+			func() (interface{}, error) {
+				return none.All(is_true), nil
 			},
 			true,
+			false,
 		},
 	}
 
 	tests["Any"] = []test{
 		test{
-			func() interface{} {
-				return many.Any(is_dummy)
+			func() (interface{}, error) {
+				return many.Any(is_dummy), nil
 			},
+			false,
 			false,
 		},
 		test{
-			func() interface{} {
-				return many.Any(is_first)
+			func() (interface{}, error) {
+				return many.Any(is_first), nil
 			},
 			true,
-		},
-		test{
-			func() interface{} {
-				return many.Any(is_first_or_third)
-			},
-			true,
-		},
-		test{
-			func() interface{} {
-				return none.Any(is_false)
-			},
 			false,
 		},
 		test{
-			func() interface{} {
-				return none.Any(is_true)
+			func() (interface{}, error) {
+				return many.Any(is_first_or_third), nil
 			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.Any(is_false), nil
+			},
+			false,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.Any(is_true), nil
+			},
+			false,
 			false,
 		},
 	}
 
 	tests["Count"] = []test{
 		test{
-			func() interface{} {
-				return many.Count(is_dummy)
+			func() (interface{}, error) {
+				return many.Count(is_dummy), nil
 			},
 			0,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Count(is_first)
+			func() (interface{}, error) {
+				return many.Count(is_first), nil
 			},
 			1,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Count(is_first_or_third)
+			func() (interface{}, error) {
+				return many.Count(is_first_or_third), nil
 			},
 			2,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Count(is_true)
+			func() (interface{}, error) {
+				return many.Count(is_true), nil
 			},
 			len(many),
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Count(is_false)
+			func() (interface{}, error) {
+				return none.Count(is_false), nil
 			},
 			0,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Count(is_true)
+			func() (interface{}, error) {
+				return none.Count(is_true), nil
 			},
 			0,
+			false,
 		},
 	}
 
 	tests["GroupBy"] = []test{
 		test{
-			func() interface{} {
-				return many.GroupByString(get_studio)
+			func() (interface{}, error) {
+				return many.GroupByString(get_studio), nil
 			},
 			map[string]Movies{
 				"Miramax":     Movies{_first, _fifth},
 				"Universal":   Movies{_third, _fourth},
 				"Warner Bros": Movies{_second},
 			},
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.GroupByInt(get_box_office)
+			func() (interface{}, error) {
+				return many.GroupByInt(get_box_office), nil
 			},
 			map[int]Movies{
 				90:  Movies{_first, _fourth},
 				100: Movies{_second, _third, _fifth},
 			},
+			false,
 		},
 	}
 
 	tests["Min"] = []test{
 		test{
-			func() interface{} {
-				return many.Min(by_theaters)
+			func() (interface{}, error) {
+				return many.Min(by_theaters), nil
 			},
 			_third,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Min(by_title)
+			func() (interface{}, error) {
+				return many.Min(by_title), nil
 			},
 			_fifth,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Min(by_theaters)
+			func() (interface{}, error) {
+				return none.Min(by_theaters), nil
 			},
 			_nil,
+			false,
 		},
 	}
 
 	tests["Max"] = []test{
 		test{
-			func() interface{} {
-				return many.Max(by_theaters)
+			func() (interface{}, error) {
+				return many.Max(by_theaters), nil
 			},
 			_fourth,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Max(by_title)
+			func() (interface{}, error) {
+				return many.Max(by_title), nil
 			},
 			_third,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Max(by_theaters)
+			func() (interface{}, error) {
+				return none.Max(by_theaters), nil
 			},
 			_nil,
+			false,
 		},
 	}
 
 	tests["Sort"] = []test{
 		test{
-			func() interface{} {
-				return many.Sort(by_title)
+			func() (interface{}, error) {
+				return many.Sort(by_title), nil
 			},
 			Movies{_fifth, _first, _fourth, _second, _third},
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Sort(by_theaters)
+			func() (interface{}, error) {
+				return many.Sort(by_theaters), nil
 			},
 			Movies{_third, _first, _second, _fifth, _fourth},
-		},
-		test{
-			func() interface{} {
-				return many.IsSorted(by_title)
-			},
 			false,
 		},
 		test{
-			func() interface{} {
-				sorted := many.Sort(by_title)
-				return sorted.IsSorted(by_title)
+			func() (interface{}, error) {
+				return many.IsSorted(by_title), nil
 			},
-			true,
+			false,
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.SortDesc(by_title)
+			func() (interface{}, error) {
+				sorted := many.Sort(by_title)
+				return sorted.IsSorted(by_title), nil
+			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.SortDesc(by_title), nil
 			},
 			Movies{_third, _second, _fourth, _first, _fifth},
-		},
-		test{
-			func() interface{} {
-				return many.SortDesc(by_theaters)
-			},
-			Movies{_fourth, _fifth, _second, _first, _third},
-		},
-		test{
-			func() interface{} {
-				return many.IsSortedDesc(by_title)
-			},
 			false,
 		},
 		test{
-			func() interface{} {
+			func() (interface{}, error) {
+				return many.SortDesc(by_theaters), nil
+			},
+			Movies{_fourth, _fifth, _second, _first, _third},
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.IsSortedDesc(by_title), nil
+			},
+			false,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
 				sorted := many.SortDesc(by_title)
-				return sorted.IsSortedDesc(by_title)
+				return sorted.IsSortedDesc(by_title), nil
 			},
 			true,
+			false,
 		},
 	}
 
 	tests["SumInt"] = []test{
 		test{
-			func() interface{} {
-				return many.SumInt(get_theaters)
+			func() (interface{}, error) {
+				return many.SumInt(get_theaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.SumInt(get_theaters)
+			func() (interface{}, error) {
+				return none.SumInt(get_theaters), nil
 			},
 			0,
+			false,
 		},
 	}
 
 	tests["Where"] = []test{
 		test{
-			func() interface{} {
-				return many.Where(is_dummy)
+			func() (interface{}, error) {
+				return many.Where(is_dummy), nil
 			},
 			Movies{},
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Where(is_first)
+			func() (interface{}, error) {
+				return many.Where(is_first), nil
 			},
 			Movies{_first},
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Where(is_first_or_third)
+			func() (interface{}, error) {
+				return many.Where(is_first_or_third), nil
 			},
 			Movies{_first, _third},
+			false,
 		},
 		test{
-			func() interface{} {
-				return many.Where(is_true)
+			func() (interface{}, error) {
+				return many.Where(is_true), nil
 			},
 			many,
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Where(is_false)
+			func() (interface{}, error) {
+				return none.Where(is_false), nil
 			},
 			Movies{},
+			false,
 		},
 		test{
-			func() interface{} {
-				return none.Where(is_true)
+			func() (interface{}, error) {
+				return none.Where(is_true), nil
 			},
 			Movies{},
+			false,
 		},
 	}
 
@@ -327,12 +372,25 @@ func TestAll(t *testing.T) {
 		for _, test := range tests {
 			switch test.Expected.(type) {
 			default:
-				got := test.Exec()
+				got, err := test.Exec()
+				if test.ErrorExpected && err == nil {
+					t.Errorf("Expected error but did not receive one")
+				}
+				if !test.ErrorExpected && err != nil {
+					t.Errorf("Did not expect error but received: %v", err)
+				}
 				if got != test.Expected {
 					t.Errorf("Expected %v, got %v", test.Expected, got)
 				}
 			case map[int]Movies:
-				got := test.Exec().(map[int]Movies)
+				_got, err := test.Exec()
+				if test.ErrorExpected && err == nil {
+					t.Errorf("Expected error but did not receive one")
+				}
+				if !test.ErrorExpected && err != nil {
+					t.Errorf("Did not expect error but received: %v", err)
+				}
+				got := _got.(map[int]Movies)
 				exp := test.Expected.(map[int]Movies)
 				if len(got) != len(exp) {
 					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
@@ -352,7 +410,14 @@ func TestAll(t *testing.T) {
 					}
 				}
 			case map[string]Movies:
-				got := test.Exec().(map[string]Movies)
+				_got, err := test.Exec()
+				if test.ErrorExpected && err == nil {
+					t.Errorf("Expected error but did not receive one")
+				}
+				if !test.ErrorExpected && err != nil {
+					t.Errorf("Did not expect error but received: %v", err)
+				}
+				got := _got.(map[string]Movies)
 				exp := test.Expected.(map[string]Movies)
 				if len(got) != len(exp) {
 					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
@@ -372,7 +437,14 @@ func TestAll(t *testing.T) {
 					}
 				}
 			case Movies:
-				got := test.Exec().(Movies)
+				_got, err := test.Exec()
+				if test.ErrorExpected && err == nil {
+					t.Errorf("Expected error but did not receive one")
+				}
+				if !test.ErrorExpected && err != nil {
+					t.Errorf("Did not expect error but received: %v", err)
+				}
+				got := _got.(Movies)
 				exp := test.Expected.(Movies)
 				if len(got) != len(exp) {
 					t.Errorf("Expected %v Movies, got %v", len(exp), len(got))
