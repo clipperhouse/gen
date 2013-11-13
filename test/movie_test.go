@@ -17,14 +17,14 @@ func getTests() map[string][]test {
 	tests["AggregateInt"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.AggregateInt(sum_theaters), nil
+				return many.AggregateInt(sumTheaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.AggregateInt(sum_theaters), nil
+				return none.AggregateInt(sumTheaters), nil
 			},
 			0,
 			false,
@@ -34,14 +34,14 @@ func getTests() map[string][]test {
 	tests["AggregateString"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.AggregateString(concat_title), nil
+				return many.AggregateString(concatTitle), nil
 			},
 			"first" + "second" + "third" + "fourth" + "fifth",
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.AggregateString(concat_title), nil
+				return none.AggregateString(concatTitle), nil
 			},
 			"",
 			false,
@@ -51,35 +51,35 @@ func getTests() map[string][]test {
 	tests["All"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.All(is_dummy), nil
+				return many.All(isDummy), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.All(is_first), nil
+				return many.All(isFirst), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.All(is_first_or_second_or_third_or_fourth_or_fifth), nil
-			},
-			true,
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return none.All(is_false), nil
+				return many.All(isFirstOrSecondOrThirdOrFourthOrFifth), nil
 			},
 			true,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.All(is_true), nil
+				return none.All(isFalse), nil
+			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.All(isTrue), nil
 			},
 			true,
 			false,
@@ -89,35 +89,35 @@ func getTests() map[string][]test {
 	tests["Any"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Any(is_dummy), nil
+				return many.Any(isDummy), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Any(is_first), nil
-			},
-			true,
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return many.Any(is_first_or_third), nil
+				return many.Any(isFirst), nil
 			},
 			true,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Any(is_false), nil
+				return many.Any(isFirstOrThird), nil
+			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.Any(isFalse), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Any(is_true), nil
+				return none.Any(isTrue), nil
 			},
 			false,
 			false,
@@ -127,42 +127,42 @@ func getTests() map[string][]test {
 	tests["Count"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Count(is_dummy), nil
+				return many.Count(isDummy), nil
 			},
 			0,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Count(is_first), nil
+				return many.Count(isFirst), nil
 			},
 			1,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Count(is_first_or_third), nil
+				return many.Count(isFirstOrThird), nil
 			},
 			2,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Count(is_true), nil
+				return many.Count(isTrue), nil
 			},
 			len(many),
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Count(is_false), nil
+				return none.Count(isFalse), nil
 			},
 			0,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Count(is_true), nil
+				return none.Count(isTrue), nil
 			},
 			0,
 			false,
@@ -172,22 +172,22 @@ func getTests() map[string][]test {
 	tests["GroupBy"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.GroupByString(get_studio), nil
+				return many.GroupByString(getStudio), nil
 			},
 			map[string]Movies{
-				"Miramax":     Movies{_first, _fifth},
-				"Universal":   Movies{_third, _fourth},
-				"Warner Bros": Movies{_second},
+				"Miramax":     Movies{first, fifth},
+				"Universal":   Movies{third, fourth},
+				"Warner Bros": Movies{second},
 			},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.GroupByInt(get_box_office), nil
+				return many.GroupByInt(getBoxOffice), nil
 			},
 			map[int]Movies{
-				90:  Movies{_first, _fourth},
-				100: Movies{_second, _third, _fifth},
+				90:  Movies{first, fourth},
+				100: Movies{second, third, fifth},
 			},
 			false,
 		},
@@ -196,21 +196,21 @@ func getTests() map[string][]test {
 	tests["Min"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Min(by_theaters)
+				return many.Min(byTheaters)
 			},
-			_third,
+			third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Min(by_title)
+				return many.Min(byTitle)
 			},
-			_fifth,
+			fifth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Min(by_theaters)
+				return none.Min(byTheaters)
 			},
 			_nil,
 			true,
@@ -220,21 +220,21 @@ func getTests() map[string][]test {
 	tests["Max"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Max(by_theaters)
+				return many.Max(byTheaters)
 			},
-			_fourth,
+			fourth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Max(by_title)
+				return many.Max(byTitle)
 			},
-			_third,
+			third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Max(by_theaters)
+				return none.Max(byTheaters)
 			},
 			_nil,
 			true,
@@ -244,58 +244,58 @@ func getTests() map[string][]test {
 	tests["Sort"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Sort(by_title), nil
+				return many.Sort(byTitle), nil
 			},
-			Movies{_fifth, _first, _fourth, _second, _third},
+			Movies{fifth, first, fourth, second, third},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Sort(by_theaters), nil
+				return many.Sort(byTheaters), nil
 			},
-			Movies{_third, _first, _second, _fifth, _fourth},
+			Movies{third, first, second, fifth, fourth},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.IsSorted(by_title), nil
+				return many.IsSorted(byTitle), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				sorted := many.Sort(by_title)
-				return sorted.IsSorted(by_title), nil
+				sorted := many.Sort(byTitle)
+				return sorted.IsSorted(byTitle), nil
 			},
 			true,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.SortDesc(by_title), nil
+				return many.SortDesc(byTitle), nil
 			},
-			Movies{_third, _second, _fourth, _first, _fifth},
+			Movies{third, second, fourth, first, fifth},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.SortDesc(by_theaters), nil
+				return many.SortDesc(byTheaters), nil
 			},
-			Movies{_fourth, _fifth, _second, _first, _third},
+			Movies{fourth, fifth, second, first, third},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.IsSortedDesc(by_title), nil
+				return many.IsSortedDesc(byTitle), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				sorted := many.SortDesc(by_title)
-				return sorted.IsSortedDesc(by_title), nil
+				sorted := many.SortDesc(byTitle)
+				return sorted.IsSortedDesc(byTitle), nil
 			},
 			true,
 			false,
@@ -305,14 +305,14 @@ func getTests() map[string][]test {
 	tests["SumInt"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.SumInt(get_theaters), nil
+				return many.SumInt(getTheaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.SumInt(get_theaters), nil
+				return none.SumInt(getTheaters), nil
 			},
 			0,
 			false,
@@ -322,42 +322,42 @@ func getTests() map[string][]test {
 	tests["Where"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Where(is_dummy), nil
+				return many.Where(isDummy), nil
 			},
 			Movies{},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Where(is_first), nil
+				return many.Where(isFirst), nil
 			},
-			Movies{_first},
+			Movies{first},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Where(is_first_or_third), nil
+				return many.Where(isFirstOrThird), nil
 			},
-			Movies{_first, _third},
+			Movies{first, third},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Where(is_true), nil
+				return many.Where(isTrue), nil
 			},
 			many,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Where(is_false), nil
+				return none.Where(isFalse), nil
 			},
 			Movies{},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Where(is_true), nil
+				return none.Where(isTrue), nil
 			},
 			Movies{},
 			false,
@@ -462,61 +462,61 @@ func TestAll(t *testing.T) {
 
 var _nil *Movie
 
-var _first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax", BoxOfficeMillions: 90}
-var _second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros", BoxOfficeMillions: 100}
-var _third = &Movie{Title: "third", Theaters: 5, Studio: "Universal", BoxOfficeMillions: 100}
-var _fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal", BoxOfficeMillions: 90}
-var _fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax", BoxOfficeMillions: 100}
+var first = &Movie{Title: "first", Theaters: 6, Studio: "Miramax", BoxOfficeMillions: 90}
+var second = &Movie{Title: "second", Theaters: 9, Studio: "Warner Bros", BoxOfficeMillions: 100}
+var third = &Movie{Title: "third", Theaters: 5, Studio: "Universal", BoxOfficeMillions: 100}
+var fourth = &Movie{Title: "fourth", Theaters: 50, Studio: "Universal", BoxOfficeMillions: 90}
+var fifth = &Movie{Title: "fifth", Theaters: 20, Studio: "Miramax", BoxOfficeMillions: 100}
 
 var none = Movies{}
 
 var many = Movies{
-	_first,
-	_second,
-	_third,
-	_fourth,
-	_fifth,
+	first,
+	second,
+	third,
+	fourth,
+	fifth,
 }
 
-var is_first = func(movie *Movie) bool {
+var isFirst = func(movie *Movie) bool {
 	return movie.Title == "first"
 }
-var is_first_or_second_or_third_or_fourth_or_fifth = func(movie *Movie) bool {
+var isFirstOrSecondOrThirdOrFourthOrFifth = func(movie *Movie) bool {
 	return movie.Title == "first" || movie.Title == "second" || movie.Title == "third" || movie.Title == "fourth" || movie.Title == "fifth"
 }
-var is_first_or_third = func(movie *Movie) bool {
+var isFirstOrThird = func(movie *Movie) bool {
 	return movie.Title == "first" || movie.Title == "third"
 }
-var is_dummy = func(movie *Movie) bool {
+var isDummy = func(movie *Movie) bool {
 	return movie.Title == "dummy"
 }
-var is_true = func(movie *Movie) bool {
+var isTrue = func(movie *Movie) bool {
 	return true
 }
-var is_false = func(movie *Movie) bool {
+var isFalse = func(movie *Movie) bool {
 	return false
 }
-var get_theaters = func(movie *Movie) int {
+var getTheaters = func(movie *Movie) int {
 	return movie.Theaters
 }
-var sum_theaters = func(movie *Movie, acc int) int {
+var sumTheaters = func(movie *Movie, acc int) int {
 	return acc + movie.Theaters
 }
-var get_title = func(movie *Movie) string {
+var getTitle = func(movie *Movie) string {
 	return movie.Title
 }
-var get_studio = func(movie *Movie) string {
+var getStudio = func(movie *Movie) string {
 	return movie.Studio
 }
-var get_box_office = func(movie *Movie) int {
+var getBoxOffice = func(movie *Movie) int {
 	return movie.BoxOfficeMillions
 }
-var by_title = func(movies Movies, a, b int) bool {
+var byTitle = func(movies Movies, a, b int) bool {
 	return movies[a].Title < movies[b].Title
 }
-var by_theaters = func(movies Movies, a, b int) bool {
+var byTheaters = func(movies Movies, a, b int) bool {
 	return movies[a].Theaters < movies[b].Theaters
 }
-var concat_title = func(movie *Movie, acc string) string {
+var concatTitle = func(movie *Movie, acc string) string {
 	return acc + movie.Title
 }
