@@ -368,28 +368,31 @@ func getTests() map[string][]test {
 }
 
 func TestAll(t *testing.T) {
+	checkErr := func(_t test, err error) {
+		if _t.ErrorExpected && err == nil {
+			t.Errorf("Expected error but did not receive one")
+		}
+		if !_t.ErrorExpected && err != nil {
+			t.Errorf("Did not expect error but received: %v", err)
+		}
+	}
+
 	for _, tests := range getTests() {
 		for _, test := range tests {
 			switch test.Expected.(type) {
 			default:
 				got, err := test.Exec()
-				if test.ErrorExpected && err == nil {
-					t.Errorf("Expected error but did not receive one")
-				}
-				if !test.ErrorExpected && err != nil {
-					t.Errorf("Did not expect error but received: %v", err)
-				}
+
+				checkErr(test, err)
+
 				if got != test.Expected {
 					t.Errorf("Expected %v, got %v", test.Expected, got)
 				}
 			case map[int]Movies:
 				_got, err := test.Exec()
-				if test.ErrorExpected && err == nil {
-					t.Errorf("Expected error but did not receive one")
-				}
-				if !test.ErrorExpected && err != nil {
-					t.Errorf("Did not expect error but received: %v", err)
-				}
+
+				checkErr(test, err)
+
 				got := _got.(map[int]Movies)
 				exp := test.Expected.(map[int]Movies)
 				if len(got) != len(exp) {
@@ -411,12 +414,9 @@ func TestAll(t *testing.T) {
 				}
 			case map[string]Movies:
 				_got, err := test.Exec()
-				if test.ErrorExpected && err == nil {
-					t.Errorf("Expected error but did not receive one")
-				}
-				if !test.ErrorExpected && err != nil {
-					t.Errorf("Did not expect error but received: %v", err)
-				}
+
+				checkErr(test, err)
+
 				got := _got.(map[string]Movies)
 				exp := test.Expected.(map[string]Movies)
 				if len(got) != len(exp) {
@@ -438,12 +438,9 @@ func TestAll(t *testing.T) {
 				}
 			case Movies:
 				_got, err := test.Exec()
-				if test.ErrorExpected && err == nil {
-					t.Errorf("Expected error but did not receive one")
-				}
-				if !test.ErrorExpected && err != nil {
-					t.Errorf("Did not expect error but received: %v", err)
-				}
+
+				checkErr(test, err)
+
 				got := _got.(Movies)
 				exp := test.Expected.(Movies)
 				if len(got) != len(exp) {
