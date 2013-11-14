@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 14 Nov 2013 03:09:42 UTC
+// Thu, 14 Nov 2013 03:42:59 UTC
 
 package models
 
@@ -97,6 +97,23 @@ func (rcv Movies) Distinct() (result Movies) {
 		if !appended[_item] {
 			result = append(result, _item)
 			appended[_item] = true
+		}
+	}
+	return result
+}
+
+// Returns a new Movies slice whose elements are unique where equality is defined by a passed func. Example:
+//	hairstyle := func(a *Fashionista, b *Fashionista) bool {
+//		a.Hairstyle == b.Hairstyle
+//	}
+//	trendsetters := fashionistas.DistinctBy(hairstyle)
+func (rcv Movies) DistinctBy(equal func(*Movie, *Movie) bool) (result Movies) {
+	for _, _item := range rcv {
+		eq := func(_app *Movie) bool {
+			return equal(_item, _app)
+		}
+		if !result.Any(eq) {
+			result = append(result, _item)
 		}
 	}
 	return result

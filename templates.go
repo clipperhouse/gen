@@ -112,6 +112,23 @@ func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
 	return result
 }
 
+// Returns a new {{.Plural}} slice whose elements are unique where equality is defined by a passed func. Example:
+//	hairstyle := func(a *Fashionista, b *Fashionista) bool {
+//		a.Hairstyle == b.Hairstyle
+//	}
+//	trendsetters := fashionistas.DistinctBy(hairstyle)
+func ({{.Receiver}} {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		eq := func(_app {{.Pointer}}{{.Singular}}) bool {
+			return equal({{.Loop}}, _app)
+		}
+		if !result.Any(eq) {
+			result = append(result, {{.Loop}})
+		}
+	}
+	return result
+}
+
 // Iterates over {{.Plural}} and executes the passed func against each element.
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {

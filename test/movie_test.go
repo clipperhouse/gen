@@ -179,6 +179,23 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["DistinctBy"] = []test{
+		test{
+			func() (interface{}, error) {
+				return Movies{first, third, fourth, fourth, fifth, third}.DistinctBy(sameTitle), nil
+			},
+			Movies{first, third, fourth, fifth},
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{first, third, fourth, fourth, fifth, third}.DistinctBy(sameMillions), nil
+			},
+			Movies{first, third},
+			false,
+		},
+	}
+
 	tests["GroupBy"] = []test{
 		test{
 			func() (interface{}, error) {
@@ -511,6 +528,12 @@ var sumTheaters = func(movie *Movie, acc int) int {
 }
 var getTitle = func(movie *Movie) string {
 	return movie.Title
+}
+var sameTitle = func(a *Movie, b *Movie) bool {
+	return a.Title == b.Title
+}
+var sameMillions = func(a *Movie, b *Movie) bool {
+	return a.BoxOfficeMillions == b.BoxOfficeMillions
 }
 var getStudio = func(movie *Movie) string {
 	return movie.Studio
