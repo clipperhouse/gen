@@ -99,6 +99,19 @@ func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return {{.Receiver}}.AggregateInt(count)
 }
 
+// Returns a new {{.Plural}} slice whose elements are unique. Keep in mind that pointers and values have different concepts of equality, and therefore distinctness. Example:
+//	snowflakes := hipsters.Distinct()
+func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
+	appended := make(map[{{.Pointer}}{{.Singular}}]bool)
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if !appended[{{.Loop}}] {
+			result = append(result, {{.Loop}})
+			appended[{{.Loop}}] = true
+		}
+	}
+	return result
+}
+
 // Iterates over {{.Plural}} and executes the passed func against each element.
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {

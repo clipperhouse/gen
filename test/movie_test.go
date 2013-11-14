@@ -169,6 +169,16 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Distinct"] = []test{
+		test{
+			func() (interface{}, error) {
+				return Movies{first, second, third, fourth, fourth, fifth, third}.Distinct(), nil // TODO: value test
+			},
+			Movies{first, second, third, fourth, fifth},
+			false,
+		},
+	}
+
 	tests["GroupBy"] = []test{
 		test{
 			func() (interface{}, error) {

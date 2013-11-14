@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Wed, 13 Nov 2013 03:10:51 UTC
+// Thu, 14 Nov 2013 03:09:42 UTC
 
 package models
 
@@ -87,6 +87,19 @@ func (rcv Movies) Count(fn func(*Movie) bool) int {
 		return acc
 	}
 	return rcv.AggregateInt(count)
+}
+
+// Returns a new Movies slice whose elements are unique. Keep in mind that pointers and values have different concepts of equality, and therefore distinctness. Example:
+//	snowflakes := hipsters.Distinct()
+func (rcv Movies) Distinct() (result Movies) {
+	appended := make(map[*Movie]bool)
+	for _, _item := range rcv {
+		if !appended[_item] {
+			result = append(result, _item)
+			appended[_item] = true
+		}
+	}
+	return result
 }
 
 // Iterates over Movies and executes the passed func against each element.
