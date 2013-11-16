@@ -140,7 +140,7 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 //	winner := func(_item {{.Pointer}}{{.Singular}}) bool {
 //		return _item.Placement == "winner"
 //	}
-//	theWinner := myMovies.First(winner)
+//	theWinner, err := myMovies.First(winner)
 func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
