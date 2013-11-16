@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 14 Nov 2013 03:42:59 UTC
+// Sat, 16 Nov 2013 18:14:47 UTC
 
 package models
 
@@ -124,6 +124,20 @@ func (rcv Movies) Each(fn func(*Movie)) {
 	for _, _item := range rcv {
 		fn(_item)
 	}
+}
+
+// Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
+//	winner := func(_item *Movie) bool {
+//		return _item.Placement == "winner"
+//	}
+//	theWinner := myMovies.First(winner)
+func (rcv Movies) First(fn func(*Movie) bool) (*Movie, error) {
+	for _, _item := range rcv {
+		if fn(_item) {
+			return _item, nil
+		}
+	}
+	return nil, errors.New("No Movies elements return true for passed func")
 }
 
 // Groups Movies into a map of Movies, keyed by the result of the passed func. Example:

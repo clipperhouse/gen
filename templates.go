@@ -136,6 +136,20 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	}
 }
 
+// Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
+//	winner := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.Placement == "winner"
+//	}
+//	theWinner := myMovies.First(winner)
+func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if fn({{.Loop}}) {
+			return {{.Loop}}, nil
+		}
+	}
+	return nil, errors.New("No {{.Plural}} elements return true for passed func")
+}
+
 // Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
 //	year := func(_item {{.Pointer}}{{.Singular}}) int {
 //		return _item.CreationDate.Year()

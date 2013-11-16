@@ -196,6 +196,37 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["First"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.First(isThird)
+			},
+			third,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.First(isDummy)
+			},
+			_nil,
+			true,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.First(isFalse)
+			},
+			_nil,
+			true,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.First(isTrue)
+			},
+			_nil,
+			true,
+		},
+	}
+
 	tests["GroupBy"] = []test{
 		test{
 			func() (interface{}, error) {
@@ -504,6 +535,9 @@ var many = Movies{
 
 var isFirst = func(movie *Movie) bool {
 	return movie.Title == "first"
+}
+var isThird = func(movie *Movie) bool {
+	return movie.Title == "third"
 }
 var isFirstOrSecondOrThirdOrFourthOrFifth = func(movie *Movie) bool {
 	return movie.Title == "first" || movie.Title == "second" || movie.Title == "third" || movie.Title == "fourth" || movie.Title == "fifth"
