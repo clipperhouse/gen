@@ -99,11 +99,7 @@ var structHandlers = []ArgHandler{
 				}
 			}
 			if !knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] {
-				if opts.Force {
-					notes = append(notes, fmt.Sprintf("%s.%s is not a known struct type; forced", pkg, typ))
-				} else {
-					errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type; use -force flag to generate it anyway", pkg, typ))
-				}
+				errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type", pkg, typ))
 			}
 			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
 		},
@@ -141,8 +137,13 @@ func main() {
 		for _, e := range errors {
 			fmt.Println("  error: " + e)
 		}
-		fmt.Println("  operation canceled")
-		return
+		if opts.Force {
+			fmt.Println("  forced...")
+		} else {
+			fmt.Println("  operation canceled")
+			fmt.Println("  use the -f flag if you wish to force generation (i.e., ignore errors)")
+			return
+		}
 	}
 	t := getTemplate()
 	writeFile(t, genSpecs)
@@ -188,7 +189,7 @@ func getAllStructs() {
 
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
-		fmt.Println(err)
+		errors = append(errors, err.Error())
 		return
 	}
 
