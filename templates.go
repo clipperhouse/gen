@@ -212,6 +212,29 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.
 	return {{.Receiver}}[m], nil
 }
 
+// Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
+//	byId := func(_item {{.Pointer}}{{.Singular}}) bool {
+//		return _item.Id == 5
+//	}
+//	single, err := myMovies.Single(byId)
+func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
+	var result {{.Pointer}}{{.Singular}}
+	found := false
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if fn({{.Loop}}) {
+			if found {
+				return nil, errors.New("Multiple {{.Plural}} elements return true for passed func")
+			}
+			result = {{.Loop}}
+			found = true
+		}
+	}
+	if !found {
+		return nil, errors.New("No {{.Plural}} elements return true for passed func")
+	}
+	return result, nil
+}
+
 // Returns the sum of ints returned by passed func. Example:
 //	itemTotal := func(_item {{.Pointer}}{{.Singular}}) int {
 //		return _item.Quantity * _item.UnitPrice

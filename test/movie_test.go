@@ -299,6 +299,44 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Single"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.Single(isThird)
+			},
+			third,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.Single(isDummy)
+			},
+			_nil,
+			true,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{third, fourth, fifth, third, first}.Single(isThird)
+			},
+			_nil,
+			true,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.First(isFalse)
+			},
+			_nil,
+			true,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.First(isTrue)
+			},
+			_nil,
+			true,
+		},
+	}
+
 	tests["Sort"] = []test{
 		test{
 			func() (interface{}, error) {

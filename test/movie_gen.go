@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 16 Nov 2013 18:14:47 UTC
+// Sat, 16 Nov 2013 18:24:43 UTC
 
 package models
 
@@ -200,6 +200,29 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) (*Movie, error) {
 		}
 	}
 	return rcv[m], nil
+}
+
+// Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
+//	byId := func(_item *Movie) bool {
+//		return _item.Id == 5
+//	}
+//	single, err := myMovies.Single(byId)
+func (rcv Movies) Single(fn func(*Movie) bool) (*Movie, error) {
+	var result *Movie
+	found := false
+	for _, _item := range rcv {
+		if fn(_item) {
+			if found {
+				return nil, errors.New("Multiple Movies elements return true for passed func")
+			}
+			result = _item
+			found = true
+		}
+	}
+	if !found {
+		return nil, errors.New("No Movies elements return true for passed func")
+	}
+	return result, nil
 }
 
 // Returns the sum of ints returned by passed func. Example:
