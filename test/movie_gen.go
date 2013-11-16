@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 16 Nov 2013 18:24:43 UTC
+// Sat, 16 Nov 2013 18:42:54 UTC
 
 package models
 
@@ -130,7 +130,7 @@ func (rcv Movies) Each(fn func(*Movie)) {
 //	winner := func(_item *Movie) bool {
 //		return _item.Placement == "winner"
 //	}
-//	theWinner := myMovies.First(winner)
+//	theWinner, err := myMovies.First(winner)
 func (rcv Movies) First(fn func(*Movie) bool) (*Movie, error) {
 	for _, _item := range rcv {
 		if fn(_item) {

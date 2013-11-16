@@ -20,14 +20,14 @@ import "errors"
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
 // Iterates over {{.Plural}}, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
-//	sum := func(_item {{.Pointer}}{{.Singular}}, accumulated int) int {
-//		return accumulated + _item.Something
+//	sum := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated int) int {
+//		return accumulated + {{.Loop}}.Something
 //	}
 //	sumOfSomething := my{{.Plural}}.AggregateInt(sum)
 //
-//	min := func(_item {{.Pointer}}{{.Singular}}, accumulated int) int {
-//		if _item.AnotherThing < accumulated {
-//			return _item.AnotherThing
+//	min := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated int) int {
+//		if {{.Loop}}.AnotherThing < accumulated {
+//			return {{.Loop}}.AnotherThing
 //		}
 //		return accumulated
 //	}
@@ -42,11 +42,11 @@ func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}},
 
 // Iterates over {{.Plural}}, operating on each element while accumulating results. For example, you might join strings like:
 //	my{{.Plural}} := GetSome{{.Plural}}()
-//	join := func(_item {{.Pointer}}{{.Singular}}, accumulated string) string {
-//		if _item != my{{.Plural}}[0] {
+//	join := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated string) string {
+//		if {{.Loop}} != my{{.Plural}}[0] {
 //			accumulated += ", "
 //		}
-//		return accumulated + _item.Title
+//		return accumulated + {{.Loop}}.Title
 //	}
 //	myList := my{{.Plural}}.AggregateString(join)
 func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular}}, string) string) (result string) {
@@ -57,8 +57,8 @@ func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular
 }
 
 // Tests that all elements of {{.Plural}} are true for the passed func. Example:
-//	good := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.Something > 42
+//	good := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.Something > 42
 //	}
 //	allGood := my{{.Plural}}.All(good)
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
@@ -71,8 +71,8 @@ func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bo
 }
 
 // Tests that one or more elements of {{.Plural}} are true for the passed func. Example:
-//	winner := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.Placement == "winner"
+//	winner := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.Placement == "winner"
 //	}
 //	weHaveAWinner := my{{.Plural}}.Any(winner)
 func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
@@ -85,8 +85,8 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 }
 
 // Counts the number elements of {{.Plural}} that are true for the passed func. Example:
-//	dracula := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.IsDracula()
+//	dracula := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.IsDracula()
 //	}
 //	countDracula := my{{.Plural}}.Count(dracula)
 func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) int {
@@ -137,8 +137,8 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 }
 
 // Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
-//	winner := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.Placement == "winner"
+//	winner := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.Placement == "winner"
 //	}
 //	theWinner, err := myMovies.First(winner)
 func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
@@ -151,34 +151,34 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 }
 
 // Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
-//	year := func(_item {{.Pointer}}{{.Singular}}) int {
-//		return _item.CreationDate.Year()
+//	year := func({{.Loop}} {{.Pointer}}{{.Singular}}) int {
+//		return {{.Loop}}.CreationDate.Year()
 //	}
 //	yearlyReport := my{{.Plural}}.GroupByInt(year)
 func ({{.Receiver}} {{.Plural}}) GroupByInt(fn func({{.Pointer}}{{.Singular}}) int) map[int]{{.Plural}} {
 	result := make(map[int]{{.Plural}})
-	for _, _item := range {{.Receiver}} {
-		result[fn(_item)] = append(result[fn(_item)], _item)
+	for _, {{.Loop}} := range {{.Receiver}} {
+		result[fn({{.Loop}})] = append(result[fn({{.Loop}})], {{.Loop}})
 	}
 	return result
 }
 
 // Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
-//	dept := func(_item {{.Pointer}}{{.Singular}}) string {
-//		return _item.DepartmentName
+//	dept := func({{.Loop}} {{.Pointer}}{{.Singular}}) string {
+//		return {{.Loop}}.DepartmentName
 //	}
 //	byDepartment := my{{.Plural}}.GroupByString(dept)
 func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}) string) map[string]{{.Plural}} {
 	result := make(map[string]{{.Plural}})
-	for _, _item := range {{.Receiver}} {
-		result[fn(_item)] = append(result[fn(_item)], _item)
+	for _, {{.Loop}} := range {{.Receiver}} {
+		result[fn({{.Loop}})] = append(result[fn({{.Loop}})], {{.Loop}})
 	}
 	return result
 }
 
 // Returns the element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byArea := func(_items {{.Plural}}, a int, b int) bool {
-//		return _items[a].Area() < _items[b].Area()
+//	byArea := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
+//		return {{.Loop}}s[a].Area() < {{.Loop}}s[b].Area()
 //	}
 //	roomiest := my{{.Plural}}.Max(byArea)
 //
@@ -192,8 +192,8 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) ({{.
 }
 
 // Returns the element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byPrice := func(_items {{.Plural}}, a int, b int) bool {
-//		return _items[a].Price < _items[b].Price
+//	byPrice := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
+//		return {{.Loop}}s[a].Price < {{.Loop}}s[b].Price
 //	}
 //	cheapest := my{{.Plural}}.Min(byPrice)
 //
@@ -213,8 +213,8 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.
 }
 
 // Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
-//	byId := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.Id == 5
+//	byId := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.Id == 5
 //	}
 //	single, err := myMovies.Single(byId)
 func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
@@ -236,8 +236,8 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 }
 
 // Returns the sum of ints returned by passed func. Example:
-//	itemTotal := func(_item {{.Pointer}}{{.Singular}}) int {
-//		return _item.Quantity * _item.UnitPrice
+//	itemTotal := func({{.Loop}} {{.Pointer}}{{.Singular}}) int {
+//		return {{.Loop}}.Quantity * {{.Loop}}.UnitPrice
 //	}
 //	orderTotal := my{{.Plural}}.SumInt(itemTotal)
 func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
@@ -248,8 +248,8 @@ func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) 
 }
 
 // Returns a new {{.Plural}} slice whose elements return true for func. Example:
-//	incredible := func(_item {{.Pointer}}{{.Singular}}) bool {
-//		return _item.Manufacturer == "Apple"
+//	incredible := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
+//		return {{.Loop}}.Manufacturer == "Apple"
 //	}
 //	wishList := my{{.Plural}}.Where(incredible)
 func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
@@ -267,8 +267,8 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 // license that can be found in the LICENSE file.
 
 // Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
-//	byName := func(_items {{.Plural}}, a int, b int) bool {
-//		return _items[a].LastName < _items[b].LastName
+//	byName := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
+//		return {{.Loop}}s[a].LastName < {{.Loop}}s[b].LastName
 //	}
 //	roster := my{{.Plural}}.Sort(byName)
 func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.Plural}} {
@@ -298,8 +298,8 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 }
 
 // Returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
-//	byPoints := func(_items {{.Plural}}, a int, b int) bool {
-//		return _items[a].Points < _items[b].Points
+//	byPoints := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
+//		return {{.Loop}}s[a].Points < {{.Loop}}s[b].Points
 //	}
 //	leaderboard := my{{.Plural}}.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
