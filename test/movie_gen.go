@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 16 Nov 2013 18:42:54 UTC
+// Sun, 17 Nov 2013 20:02:29 UTC
 
 package models
 
@@ -178,7 +178,7 @@ func (rcv Movies) Max(less func(Movies, int, int) bool) (*Movie, error) {
 	if len(rcv) == 0 {
 		return nil, errors.New("Cannot determine the Max of an empty slice")
 	}
-	return rcv.Min(not(less))
+	return rcv.Min(negateMovies(less))
 }
 
 // Returns the element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
@@ -294,12 +294,12 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 //	leaderboard := myMovies.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) SortDesc(less func(Movies, int, int) bool) Movies {
-	return rcv.Sort(not(less))
+	return rcv.Sort(negateMovies(less))
 }
 
 // Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
 func (rcv Movies) IsSortedDesc(less func(Movies, int, int) bool) bool {
-	return rcv.IsSorted(not(less))
+	return rcv.IsSorted(negateMovies(less))
 }
 
 func swapMovies(rcv Movies, a, b int) {
@@ -473,7 +473,7 @@ func quickSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b, maxDept
 	}
 }
 
-func not(less func(Movies, int, int) bool) func(Movies, int, int) bool {
+func negateMovies(less func(Movies, int, int) bool) func(Movies, int, int) bool {
 	return func(z Movies, a int, b int) bool {
 		return !less(z, a, b)
 	}

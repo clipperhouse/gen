@@ -188,7 +188,7 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) ({{.
 	if len(rcv) == 0 {
 		return nil, errors.New("Cannot determine the Max of an empty slice")
 	}
-	return rcv.Min(not(less))
+	return rcv.Min(negate{{.Plural}}(less))
 }
 
 // Returns the element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
@@ -304,12 +304,12 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 //	leaderboard := my{{.Plural}}.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool) {{.Plural}} {
-	return {{.Receiver}}.Sort(not(less))
+	return {{.Receiver}}.Sort(negate{{.Plural}}(less))
 }
 
 // Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Plural}}, int, int) bool) bool {
-	return {{.Receiver}}.IsSorted(not(less))
+	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
 }
 
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
@@ -483,7 +483,7 @@ func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int,
 	}
 }
 
-func not(less func({{.Plural}}, int, int) bool) func({{.Plural}}, int, int) bool {
+func negate{{.Plural}}(less func({{.Plural}}, int, int) bool) func({{.Plural}}, int, int) bool {
 	return func(z {{.Plural}}, a int, b int) bool {
 		return !less(z, a, b)
 	}
