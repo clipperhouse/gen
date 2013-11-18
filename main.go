@@ -260,6 +260,7 @@ const usage = `Usage: gen [[*]package.TypeName] [-[*]all] [-exported]
   *package.TypeName    # generate funcs for specified struct type; use leading * to specify pointer type (recommended)
   -all                 # generate all structs in current directory; use leading * to specify pointer type (recommended); shortcut -a or -*a
   -exported            # only generate exported structs; shortcut -e
+  -force               # force generate, overriding errors; shortcut -f
 
 Examples:
   gen -*models.Movie   # generates funcs for Movie type in the models package; generated Movies type is []*Movie
