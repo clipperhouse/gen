@@ -141,13 +141,15 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 //		return {{.Loop}}.Placement == "winner"
 //	}
 //	theWinner, err := myMovies.First(winner)
-func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
+func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
-			return {{.Loop}}, nil
+			result = {{.Loop}}
+			return
 		}
 	}
-	return nil, errors.New("No {{.Plural}} elements return true for passed func")
+	err = errors.New("No {{.Plural}} elements return true for passed func")
+	return
 }
 
 // Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
@@ -184,9 +186,10 @@ func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) ({{.Pointer}}{{.Singular}}, error) {
+func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	if len(rcv) == 0 {
-		return nil, errors.New("Cannot determine the Max of an empty slice")
+		err = errors.New("Cannot determine the Max of an empty slice")
+		return
 	}
 	return rcv.Min(negate{{.Plural}}(less))
 }
@@ -198,10 +201,11 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) ({{.
 //	cheapest := my{{.Plural}}.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.Pointer}}{{.Singular}}, error) {
+func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
 	if l == 0 {
-		return nil, errors.New("Cannot determine the Min of an empty slice")
+		err = errors.New("Cannot determine the Min of an empty slice")
+		return
 	}
 	m := 0
 	for i := 1; i < l; i++ {
@@ -209,7 +213,8 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.
 			m = i
 		}
 	}
-	return {{.Receiver}}[m], nil
+	result = {{.Receiver}}[m]
+	return
 }
 
 // Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
@@ -217,22 +222,25 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) ({{.
 //		return {{.Loop}}.Id == 5
 //	}
 //	single, err := myMovies.Single(byId)
-func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) ({{.Pointer}}{{.Singular}}, error) {
-	var result {{.Pointer}}{{.Singular}}
+func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
+	var candidate {{.Pointer}}{{.Singular}}
 	found := false
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
 			if found {
-				return nil, errors.New("Multiple {{.Plural}} elements return true for passed func")
+				err = errors.New("Multiple {{.Plural}} elements return true for passed func")
+				return
 			}
-			result = {{.Loop}}
+			candidate = {{.Loop}}
 			found = true
 		}
 	}
-	if !found {
-		return nil, errors.New("No {{.Plural}} elements return true for passed func")
+	if found {
+		result = candidate
+	} else {
+		err = errors.New("No {{.Plural}} elements return true for passed func")
 	}
-	return result, nil
+	return
 }
 
 // Returns the sum of ints returned by passed func. Example:

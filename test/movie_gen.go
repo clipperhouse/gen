@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 17 Nov 2013 20:02:29 UTC
+// Mon, 18 Nov 2013 02:00:51 UTC
 
 package models
 
@@ -131,13 +131,15 @@ func (rcv Movies) Each(fn func(*Movie)) {
 //		return _item.Placement == "winner"
 //	}
 //	theWinner, err := myMovies.First(winner)
-func (rcv Movies) First(fn func(*Movie) bool) (*Movie, error) {
+func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 	for _, _item := range rcv {
 		if fn(_item) {
-			return _item, nil
+			result = _item
+			return
 		}
 	}
-	return nil, errors.New("No Movies elements return true for passed func")
+	err = errors.New("No Movies elements return true for passed func")
+	return
 }
 
 // Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
@@ -174,9 +176,10 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) Max(less func(Movies, int, int) bool) (*Movie, error) {
+func (rcv Movies) Max(less func(Movies, int, int) bool) (result *Movie, err error) {
 	if len(rcv) == 0 {
-		return nil, errors.New("Cannot determine the Max of an empty slice")
+		err = errors.New("Cannot determine the Max of an empty slice")
+		return
 	}
 	return rcv.Min(negateMovies(less))
 }
@@ -188,10 +191,11 @@ func (rcv Movies) Max(less func(Movies, int, int) bool) (*Movie, error) {
 //	cheapest := myMovies.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func (rcv Movies) Min(less func(Movies, int, int) bool) (*Movie, error) {
+func (rcv Movies) Min(less func(Movies, int, int) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
-		return nil, errors.New("Cannot determine the Min of an empty slice")
+		err = errors.New("Cannot determine the Min of an empty slice")
+		return
 	}
 	m := 0
 	for i := 1; i < l; i++ {
@@ -199,7 +203,8 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) (*Movie, error) {
 			m = i
 		}
 	}
-	return rcv[m], nil
+	result = rcv[m]
+	return
 }
 
 // Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
@@ -207,22 +212,25 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) (*Movie, error) {
 //		return _item.Id == 5
 //	}
 //	single, err := myMovies.Single(byId)
-func (rcv Movies) Single(fn func(*Movie) bool) (*Movie, error) {
-	var result *Movie
+func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
+	var candidate *Movie
 	found := false
 	for _, _item := range rcv {
 		if fn(_item) {
 			if found {
-				return nil, errors.New("Multiple Movies elements return true for passed func")
+				err = errors.New("Multiple Movies elements return true for passed func")
+				return
 			}
-			result = _item
+			candidate = _item
 			found = true
 		}
 	}
-	if !found {
-		return nil, errors.New("No Movies elements return true for passed func")
+	if found {
+		result = candidate
+	} else {
+		err = errors.New("No Movies elements return true for passed func")
 	}
-	return result, nil
+	return
 }
 
 // Returns the sum of ints returned by passed func. Example:
