@@ -14,19 +14,47 @@ import (
 )
 
 type genSpec struct {
-	Package   string
-	Singular  string
-	Plural    string
-	Receiver  string
-	Loop      string
-	Pointer   string
-	Generated string
-	Command   string
-	FileName  string
+	Pointer    string
+	Package    string
+	Singular   string
+	FieldSpecs []*fieldSpec
+	Plural     string
+	Receiver   string
+	Loop       string
+	Generated  string
+	Command    string
+	FileName   string
+}
+
+func newGenSpec(ptr, pkg, name string, fieldSpecs []*fieldSpec) *genSpec {
+	name = inflect.Singularize(name)
+	return &genSpec{
+		Pointer:    ptr,
+		Package:    pkg,
+		Singular:   name,
+		FieldSpecs: fieldSpecs,
+		Plural:     inflect.Pluralize(name),
+		Receiver:   "rcv",
+		Loop:       "_item",
+		Generated:  time.Now().UTC().Format(time.RFC1123),
+		Command:    fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, name),
+		FileName:   strings.ToLower(name) + "_gen.go",
+	}
 }
 
 func (g genSpec) String() string {
-	return fmt.Sprintf("%s.%s", g.Package, g.Plural)
+	return joinName(g.Package, g.Plural)
+}
+
+type structArg struct {
+	Pointer string
+	Package string
+	Name    string
+}
+
+type fieldSpec struct {
+	Name string
+	Type string
 }
 
 type options struct {
@@ -36,77 +64,8 @@ type options struct {
 	Force        bool
 }
 
-var opts = options{}
 var errors = make([]string, 0)
 var notes = make([]string, 0)
-var knownTypes = make(map[string]bool)
-
-type ArgHandler struct {
-	Handle func(string)
-}
-
-var allOption = regexp.MustCompile(`-(\*?)a(ll)?`)
-var exportedOption = regexp.MustCompile(`-e(xported)?`)
-var forceOption = regexp.MustCompile(`-f(orce)?`)
-
-var structArg = regexp.MustCompile(`(\*?)(\p{L}+)\.(\p{L}+)`)
-
-var optionHandlers = []ArgHandler{
-	ArgHandler{
-		Handle: func(s string) {
-			matches := allOption.FindStringSubmatch(s)
-			if matches == nil {
-				return
-			}
-			opts.All = true
-			opts.AllPointer = matches[1]
-		},
-	},
-	ArgHandler{
-		Handle: func(s string) {
-			if exportedOption.MatchString(s) {
-				opts.ExportedOnly = true
-			}
-		},
-	},
-	ArgHandler{
-		Handle: func(s string) {
-			if forceOption.MatchString(s) {
-				opts.Force = true
-			}
-		},
-	},
-}
-
-var structHandlers = []ArgHandler{
-	ArgHandler{
-		Handle: func(s string) {
-			matches := structArg.FindStringSubmatch(s)
-
-			if matches == nil {
-				return
-			}
-
-			ptr := matches[1]
-			pkg := matches[2]
-			typ := matches[3]
-
-			if opts.ExportedOnly {
-				if ast.IsExported(typ) {
-					notes = append(notes, fmt.Sprintf("  note: the %s type is already exported; the -e[xported] flag is redundant (ignored)", typ))
-				} else {
-					errors = append(errors, fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", typ))
-				}
-			}
-			if !knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] {
-				errors = append(errors, fmt.Sprintf("%s.%s is not a known struct type", pkg, typ))
-			}
-			genSpecs = append(genSpecs, newGenSpec(ptr, pkg, typ))
-		},
-	},
-}
-
-var genSpecs = make([]*genSpec, 0)
 
 func main() {
 	has_args := len(os.Args) > 1
@@ -123,9 +82,10 @@ func main() {
 		return
 	}
 
-	getOptions(args)
-	getAllStructs()
-	getStructs(args)
+	opts := getOptions(args)
+	structArgs := getStructArgs(args)
+	structTypes := getAllStructTypes()
+	genSpecs := getGenSpecs(opts, structArgs, structTypes)
 
 	if len(notes) > 0 {
 		for _, n := range notes {
@@ -149,69 +109,137 @@ func main() {
 	writeFile(t, genSpecs)
 }
 
-func getOptions(args []string) {
+func getOptions(args []string) *options {
+	opts := &options{}
+
+	allOption := regexp.MustCompile(`^-(\*?)a(ll)?$`)
+	exportedOption := regexp.MustCompile(`^-e(xported)?$`)
+	forceOption := regexp.MustCompile(`^-f(orce)?$`)
+
 	for _, a := range args {
-		for _, h := range optionHandlers {
-			h.Handle(a)
+		allMatches := allOption.FindStringSubmatch(a)
+		if allMatches != nil {
+			opts.All = true
+			opts.AllPointer = allMatches[1]
+		}
+		if exportedOption.MatchString(a) {
+			opts.ExportedOnly = true
+		}
+		if forceOption.MatchString(a) {
+			opts.Force = true
 		}
 	}
+
+	return opts
 }
 
-func getStructs(args []string) {
-	for _, a := range args {
-		for _, h := range structHandlers {
-			h.Handle(a)
+func getStructArgs(args []string) (structArgs []*structArg) {
+	regex := regexp.MustCompile(`^(\*?)(\p{L}+)\.(\p{L}+)$`)
+
+	for _, s := range args {
+		matches := regex.FindStringSubmatch(s)
+
+		if matches == nil {
+			continue
 		}
+
+		ptr := matches[1]
+		pkg := matches[2]
+		typ := matches[3]
+
+		structArgs = append(structArgs, &structArg{ptr, pkg, typ})
 	}
+
+	return
 }
 
-func newGenSpec(ptr, pkg, typ string) *genSpec {
-	typ = inflect.Singularize(typ)
-	return &genSpec{
-		Pointer:   ptr,
-		Package:   pkg,
-		Singular:  typ,
-		Plural:    inflect.Pluralize(typ),
-		Receiver:  "rcv",
-		Loop:      "_item",
-		Generated: time.Now().UTC().Format(time.RFC1123),
-		Command:   fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, typ),
-		FileName:  strings.ToLower(typ) + "_gen.go",
+func getAllStructTypes() map[string]*ast.StructType {
+	goFiles := func(f os.FileInfo) bool {
+		return strings.HasSuffix(f.Name(), ".go")
 	}
-}
 
-var goFiles = func(f os.FileInfo) bool {
-	return strings.HasSuffix(f.Name(), ".go")
-}
-
-func getAllStructs() {
 	fset := token.NewFileSet()
-
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
 		errors = append(errors, err.Error())
-		return
+		return nil
 	}
 
+	structTypes := make(map[string]*ast.StructType)
 	for pkg, f := range dir {
 		ast.Inspect(f, func(n ast.Node) bool {
 			switch x := n.(type) {
 			case *ast.TypeSpec:
 				switch y := x.Type.(type) {
 				case *ast.StructType:
-					_ = y
-					typ := x.Name.String()
-					knownTypes[fmt.Sprintf("%s.%s", pkg, typ)] = true
-					if opts.All {
-						if !opts.ExportedOnly || ast.IsExported(typ) {
-							genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, typ))
-						}
-					}
+					key := joinName(pkg, x.Name.Name)
+					structTypes[key] = y
 				}
 			}
 			return true
 		})
 	}
+	return structTypes
+}
+
+func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]*ast.StructType) (genSpecs []*genSpec) {
+	for _, structArg := range structArgs {
+		key := joinName(structArg.Package, structArg.Name)
+		typ, known := structTypes[key]
+		if known {
+			fieldSpecs := getFieldSpecs(typ)
+			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name, fieldSpecs))
+		} else {
+			errors = append(errors, fmt.Sprintf("%s is not a known struct type", key))
+			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name, nil))
+		}
+		if opts.ExportedOnly {
+			if ast.IsExported(structArg.Name) {
+				notes = append(notes, fmt.Sprintf("the %s type is already exported; the -e[xported] flag is redundant (ignored)", structArg.Name))
+			} else {
+				errors = append(errors, fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", structArg.Name))
+			}
+		}
+	}
+	if opts.All {
+		for key, typ := range structTypes {
+			fieldSpecs := getFieldSpecs(typ)
+			pkg, name := splitName(key)
+			if !opts.ExportedOnly || ast.IsExported(name) {
+				genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, name, fieldSpecs))
+			}
+		}
+	}
+	return
+}
+
+func joinName(pkg, name string) string {
+	return fmt.Sprintf("%s.%s", pkg, name)
+}
+
+func splitName(s string) (string, string) {
+	names := strings.Split(s, ".")
+	return names[0], names[1]
+}
+
+func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
+	genTag := regexp.MustCompile(`gen:"([A-Za-z ,]+)"`)
+
+	for _, fld := range typ.Fields.List {
+		if fld.Tag != nil {
+			parse := genTag.FindStringSubmatch(fld.Tag.Value)
+			if parse != nil {
+				fmt.Printf("  parse %v\n", parse)
+				fieldSpecs := make([]*fieldSpec, 0)
+				for _, fldName := range fld.Names {
+					name := fmt.Sprintf("%v", fld.Type)
+					fmt.Printf("  type %v\n", name)
+					fieldSpecs = append(fieldSpecs, &fieldSpec{fldName.Name, name})
+				}
+			}
+		}
+	}
+	return
 }
 
 func writeFile(t *template.Template, genSpecs []*genSpec) {
