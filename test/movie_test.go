@@ -473,8 +473,8 @@ func TestAll(t *testing.T) {
 		}
 	}
 
-	for _, tests := range getTests() {
-		for _, test := range tests {
+	for name, tests := range getTests() {
+		for i, test := range tests {
 			switch test.Expected.(type) {
 			default:
 				got, err := test.Exec()
@@ -482,7 +482,7 @@ func TestAll(t *testing.T) {
 				checkErr(test, err)
 
 				if got != test.Expected {
-					t.Errorf("Expected %v, got %v", test.Expected, got)
+					t.Errorf("%s[%v]: Expected %v, got %v", name, i, test.Expected, got)
 				}
 			case map[int]Movies:
 				_got, err := test.Exec()
@@ -492,19 +492,19 @@ func TestAll(t *testing.T) {
 				got := _got.(map[int]Movies)
 				exp := test.Expected.(map[int]Movies)
 				if len(got) != len(exp) {
-					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
+					t.Errorf("%s[%v]: Expected %v groups, got %v", name, i, len(exp), len(got))
 					break
 				}
 				for k, _ := range got {
 					got2 := got[k]
 					exp2 := exp[k]
 					if len(got2) != len(exp2) {
-						t.Errorf("Expected %v Movies in %d element, got %v", len(exp2), k, len(got2))
+						t.Errorf("%s[%v]: Expected %v Movies in %d element, got %v", name, i, len(exp2), k, len(got2))
 						break
 					}
 					for i := range got2 {
 						if got2[i] != exp2[i] {
-							t.Errorf("Expected %v, got %v", exp2[i], got2[i])
+							t.Errorf("%s[%v]: Expected %v, got %v", name, i, exp2[i], got2[i])
 						}
 					}
 				}
@@ -516,19 +516,19 @@ func TestAll(t *testing.T) {
 				got := _got.(map[string]Movies)
 				exp := test.Expected.(map[string]Movies)
 				if len(got) != len(exp) {
-					t.Errorf("Expected %v groups, got %v", len(exp), len(got))
+					t.Errorf("%s[%v]: Expected %v groups, got %v", name, i, len(exp), len(got))
 					break
 				}
 				for k, _ := range got {
 					got2 := got[k]
 					exp2 := exp[k]
 					if len(got2) != len(exp2) {
-						t.Errorf("Expected %v Movies in %s element, got %v", len(exp2), k, len(got2))
+						t.Errorf("%s[%v]: Expected %v Movies in %s element, got %v", name, i, len(exp2), k, len(got2))
 						break
 					}
 					for i := range got2 {
 						if got2[i] != exp2[i] {
-							t.Errorf("Expected %v, got %v", exp2[i], got2[i])
+							t.Errorf("%s[%v]: Expected %v, got %v", name, i, exp2[i], got2[i])
 						}
 					}
 				}
@@ -540,12 +540,12 @@ func TestAll(t *testing.T) {
 				got := _got.(Movies)
 				exp := test.Expected.(Movies)
 				if len(got) != len(exp) {
-					t.Errorf("Expected %v Movies, got %v", len(exp), len(got))
+					t.Errorf("%s[%v]: Expected %v Movies, got %v", name, i, len(exp), len(got))
 					break
 				}
 				for i := range got {
 					if got[i] != exp[i] {
-						t.Errorf("Expected %v, got %v", exp[i], got[i])
+						t.Errorf("%s[%v]: Expected %v, got %v", name, i, exp[i], got[i])
 					}
 				}
 			}
