@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"text/template"
 )
 
@@ -498,9 +500,14 @@ func negate{{.Plural}}(less func({{.Plural}}, int, int) bool) func({{.Plural}}, 
 }
 `
 
-func getCustomTemplate(name string) *template.Template {
-	t := customTemplates[name]
-	return template.Must(template.New(name).Parse(t))
+func getCustomTemplate(name string) (result *template.Template, err error) {
+	t, found := customTemplates[name]
+	if found {
+		result = template.Must(template.New(name).Parse(t))
+	} else {
+		err = errors.New(fmt.Sprintf("%s is not a known custom method", name))
+	}
+	return
 }
 
 var customTemplates = map[string]string{

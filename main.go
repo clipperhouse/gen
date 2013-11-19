@@ -119,7 +119,7 @@ func main() {
 		}
 	}
 	t := getTemplate()
-	writeFile(t, genSpecs)
+	writeFile(t, genSpecs, opts)
 }
 
 func getOptions(args []string) *options {
@@ -247,6 +247,12 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 			parse := genTag.FindStringSubmatch(fld.Tag.Value)
 			if parse != nil && len(parse) > 1 {
 				methods := strings.Split(parse[1], ",")
+				for _, m := range methods {
+					_, err := getCustomTemplate(m)
+					if err != nil {
+						errs = append(errs, err)
+					}
+				}
 				for _, name := range fld.Names {
 					typeName := fmt.Sprintf("%v", fld.Type)
 					fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Methods: methods})
@@ -257,7 +263,7 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 	return
 }
 
-func writeFile(t *template.Template, genSpecs []*genSpec) {
+func writeFile(t *template.Template, genSpecs []*genSpec, opts *options) {
 	for _, g := range genSpecs {
 		file, err := os.Create(g.FileName)
 		if err != nil {
@@ -268,10 +274,14 @@ func writeFile(t *template.Template, genSpecs []*genSpec) {
 		t.Execute(file, g)
 
 		for _, f := range g.FieldSpecs {
-			if f.Methods != nil {
-				for _, m := range f.Methods {
-					c := getCustomTemplate(m)
+			for _, m := range f.Methods {
+				c, err := getCustomTemplate(m)
+				if err == nil {
 					c.Execute(file, f)
+				} else if opts.Force {
+					fmt.Printf("  skipping %v method\n", m)
+				} else {
+					panic(err) // shouldn't get here, should have been caught in getFieldSpecs
 				}
 			}
 		}
