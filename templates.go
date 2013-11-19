@@ -497,3 +497,27 @@ func negate{{.Plural}}(less func({{.Plural}}, int, int) bool) func({{.Plural}}, 
 	}
 }
 `
+
+func getCustomTemplate(name string) *template.Template {
+	t := customTemplates[name]
+	return template.Must(template.New(name).Parse(t))
+}
+
+var customTemplates = map[string]string{
+	"SortBy": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plural}} {
+	less := func(z {{.Parent.Plural}}, a int, b int) bool {
+		return z[a].{{.Name}} < z[b].{{.Name}}
+	}
+	return {{.Parent.Receiver}}.Sort(less)
+}
+`,
+	"DistinctBy": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.Plural}} {
+	equal := func(a {{.Parent.Pointer}}{{.Parent.Singular}}, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {
+		return a.{{.Name}} == b.{{.Name}}
+	}
+	return {{.Parent.Receiver}}.DistinctBy(equal)
+}
+`,
+}

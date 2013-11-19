@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 18 Nov 2013 02:00:51 UTC
+// Tue, 19 Nov 2013 03:40:22 UTC
 
 package models
 
@@ -485,4 +485,25 @@ func negateMovies(less func(Movies, int, int) bool) func(Movies, int, int) bool 
 	return func(z Movies, a int, b int) bool {
 		return !less(z, a, b)
 	}
+}
+
+func (rcv Movies) SortByTheaters() Movies {
+	less := func(z Movies, a int, b int) bool {
+		return z[a].Theaters < z[b].Theaters
+	}
+	return rcv.Sort(less)
+}
+
+func (rcv Movies) DistinctByStudio() Movies {
+	equal := func(a *Movie, b *Movie) bool {
+		return a.Studio == b.Studio
+	}
+	return rcv.DistinctBy(equal)
+}
+
+func (rcv Movies) SortByStudio() Movies {
+	less := func(z Movies, a int, b int) bool {
+		return z[a].Studio < z[b].Studio
+	}
+	return rcv.Sort(less)
 }

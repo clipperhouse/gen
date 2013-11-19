@@ -26,20 +26,26 @@ type genSpec struct {
 	FileName   string
 }
 
-func newGenSpec(ptr, pkg, name string, fieldSpecs []*fieldSpec) *genSpec {
+func newGenSpec(ptr, pkg, name string) *genSpec {
 	name = inflect.Singularize(name)
 	return &genSpec{
-		Pointer:    ptr,
-		Package:    pkg,
-		Singular:   name,
-		FieldSpecs: fieldSpecs,
-		Plural:     inflect.Pluralize(name),
-		Receiver:   "rcv",
-		Loop:       "_item",
-		Generated:  time.Now().UTC().Format(time.RFC1123),
-		Command:    fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, name),
-		FileName:   strings.ToLower(name) + "_gen.go",
+		Pointer:   ptr,
+		Package:   pkg,
+		Singular:  name,
+		Plural:    inflect.Pluralize(name),
+		Receiver:  "rcv",
+		Loop:      "_item",
+		Generated: time.Now().UTC().Format(time.RFC1123),
+		Command:   fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, name),
+		FileName:  strings.ToLower(name) + "_gen.go",
 	}
+}
+
+func (g *genSpec) AddFieldSpecs(fieldSpecs []*fieldSpec) {
+	for _, f := range fieldSpecs {
+		f.Parent = g
+	}
+	g.FieldSpecs = fieldSpecs
 }
 
 func (g genSpec) String() string {
@@ -53,8 +59,10 @@ type structArg struct {
 }
 
 type fieldSpec struct {
-	Name string
-	Type string
+	Name    string
+	Type    string
+	Methods []string
+	Parent  *genSpec
 }
 
 type options struct {
@@ -188,10 +196,12 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 		typ, known := structTypes[key]
 		if known {
 			fieldSpecs := getFieldSpecs(typ)
-			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name, fieldSpecs))
+			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
+			g.AddFieldSpecs(fieldSpecs)
+			genSpecs = append(genSpecs, g)
 		} else {
 			errors = append(errors, fmt.Sprintf("%s is not a known struct type", key))
-			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name, nil))
+			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name))
 		}
 		if opts.ExportedOnly {
 			if ast.IsExported(structArg.Name) {
@@ -206,7 +216,9 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 			fieldSpecs := getFieldSpecs(typ)
 			pkg, name := splitName(key)
 			if !opts.ExportedOnly || ast.IsExported(name) {
-				genSpecs = append(genSpecs, newGenSpec(opts.AllPointer, pkg, name, fieldSpecs))
+				g := newGenSpec(opts.AllPointer, pkg, name)
+				g.AddFieldSpecs(fieldSpecs)
+				genSpecs = append(genSpecs, g)
 			}
 		}
 	}
@@ -223,18 +235,16 @@ func splitName(s string) (string, string) {
 }
 
 func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
-	genTag := regexp.MustCompile(`gen:"([A-Za-z ,]+)"`)
+	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
 
 	for _, fld := range typ.Fields.List {
 		if fld.Tag != nil {
 			parse := genTag.FindStringSubmatch(fld.Tag.Value)
-			if parse != nil {
-				fmt.Printf("  parse %v\n", parse)
-				fieldSpecs := make([]*fieldSpec, 0)
-				for _, fldName := range fld.Names {
-					name := fmt.Sprintf("%v", fld.Type)
-					fmt.Printf("  type %v\n", name)
-					fieldSpecs = append(fieldSpecs, &fieldSpec{fldName.Name, name})
+			if parse != nil && len(parse) > 1 {
+				methods := strings.Split(parse[1], ",")
+				for _, name := range fld.Names {
+					typeName := fmt.Sprintf("%v", fld.Type)
+					fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Methods: methods})
 				}
 			}
 		}
@@ -243,15 +253,24 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 }
 
 func writeFile(t *template.Template, genSpecs []*genSpec) {
-	for _, v := range genSpecs {
-		f, err := os.Create(v.FileName)
+	for _, g := range genSpecs {
+		file, err := os.Create(g.FileName)
 		if err != nil {
 			panic(err)
 		}
-		defer f.Close()
+		defer file.Close()
 
-		t.Execute(f, v)
-		fmt.Printf("  generated %s, yay!\n", v)
+		t.Execute(file, g)
+
+		for _, f := range g.FieldSpecs {
+			if f.Methods != nil {
+				for _, m := range f.Methods {
+					c := getCustomTemplate(m)
+					c.Execute(file, f)
+				}
+			}
+		}
+		fmt.Printf("  generated %s, yay!\n", g)
 	}
 }
 
