@@ -2,6 +2,7 @@ package main
 
 import (
 	"bitbucket.org/clipperhouse/inflect"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -72,8 +73,12 @@ type options struct {
 	Force        bool
 }
 
-var errors = make([]string, 0)
+var errs = make([]error, 0)
 var notes = make([]string, 0)
+
+func addError(text string) {
+	errs = append(errs, errors.New(text))
+}
 
 func main() {
 	has_args := len(os.Args) > 1
@@ -101,9 +106,9 @@ func main() {
 		}
 	}
 
-	if len(errors) > 0 {
-		for _, e := range errors {
-			fmt.Println("  error: " + e)
+	if len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Printf("  error: %v\n", e)
 		}
 		if opts.Force {
 			fmt.Println("  forced...")
@@ -169,7 +174,7 @@ func getAllStructTypes() map[string]*ast.StructType {
 	fset := token.NewFileSet()
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
-		errors = append(errors, err.Error())
+		errs = append(errs, err)
 		return nil
 	}
 
@@ -200,14 +205,14 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 			g.AddFieldSpecs(fieldSpecs)
 			genSpecs = append(genSpecs, g)
 		} else {
-			errors = append(errors, fmt.Sprintf("%s is not a known struct type", key))
+			addError(fmt.Sprintf("%s is not a known struct type", key))
 			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name))
 		}
 		if opts.ExportedOnly {
 			if ast.IsExported(structArg.Name) {
 				notes = append(notes, fmt.Sprintf("the %s type is already exported; the -e[xported] flag is redundant (ignored)", structArg.Name))
 			} else {
-				errors = append(errors, fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", structArg.Name))
+				addError(fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", structArg.Name))
 			}
 		}
 	}
