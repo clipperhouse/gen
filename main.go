@@ -100,10 +100,8 @@ func main() {
 	structTypes := getAllStructTypes()
 	genSpecs := getGenSpecs(opts, structArgs, structTypes)
 
-	if len(notes) > 0 {
-		for _, n := range notes {
-			fmt.Println("  note: " + n)
-		}
+	for _, n := range notes {
+		fmt.Println("  note: " + n)
 	}
 
 	if len(errs) > 0 {
