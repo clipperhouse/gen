@@ -243,21 +243,25 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
 
 	for _, fld := range typ.Fields.List {
-		if fld.Tag != nil {
-			parse := genTag.FindStringSubmatch(fld.Tag.Value)
-			if parse != nil && len(parse) > 1 {
-				methods := strings.Split(parse[1], ",")
-				for _, m := range methods {
-					_, err := getCustomTemplate(m)
-					if err != nil {
-						errs = append(errs, err)
-					}
-				}
-				for _, name := range fld.Names {
-					typeName := fmt.Sprintf("%v", fld.Type)
-					fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Methods: methods})
-				}
+		if fld.Tag == nil {
+			continue
+		}
+
+		parse := genTag.FindStringSubmatch(fld.Tag.Value)
+		if parse == nil || len(parse) < 2 {
+			continue
+		}
+
+		methods := strings.Split(parse[1], ",")
+		for _, m := range methods {
+			_, err := getCustomTemplate(m)
+			if err != nil {
+				errs = append(errs, err)
 			}
+		}
+		for _, name := range fld.Names {
+			typeName := fmt.Sprintf("%v", fld.Type)
+			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Methods: methods})
 		}
 	}
 	return
