@@ -35,7 +35,7 @@ func newGenSpec(ptr, pkg, name string) *genSpec {
 		Singular:  name,
 		Plural:    inflect.Pluralize(name),
 		Receiver:  "rcv",
-		Loop:      "_item",
+		Loop:      "v",
 		Generated: time.Now().UTC().Format(time.RFC1123),
 		Command:   fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, name),
 		FileName:  strings.ToLower(name) + "_gen.go",

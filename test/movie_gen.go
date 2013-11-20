@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Tue, 19 Nov 2013 03:40:22 UTC
+// Wed, 20 Nov 2013 03:41:24 UTC
 
 package models
 
@@ -10,50 +10,50 @@ import "errors"
 type Movies []*Movie
 
 // Iterates over Movies, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
-//	sum := func(_item *Movie, accumulated int) int {
-//		return accumulated + _item.Something
+//	sum := func(v *Movie, accumulated int) int {
+//		return accumulated + v.Something
 //	}
 //	sumOfSomething := myMovies.AggregateInt(sum)
 //
-//	min := func(_item *Movie, accumulated int) int {
-//		if _item.AnotherThing < accumulated {
-//			return _item.AnotherThing
+//	min := func(v *Movie, accumulated int) int {
+//		if v.AnotherThing < accumulated {
+//			return v.AnotherThing
 //		}
 //		return accumulated
 //	}
 //	minOfAnotherThing := myMovies.AggregateInt(min)
 func (rcv Movies) AggregateInt(fn func(*Movie, int) int) int {
 	result := 0
-	for _, _item := range rcv {
-		result = fn(_item, result)
+	for _, v := range rcv {
+		result = fn(v, result)
 	}
 	return result
 }
 
 // Iterates over Movies, operating on each element while accumulating results. For example, you might join strings like:
 //	myMovies := GetSomeMovies()
-//	join := func(_item *Movie, accumulated string) string {
-//		if _item != myMovies[0] {
+//	join := func(v *Movie, accumulated string) string {
+//		if v != myMovies[0] {
 //			accumulated += ", "
 //		}
-//		return accumulated + _item.Title
+//		return accumulated + v.Title
 //	}
 //	myList := myMovies.AggregateString(join)
 func (rcv Movies) AggregateString(fn func(*Movie, string) string) (result string) {
-	for _, _item := range rcv {
-		result = fn(_item, result)
+	for _, v := range rcv {
+		result = fn(v, result)
 	}
 	return result
 }
 
 // Tests that all elements of Movies are true for the passed func. Example:
-//	good := func(_item *Movie) bool {
-//		return _item.Something > 42
+//	good := func(v *Movie) bool {
+//		return v.Something > 42
 //	}
 //	allGood := myMovies.All(good)
 func (rcv Movies) All(fn func(*Movie) bool) bool {
-	for _, _item := range rcv {
-		if !fn(_item) {
+	for _, v := range rcv {
+		if !fn(v) {
 			return false
 		}
 	}
@@ -61,13 +61,13 @@ func (rcv Movies) All(fn func(*Movie) bool) bool {
 }
 
 // Tests that one or more elements of Movies are true for the passed func. Example:
-//	winner := func(_item *Movie) bool {
-//		return _item.Placement == "winner"
+//	winner := func(v *Movie) bool {
+//		return v.Placement == "winner"
 //	}
 //	weHaveAWinner := myMovies.Any(winner)
 func (rcv Movies) Any(fn func(*Movie) bool) bool {
-	for _, _item := range rcv {
-		if fn(_item) {
+	for _, v := range rcv {
+		if fn(v) {
 			return true
 		}
 	}
@@ -75,13 +75,13 @@ func (rcv Movies) Any(fn func(*Movie) bool) bool {
 }
 
 // Counts the number elements of Movies that are true for the passed func. Example:
-//	dracula := func(_item *Movie) bool {
-//		return _item.IsDracula()
+//	dracula := func(v *Movie) bool {
+//		return v.IsDracula()
 //	}
 //	countDracula := myMovies.Count(dracula)
 func (rcv Movies) Count(fn func(*Movie) bool) int {
-	var count = func(_item *Movie, acc int) int {
-		if fn(_item) {
+	var count = func(v *Movie, acc int) int {
+		if fn(v) {
 			acc++
 		}
 		return acc
@@ -93,10 +93,10 @@ func (rcv Movies) Count(fn func(*Movie) bool) int {
 //	snowflakes := hipsters.Distinct()
 func (rcv Movies) Distinct() (result Movies) {
 	appended := make(map[*Movie]bool)
-	for _, _item := range rcv {
-		if !appended[_item] {
-			result = append(result, _item)
-			appended[_item] = true
+	for _, v := range rcv {
+		if !appended[v] {
+			result = append(result, v)
+			appended[v] = true
 		}
 	}
 	return result
@@ -108,12 +108,12 @@ func (rcv Movies) Distinct() (result Movies) {
 //	}
 //	trendsetters := fashionistas.DistinctBy(hairstyle)
 func (rcv Movies) DistinctBy(equal func(*Movie, *Movie) bool) (result Movies) {
-	for _, _item := range rcv {
+	for _, v := range rcv {
 		eq := func(_app *Movie) bool {
-			return equal(_item, _app)
+			return equal(v, _app)
 		}
 		if !result.Any(eq) {
-			result = append(result, _item)
+			result = append(result, v)
 		}
 	}
 	return result
@@ -121,20 +121,20 @@ func (rcv Movies) DistinctBy(equal func(*Movie, *Movie) bool) (result Movies) {
 
 // Iterates over Movies and executes the passed func against each element.
 func (rcv Movies) Each(fn func(*Movie)) {
-	for _, _item := range rcv {
-		fn(_item)
+	for _, v := range rcv {
+		fn(v)
 	}
 }
 
 // Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
-//	winner := func(_item *Movie) bool {
-//		return _item.Placement == "winner"
+//	winner := func(v *Movie) bool {
+//		return v.Placement == "winner"
 //	}
 //	theWinner, err := myMovies.First(winner)
 func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
-	for _, _item := range rcv {
-		if fn(_item) {
-			result = _item
+	for _, v := range rcv {
+		if fn(v) {
+			result = v
 			return
 		}
 	}
@@ -143,34 +143,34 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 }
 
 // Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
-//	year := func(_item *Movie) int {
-//		return _item.CreationDate.Year()
+//	year := func(v *Movie) int {
+//		return v.CreationDate.Year()
 //	}
 //	yearlyReport := myMovies.GroupByInt(year)
 func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
 	result := make(map[int]Movies)
-	for _, _item := range rcv {
-		result[fn(_item)] = append(result[fn(_item)], _item)
+	for _, v := range rcv {
+		result[fn(v)] = append(result[fn(v)], v)
 	}
 	return result
 }
 
 // Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
-//	dept := func(_item *Movie) string {
-//		return _item.DepartmentName
+//	dept := func(v *Movie) string {
+//		return v.DepartmentName
 //	}
 //	byDepartment := myMovies.GroupByString(dept)
 func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 	result := make(map[string]Movies)
-	for _, _item := range rcv {
-		result[fn(_item)] = append(result[fn(_item)], _item)
+	for _, v := range rcv {
+		result[fn(v)] = append(result[fn(v)], v)
 	}
 	return result
 }
 
 // Returns the element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byArea := func(_items Movies, a int, b int) bool {
-//		return _items[a].Area() < _items[b].Area()
+//	byArea := func(vs Movies, a int, b int) bool {
+//		return vs[a].Area() < vs[b].Area()
 //	}
 //	roomiest := myMovies.Max(byArea)
 //
@@ -185,8 +185,8 @@ func (rcv Movies) Max(less func(Movies, int, int) bool) (result *Movie, err erro
 }
 
 // Returns the element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byPrice := func(_items Movies, a int, b int) bool {
-//		return _items[a].Price < _items[b].Price
+//	byPrice := func(vs Movies, a int, b int) bool {
+//		return vs[a].Price < vs[b].Price
 //	}
 //	cheapest := myMovies.Min(byPrice)
 //
@@ -208,20 +208,20 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) (result *Movie, err erro
 }
 
 // Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
-//	byId := func(_item *Movie) bool {
-//		return _item.Id == 5
+//	byId := func(v *Movie) bool {
+//		return v.Id == 5
 //	}
 //	single, err := myMovies.Single(byId)
 func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 	var candidate *Movie
 	found := false
-	for _, _item := range rcv {
-		if fn(_item) {
+	for _, v := range rcv {
+		if fn(v) {
 			if found {
 				err = errors.New("Multiple Movies elements return true for passed func")
 				return
 			}
-			candidate = _item
+			candidate = v
 			found = true
 		}
 	}
@@ -234,26 +234,26 @@ func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 }
 
 // Returns the sum of ints returned by passed func. Example:
-//	itemTotal := func(_item *Movie) int {
-//		return _item.Quantity * _item.UnitPrice
+//	itemTotal := func(v *Movie) int {
+//		return v.Quantity * v.UnitPrice
 //	}
 //	orderTotal := myMovies.SumInt(itemTotal)
 func (rcv Movies) SumInt(fn func(*Movie) int) int {
-	var sum = func(_item *Movie, acc int) int {
-		return acc + fn(_item)
+	var sum = func(v *Movie, acc int) int {
+		return acc + fn(v)
 	}
 	return rcv.AggregateInt(sum)
 }
 
 // Returns a new Movies slice whose elements return true for func. Example:
-//	incredible := func(_item *Movie) bool {
-//		return _item.Manufacturer == "Apple"
+//	incredible := func(v *Movie) bool {
+//		return v.Manufacturer == "Apple"
 //	}
 //	wishList := myMovies.Where(incredible)
 func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
-	for _, _item := range rcv {
-		if fn(_item) {
-			result = append(result, _item)
+	for _, v := range rcv {
+		if fn(v) {
+			result = append(result, v)
 		}
 	}
 	return result
@@ -265,8 +265,8 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 // license that can be found in the LICENSE file.
 
 // Returns a new ordered Movies slice, determined by a func defining ‘less’. Example:
-//	byName := func(_items Movies, a int, b int) bool {
-//		return _items[a].LastName < _items[b].LastName
+//	byName := func(vs Movies, a int, b int) bool {
+//		return vs[a].LastName < vs[b].LastName
 //	}
 //	roster := myMovies.Sort(byName)
 func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
@@ -296,8 +296,8 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 }
 
 // Returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. Example:
-//	byPoints := func(_items Movies, a int, b int) bool {
-//		return _items[a].Points < _items[b].Points
+//	byPoints := func(vs Movies, a int, b int) bool {
+//		return vs[a].Points < vs[b].Points
 //	}
 //	leaderboard := myMovies.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
