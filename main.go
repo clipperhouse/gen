@@ -62,6 +62,7 @@ type structArg struct {
 type fieldSpec struct {
 	Name    string
 	Type    string
+	Pointer string
 	Methods []string
 	Parent  *genSpec
 }
@@ -258,8 +259,14 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 			}
 		}
 		for _, name := range fld.Names {
+			ptr := ""
+			switch x := fld.Type.(type) {
+			case *ast.StarExpr:
+				_ = x
+				ptr = "*"
+			}
 			typeName := fmt.Sprintf("%v", fld.Type)
-			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Methods: methods})
+			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Pointer: ptr, Methods: methods})
 		}
 	}
 	return
