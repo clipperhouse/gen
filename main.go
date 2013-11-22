@@ -60,6 +60,7 @@ type structArg struct {
 }
 
 type fieldSpec struct {
+	Package string
 	Name    string
 	Type    string
 	Pointer string
@@ -199,7 +200,7 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 		key := joinName(structArg.Package, structArg.Name)
 		typ, known := structTypes[key]
 		if known {
-			fieldSpecs := getFieldSpecs(typ)
+			fieldSpecs := getFieldSpecs(typ, opts)
 			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
 			g.AddFieldSpecs(fieldSpecs)
 			genSpecs = append(genSpecs, g)
@@ -217,7 +218,7 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 	}
 	if opts.All {
 		for key, typ := range structTypes {
-			fieldSpecs := getFieldSpecs(typ)
+			fieldSpecs := getFieldSpecs(typ, opts)
 			pkg, name := splitName(key)
 			if !opts.ExportedOnly || ast.IsExported(name) {
 				g := newGenSpec(opts.AllPointer, pkg, name)
@@ -238,7 +239,7 @@ func splitName(s string) (string, string) {
 	return names[0], names[1]
 }
 
-func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
+func getFieldSpecs(typ *ast.StructType, opts *options) (fieldSpecs []*fieldSpec) {
 	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
 
 	for _, fld := range typ.Fields.List {
@@ -259,16 +260,36 @@ func getFieldSpecs(typ *ast.StructType) (fieldSpecs []*fieldSpec) {
 			}
 		}
 		for _, name := range fld.Names {
-			ptr := ""
+			var ptr, pkg, typ string
+			ok := true
 			switch x := fld.Type.(type) {
+			default:
+				pkg = fmt.Sprintf("%v", x)
+			case *ast.SelectorExpr:
+				pkg, typ, ok = handleImportedType(x, opts)
 			case *ast.StarExpr:
-				_ = x
 				ptr = "*"
+				switch y := x.X.(type) {
+				default:
+					typ = fmt.Sprintf("%v", x.X)
+				case *ast.SelectorExpr:
+					pkg, typ, ok = handleImportedType(y, opts)
+				}
 			}
-			typeName := fmt.Sprintf("%v", fld.Type)
-			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: typeName, Pointer: ptr, Methods: methods})
+			if ok {
+				fieldSpecs = append(fieldSpecs, &fieldSpec{Package: pkg, Name: name.String(), Type: typ, Pointer: ptr, Methods: methods})
+			}
 		}
 	}
+	return
+}
+
+func handleImportedType(expr *ast.SelectorExpr, opts *options) (pkg, typ string, ok bool) {
+	pkg = fmt.Sprintf("%v.", expr.X)
+	typ = fmt.Sprintf("%v", expr.Sel)
+	desc := fmt.Sprintf("%v%v", pkg, typ)
+	addError(fmt.Sprintf("gen cannot work with imported types, in this case %s. consider making an alias type, e.g., type %v struct { %s }.", desc, typ, desc))
+	ok = opts.Force
 	return
 }
 

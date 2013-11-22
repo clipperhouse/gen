@@ -527,4 +527,12 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.P
 	return {{.Parent.Receiver}}.DistinctBy(equal)
 }
 `,
+	"Select": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Pointer}}{{.Package}}{{.Type}}) {
+	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
+		result = append(result, {{.Parent.Loop}}.{{.Name}})
+	}
+	return
+}
+`,
 }

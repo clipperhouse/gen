@@ -240,6 +240,23 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["SelectTitle"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.SelectTitle(), nil
+			},
+			[]string{"first", "second", "third", "fourth", "fifth"},
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.SelectTitle(), nil
+			},
+			[]string{},
+			false,
+		},
+	}
+
 	tests["First"] = []test{
 		test{
 			func() (interface{}, error) {
@@ -527,6 +544,23 @@ func TestAll(t *testing.T) {
 
 				if got != test.Expected {
 					t.Errorf("%s[%v]: Expected %v, got %v", name, i, test.Expected, got)
+				}
+			case []string:
+				_got, err := test.Exec()
+
+				checkErr(test, err)
+
+				got := _got.([]string)
+				exp := test.Expected.([]string)
+				if len(got) != len(exp) {
+					t.Errorf("%s[%v]: Expected %v strings, got %v", name, i, len(exp), len(got))
+					break
+				}
+				for j := range got {
+					if got[j] != exp[j] {
+						t.Errorf("%s[%v]: Expected %v, got %v", name, i, exp[j], got[j])
+						break
+					}
 				}
 			case map[int]Movies:
 				_got, err := test.Exec()
