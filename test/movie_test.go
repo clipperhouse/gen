@@ -31,6 +31,23 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["SumTheaters"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.SumTheaters(), nil
+			},
+			6 + 9 + 5 + 50 + 20,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.SumTheaters(), nil
+			},
+			0,
+			false,
+		},
+	}
+
 	tests["All"] = []test{
 		test{
 			func() (interface{}, error) {

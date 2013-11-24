@@ -493,4 +493,12 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plura
 	return {{.Parent.Receiver}}.Sort(less)
 }
 `,
+	"Sum": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Sum{{.Name}}() (result {{.Pointer}}{{.Package}}{{.Type}}) {
+	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
+		result += {{.Parent.Loop}}.{{.Name}}
+	}
+	return
+}
+`,
 }
