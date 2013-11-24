@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Fri, 22 Nov 2013 05:01:45 UTC
+// Sun, 24 Nov 2013 19:21:03 UTC
 
 package models
 
@@ -499,6 +499,13 @@ func (rcv Movies) SortByTheaters() Movies {
 		return z[a].Theaters < z[b].Theaters
 	}
 	return rcv.Sort(less)
+}
+
+func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
+	for _, v := range rcv {
+		result = fn(result, v.Theaters)
+	}
+	return
 }
 
 func (rcv Movies) DistinctByStudio() Movies {

@@ -511,6 +511,14 @@ func getCustomTemplate(name string) (result *template.Template, err error) {
 }
 
 var customTemplates = map[string]string{
+	"Aggregate": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Pointer}}{{.Package}}{{.Type}}, {{.Pointer}}{{.Package}}{{.Type}}) {{.Pointer}}{{.Package}}{{.Type}}) (result {{.Pointer}}{{.Package}}{{.Type}}) {
+	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
+		result = fn(result, {{.Parent.Loop}}.{{.Name}})
+	}
+	return
+}
+`,
 	"DistinctBy": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.Plural}} {
 	equal := func(a {{.Parent.Pointer}}{{.Parent.Singular}}, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {

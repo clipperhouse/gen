@@ -31,6 +31,23 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["AggregateTheaters"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.AggregateTheaters(sumInt), nil
+			},
+			6 + 9 + 5 + 50 + 20,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.AggregateTheaters(sumInt), nil
+			},
+			0,
+			false,
+		},
+	}
+
 	tests["AggregateString"] = []test{
 		test{
 			func() (interface{}, error) {
@@ -672,6 +689,9 @@ var isFalse = func(movie *Movie) bool {
 }
 var getTheaters = func(movie *Movie) int {
 	return movie.Theaters
+}
+var sumInt = func(state int, value int) int {
+	return state + value
 }
 var sumTheaters = func(movie *Movie, acc int) int {
 	return acc + movie.Theaters
