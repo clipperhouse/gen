@@ -21,43 +21,6 @@ import "errors"
 // The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
-// Iterates over {{.Plural}}, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
-//	sum := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated int) int {
-//		return accumulated + {{.Loop}}.Something
-//	}
-//	sumOfSomething := my{{.Plural}}.AggregateInt(sum)
-//
-//	min := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated int) int {
-//		if {{.Loop}}.AnotherThing < accumulated {
-//			return {{.Loop}}.AnotherThing
-//		}
-//		return accumulated
-//	}
-//	minOfAnotherThing := my{{.Plural}}.AggregateInt(min)
-func ({{.Receiver}} {{.Plural}}) AggregateInt(fn func({{.Pointer}}{{.Singular}}, int) int) int {
-	result := 0
-	for _, {{.Loop}} := range {{.Receiver}} {
-		result = fn({{.Loop}}, result)
-	}
-	return result
-}
-
-// Iterates over {{.Plural}}, operating on each element while accumulating results. For example, you might join strings like:
-//	my{{.Plural}} := GetSome{{.Plural}}()
-//	join := func({{.Loop}} {{.Pointer}}{{.Singular}}, accumulated string) string {
-//		if {{.Loop}} != my{{.Plural}}[0] {
-//			accumulated += ", "
-//		}
-//		return accumulated + {{.Loop}}.Title
-//	}
-//	myList := my{{.Plural}}.AggregateString(join)
-func ({{.Receiver}} {{.Plural}}) AggregateString(fn func({{.Pointer}}{{.Singular}}, string) string) (result string) {
-	for _, {{.Loop}} := range {{.Receiver}} {
-		result = fn({{.Loop}}, result)
-	}
-	return result
-}
-
 // Tests that all elements of {{.Plural}} are true for the passed func. Example:
 //	good := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
 //		return {{.Loop}}.Something > 42
@@ -91,14 +54,13 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 //		return {{.Loop}}.IsDracula()
 //	}
 //	countDracula := my{{.Plural}}.Count(dracula)
-func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) int {
-	var count = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
+func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
+	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
-			acc++
+			result++
 		}
-		return acc
 	}
-	return {{.Receiver}}.AggregateInt(count)
+	return
 }
 
 // Returns a new {{.Plural}} slice whose elements are unique. Keep in mind that pointers and values have different concepts of equality, and therefore distinctness. Example:
@@ -243,18 +205,6 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 		err = errors.New("No {{.Plural}} elements return true for passed func")
 	}
 	return
-}
-
-// Returns the sum of ints returned by passed func. Example:
-//	itemTotal := func({{.Loop}} {{.Pointer}}{{.Singular}}) int {
-//		return {{.Loop}}.Quantity * {{.Loop}}.UnitPrice
-//	}
-//	orderTotal := my{{.Plural}}.SumInt(itemTotal)
-func ({{.Receiver}} {{.Plural}}) SumInt(fn func({{.Pointer}}{{.Singular}}) int) int {
-	var sum = func({{.Loop}} {{.Pointer}}{{.Singular}}, acc int) int {
-		return acc + fn({{.Loop}})
-	}
-	return {{.Receiver}}.AggregateInt(sum)
 }
 
 // Returns a new {{.Plural}} slice whose elements return true for func. Example:

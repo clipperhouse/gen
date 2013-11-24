@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 24 Nov 2013 19:21:03 UTC
+// Sun, 24 Nov 2013 19:38:33 UTC
 
 package models
 
@@ -8,43 +8,6 @@ import "errors"
 
 // The plural (slice) type of *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
 type Movies []*Movie
-
-// Iterates over Movies, operating on each element while accumulating results. For example, Sum & Min might be implemented like:
-//	sum := func(v *Movie, accumulated int) int {
-//		return accumulated + v.Something
-//	}
-//	sumOfSomething := myMovies.AggregateInt(sum)
-//
-//	min := func(v *Movie, accumulated int) int {
-//		if v.AnotherThing < accumulated {
-//			return v.AnotherThing
-//		}
-//		return accumulated
-//	}
-//	minOfAnotherThing := myMovies.AggregateInt(min)
-func (rcv Movies) AggregateInt(fn func(*Movie, int) int) int {
-	result := 0
-	for _, v := range rcv {
-		result = fn(v, result)
-	}
-	return result
-}
-
-// Iterates over Movies, operating on each element while accumulating results. For example, you might join strings like:
-//	myMovies := GetSomeMovies()
-//	join := func(v *Movie, accumulated string) string {
-//		if v != myMovies[0] {
-//			accumulated += ", "
-//		}
-//		return accumulated + v.Title
-//	}
-//	myList := myMovies.AggregateString(join)
-func (rcv Movies) AggregateString(fn func(*Movie, string) string) (result string) {
-	for _, v := range rcv {
-		result = fn(v, result)
-	}
-	return result
-}
 
 // Tests that all elements of Movies are true for the passed func. Example:
 //	good := func(v *Movie) bool {
@@ -79,14 +42,13 @@ func (rcv Movies) Any(fn func(*Movie) bool) bool {
 //		return v.IsDracula()
 //	}
 //	countDracula := myMovies.Count(dracula)
-func (rcv Movies) Count(fn func(*Movie) bool) int {
-	var count = func(v *Movie, acc int) int {
+func (rcv Movies) Count(fn func(*Movie) bool) (result int) {
+	for _, v := range rcv {
 		if fn(v) {
-			acc++
+			result++
 		}
-		return acc
 	}
-	return rcv.AggregateInt(count)
+	return
 }
 
 // Returns a new Movies slice whose elements are unique. Keep in mind that pointers and values have different concepts of equality, and therefore distinctness. Example:
@@ -231,18 +193,6 @@ func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 		err = errors.New("No Movies elements return true for passed func")
 	}
 	return
-}
-
-// Returns the sum of ints returned by passed func. Example:
-//	itemTotal := func(v *Movie) int {
-//		return v.Quantity * v.UnitPrice
-//	}
-//	orderTotal := myMovies.SumInt(itemTotal)
-func (rcv Movies) SumInt(fn func(*Movie) int) int {
-	var sum = func(v *Movie, acc int) int {
-		return acc + fn(v)
-	}
-	return rcv.AggregateInt(sum)
 }
 
 // Returns a new Movies slice whose elements return true for func. Example:

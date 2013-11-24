@@ -14,23 +14,6 @@ func getTests() map[string][]test {
 	// the basic pattern for tests is zero/many for 'many' slice & sanity checks on 'none' slice
 	tests := make(map[string][]test)
 
-	tests["AggregateInt"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.AggregateInt(sumTheaters), nil
-			},
-			6 + 9 + 5 + 50 + 20,
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return none.AggregateInt(sumTheaters), nil
-			},
-			0,
-			false,
-		},
-	}
-
 	tests["AggregateTheaters"] = []test{
 		test{
 			func() (interface{}, error) {
@@ -44,23 +27,6 @@ func getTests() map[string][]test {
 				return none.AggregateTheaters(sumInt), nil
 			},
 			0,
-			false,
-		},
-	}
-
-	tests["AggregateString"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.AggregateString(concatTitle), nil
-			},
-			"first" + "second" + "third" + "fourth" + "fifth",
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return none.AggregateString(concatTitle), nil
-			},
-			"",
 			false,
 		},
 	}
@@ -472,23 +438,6 @@ func getTests() map[string][]test {
 				return sorted.IsSortedDesc(byTitle), nil
 			},
 			true,
-			false,
-		},
-	}
-
-	tests["SumInt"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.SumInt(getTheaters), nil
-			},
-			6 + 9 + 5 + 50 + 20,
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return none.SumInt(getTheaters), nil
-			},
-			0,
 			false,
 		},
 	}
