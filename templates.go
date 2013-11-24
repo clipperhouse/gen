@@ -511,14 +511,6 @@ func getCustomTemplate(name string) (result *template.Template, err error) {
 }
 
 var customTemplates = map[string]string{
-	"SortBy": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plural}} {
-	less := func(z {{.Parent.Plural}}, a int, b int) bool {
-		return z[a].{{.Name}} < z[b].{{.Name}}
-	}
-	return {{.Parent.Receiver}}.Sort(less)
-}
-`,
 	"DistinctBy": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.Plural}} {
 	equal := func(a {{.Parent.Pointer}}{{.Parent.Singular}}, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {
@@ -533,6 +525,14 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Po
 		result = append(result, {{.Parent.Loop}}.{{.Name}})
 	}
 	return
+}
+`,
+	"SortBy": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plural}} {
+	less := func(z {{.Parent.Plural}}, a int, b int) bool {
+		return z[a].{{.Name}} < z[b].{{.Name}}
+	}
+	return {{.Parent.Receiver}}.Sort(less)
 }
 `,
 }
