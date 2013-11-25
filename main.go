@@ -10,7 +10,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -118,8 +117,8 @@ func main() {
 			return
 		}
 	}
-	t := getTemplate()
-	writeFile(t, genSpecs, opts)
+
+	writeFile(genSpecs, opts)
 }
 
 func getOptions(args []string) *options {
@@ -293,7 +292,7 @@ func handleImportedType(expr *ast.SelectorExpr, opts *options) (pkg, typ string,
 	return
 }
 
-func writeFile(t *template.Template, genSpecs []*genSpec, opts *options) {
+func writeFile(genSpecs []*genSpec, opts *options) {
 	for _, g := range genSpecs {
 		file, err := os.Create(g.FileName)
 		if err != nil {
@@ -301,6 +300,7 @@ func writeFile(t *template.Template, genSpecs []*genSpec, opts *options) {
 		}
 		defer file.Close()
 
+		t := getTemplate()
 		t.Execute(file, g)
 
 		for _, f := range g.FieldSpecs {
@@ -315,6 +315,10 @@ func writeFile(t *template.Template, genSpecs []*genSpec, opts *options) {
 				}
 			}
 		}
+
+		s := getSortSupportTemplate()
+		s.Execute(file, g)
+
 		fmt.Printf("  generated %s, yay!\n", g)
 	}
 }

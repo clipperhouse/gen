@@ -1,6 +1,11 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 25 Nov 2013 01:15:37 UTC
+// Mon, 25 Nov 2013 02:53:48 UTC
+
+// Sort functions are a modification of http://golang.org/pkg/sort/#Sort
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package models
 
@@ -183,11 +188,6 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	return result
 }
 
-// Sort functions below are a modification of http://golang.org/pkg/sort/#Sort
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // Returns a new ordered Movies slice, determined by a func defining ‘less’. Example:
 //	byName := func(a, b *Movie) bool {
 //		return a.LastName < b.LastName
@@ -233,6 +233,67 @@ func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
 func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
 	return rcv.IsSorted(negateMovies(less))
 }
+
+func (rcv Movies) SelectTitle() (result []string) {
+	for _, v := range rcv {
+		result = append(result, v.Title)
+	}
+	return
+}
+
+func (rcv Movies) SortByTheaters() Movies {
+	less := func(a, b *Movie) bool {
+		return a.Theaters < b.Theaters
+	}
+	return rcv.Sort(less)
+}
+
+func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
+	for _, v := range rcv {
+		result = fn(result, v.Theaters)
+	}
+	return
+}
+
+func (rcv Movies) SumTheaters() (result int) {
+	for _, v := range rcv {
+		result += v.Theaters
+	}
+	return
+}
+
+func (rcv Movies) DistinctByStudio() Movies {
+	equal := func(a *Movie, b *Movie) bool {
+		return a.Studio == b.Studio
+	}
+	return rcv.DistinctBy(equal)
+}
+
+func (rcv Movies) SortByStudio() Movies {
+	less := func(a, b *Movie) bool {
+		return a.Studio < b.Studio
+	}
+	return rcv.Sort(less)
+}
+
+func (rcv Movies) GroupByStudio() map[string]Movies {
+	result := make(map[string]Movies)
+	for _, v := range rcv {
+		result[v.Studio] = append(result[v.Studio], v)
+	}
+	return result
+}
+
+func (rcv Movies) GroupByBoxOfficeMillions() map[int]Movies {
+	result := make(map[int]Movies)
+	for _, v := range rcv {
+		result[v.BoxOfficeMillions] = append(result[v.BoxOfficeMillions], v)
+	}
+	return result
+}
+
+// ====================
+// Sort support methods
 
 func swapMovies(rcv Movies, a, b int) {
 	rcv[a], rcv[b] = rcv[b], rcv[a]
@@ -409,62 +470,4 @@ func negateMovies(less func(*Movie, *Movie) bool) func(*Movie, *Movie) bool {
 	return func(a, b *Movie) bool {
 		return !less(a, b)
 	}
-}
-
-func (rcv Movies) SelectTitle() (result []string) {
-	for _, v := range rcv {
-		result = append(result, v.Title)
-	}
-	return
-}
-
-func (rcv Movies) SortByTheaters() Movies {
-	less := func(a, b *Movie) bool {
-		return a.Theaters < b.Theaters
-	}
-	return rcv.Sort(less)
-}
-
-func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
-	for _, v := range rcv {
-		result = fn(result, v.Theaters)
-	}
-	return
-}
-
-func (rcv Movies) SumTheaters() (result int) {
-	for _, v := range rcv {
-		result += v.Theaters
-	}
-	return
-}
-
-func (rcv Movies) DistinctByStudio() Movies {
-	equal := func(a *Movie, b *Movie) bool {
-		return a.Studio == b.Studio
-	}
-	return rcv.DistinctBy(equal)
-}
-
-func (rcv Movies) SortByStudio() Movies {
-	less := func(a, b *Movie) bool {
-		return a.Studio < b.Studio
-	}
-	return rcv.Sort(less)
-}
-
-func (rcv Movies) GroupByStudio() map[string]Movies {
-	result := make(map[string]Movies)
-	for _, v := range rcv {
-		result[v.Studio] = append(result[v.Studio], v)
-	}
-	return result
-}
-
-func (rcv Movies) GroupByBoxOfficeMillions() map[int]Movies {
-	result := make(map[int]Movies)
-	for _, v := range rcv {
-		result[v.BoxOfficeMillions] = append(result[v.BoxOfficeMillions], v)
-	}
-	return result
 }

@@ -14,6 +14,11 @@ const tmpl = `// {{.Command}}
 // this file was auto-generated using github.com/clipperhouse/gen
 // {{.Generated}}
 
+// Sort functions are a modification of http://golang.org/pkg/sort/#Sort
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package {{.Package}}
 
 import "errors"
@@ -195,11 +200,6 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return result
 }
 
-// Sort functions below are a modification of http://golang.org/pkg/sort/#Sort
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
 //	byName := func(a, b {{.Pointer}}{{.Singular}}) bool {
 //		return a.LastName < b.LastName
@@ -245,6 +245,15 @@ func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Singular}}, {
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
 }
+`
+
+func getSortSupportTemplate() *template.Template {
+	return template.Must(template.New("sortSupport").Parse(sortSupport))
+}
+
+const sortSupport = `
+// ====================
+// Sort support methods
 
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
 	{{.Receiver}}[a], {{.Receiver}}[b] = {{.Receiver}}[b], {{.Receiver}}[a]
