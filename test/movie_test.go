@@ -656,17 +656,8 @@ var isTrue = func(movie *Movie) bool {
 var isFalse = func(movie *Movie) bool {
 	return false
 }
-var getTheaters = func(movie *Movie) int {
-	return movie.Theaters
-}
 var sumInt = func(state int, value int) int {
 	return state + value
-}
-var sumTheaters = func(movie *Movie, acc int) int {
-	return acc + movie.Theaters
-}
-var getTitle = func(movie *Movie) string {
-	return movie.Title
 }
 var sameTitle = func(a *Movie, b *Movie) bool {
 	return a.Title == b.Title
@@ -674,18 +665,9 @@ var sameTitle = func(a *Movie, b *Movie) bool {
 var sameMillions = func(a *Movie, b *Movie) bool {
 	return a.BoxOfficeMillions == b.BoxOfficeMillions
 }
-var getStudio = func(movie *Movie) string {
-	return movie.Studio
-}
-var getBoxOffice = func(movie *Movie) int {
-	return movie.BoxOfficeMillions
-}
 var byTitle = func(a, b *Movie) bool {
 	return a.Title < b.Title
 }
 var byTheaters = func(a, b *Movie) bool {
 	return a.Theaters < b.Theaters
-}
-var concatTitle = func(movie *Movie, acc string) string {
-	return acc + movie.Title
 }
