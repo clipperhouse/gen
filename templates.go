@@ -452,14 +452,6 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Poi
 	return
 }
 `,
-	"DistinctBy": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.Plural}} {
-	equal := func(a {{.Parent.Pointer}}{{.Parent.Singular}}, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {
-		return a.{{.Name}} == b.{{.Name}}
-	}
-	return {{.Parent.Receiver}}.DistinctBy(equal)
-}
-`,
 	"GroupBy": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}})
@@ -475,14 +467,6 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Po
 		result = append(result, {{.Parent.Loop}}.{{.Name}})
 	}
 	return
-}
-`,
-	"SortBy": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plural}} {
-	less := func(a, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {
-		return a.{{.Name}} < b.{{.Name}}
-	}
-	return {{.Parent.Receiver}}.Sort(less)
 }
 `,
 	"Sum": `

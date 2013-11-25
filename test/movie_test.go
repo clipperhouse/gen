@@ -196,50 +196,6 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["DistinctByStudio"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.DistinctByStudio(), nil
-			},
-			Movies{first, second, third},
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return Movies{fourth, fourth, fifth, third}.DistinctByStudio(), nil
-			},
-			Movies{fourth, fifth},
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return none.DistinctByStudio(), nil
-			},
-			Movies{},
-			false,
-		},
-	}
-
-	tests["SortByStudio"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.SortByStudio(), nil
-			},
-			Movies{first, fifth, third, fourth, second},
-			false,
-		},
-	}
-
-	tests["SortByTheaters"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.SortByTheaters(), nil
-			},
-			Movies{third, first, second, fifth, fourth},
-			false,
-		},
-	}
-
 	tests["SelectTitle"] = []test{
 		test{
 			func() (interface{}, error) {

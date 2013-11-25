@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 25 Nov 2013 02:53:48 UTC
+// Mon, 25 Nov 2013 03:39:57 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -241,13 +241,6 @@ func (rcv Movies) SelectTitle() (result []string) {
 	return
 }
 
-func (rcv Movies) SortByTheaters() Movies {
-	less := func(a, b *Movie) bool {
-		return a.Theaters < b.Theaters
-	}
-	return rcv.Sort(less)
-}
-
 func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
 	for _, v := range rcv {
 		result = fn(result, v.Theaters)
@@ -260,20 +253,6 @@ func (rcv Movies) SumTheaters() (result int) {
 		result += v.Theaters
 	}
 	return
-}
-
-func (rcv Movies) DistinctByStudio() Movies {
-	equal := func(a *Movie, b *Movie) bool {
-		return a.Studio == b.Studio
-	}
-	return rcv.DistinctBy(equal)
-}
-
-func (rcv Movies) SortByStudio() Movies {
-	less := func(a, b *Movie) bool {
-		return a.Studio < b.Studio
-	}
-	return rcv.Sort(less)
 }
 
 func (rcv Movies) GroupByStudio() map[string]Movies {
