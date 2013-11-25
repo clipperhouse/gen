@@ -117,14 +117,14 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 }
 
 // Returns the element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byArea := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
-//		return {{.Loop}}s[a].Area() < {{.Loop}}s[b].Area()
+//	byArea := func(a, b {{.Pointer}}{{.Singular}}) bool {
+//		return a.Area() < b.Area()
 //	}
 //	roomiest := my{{.Plural}}.Max(byArea)
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) (result {{.Pointer}}{{.Singular}}, err error) {
+func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	if len(rcv) == 0 {
 		err = errors.New("Cannot determine the Max of an empty slice")
 		return
@@ -133,13 +133,13 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Plural}}, int, int) bool) (res
 }
 
 // Returns the element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byPrice := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
-//		return {{.Loop}}s[a].Price < {{.Loop}}s[b].Price
+//	byPrice := func(a, b {{.Pointer}}{{.Singular}}) bool {
+//		return a.Price < b.Price
 //	}
 //	cheapest := my{{.Plural}}.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) (result {{.Pointer}}{{.Singular}}, err error) {
+func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
 	if l == 0 {
 		err = errors.New("Cannot determine the Min of an empty slice")
@@ -147,7 +147,7 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Plural}}, int, int) bool) (res
 	}
 	m := 0
 	for i := 1; i < l; i++ {
-		if less({{.Receiver}}, i, m) {
+		if less({{.Receiver}}[i], {{.Receiver}}[m]) {
 			m = i
 		}
 	}
@@ -201,11 +201,11 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 // license that can be found in the LICENSE file.
 
 // Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
-//	byName := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
-//		return {{.Loop}}s[a].LastName < {{.Loop}}s[b].LastName
+//	byName := func(a, b {{.Pointer}}{{.Singular}}) bool {
+//		return a.LastName < b.LastName
 //	}
 //	roster := my{{.Plural}}.Sort(byName)
-func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.Plural}} {
+func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	result := make({{.Plural}}, len({{.Receiver}}))
 	copy(result, {{.Receiver}})
 
@@ -221,10 +221,10 @@ func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Plural}}, int, int) bool) {{.
 }
 
 // Reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See Sort method below.
-func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool) bool {
+func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	n := len({{.Receiver}})
 	for i := n - 1; i > 0; i-- {
-		if less({{.Receiver}}, i, i-1) {
+		if less({{.Receiver}}[i], {{.Receiver}}[i-1]) {
 			return false
 		}
 	}
@@ -237,12 +237,12 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Plural}}, int, int) bool)
 //	}
 //	leaderboard := my{{.Plural}}.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Plural}}, int, int) bool) {{.Plural}} {
+func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	return {{.Receiver}}.Sort(negate{{.Plural}}(less))
 }
 
 // Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
-func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Plural}}, int, int) bool) bool {
+func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
 }
 
@@ -251,9 +251,9 @@ func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
 }
 
 // Insertion sort
-func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b int) {
+func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, a, b int) {
 	for i := a + 1; i < b; i++ {
-		for j := i; j > a && less({{.Receiver}}, j, j-1); j-- {
+		for j := i; j > a && less({{.Receiver}}[j], {{.Receiver}}[j-1]); j-- {
 			swap{{.Plural}}({{.Receiver}}, j, j-1)
 		}
 	}
@@ -261,17 +261,17 @@ func insertionSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, 
 
 // siftDown implements the heap property on {{.Receiver}}[lo, hi).
 // first is an offset into the array where the root of the heap lies.
-func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, lo, hi, first int) {
+func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, lo, hi, first int) {
 	root := lo
 	for {
 		child := 2*root + 1
 		if child >= hi {
 			break
 		}
-		if child+1 < hi && less({{.Receiver}}, first+child, first+child+1) {
+		if child+1 < hi && less({{.Receiver}}[first+child], {{.Receiver}}[first+child+1]) {
 			child++
 		}
-		if !less({{.Receiver}}, first+root, first+child) {
+		if !less({{.Receiver}}[first+root], {{.Receiver}}[first+child]) {
 			return
 		}
 		swap{{.Plural}}({{.Receiver}}, first+root, first+child)
@@ -279,7 +279,7 @@ func siftDown{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, 
 	}
 }
 
-func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b int) {
+func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, a, b int) {
 	first := a
 	lo := 0
 	hi := b - a
@@ -300,18 +300,18 @@ func heapSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, 
 // Engineering a Sort Function, SP&E November 1993.
 
 // medianOfThree moves the median of the three values {{.Receiver}}[a], {{.Receiver}}[b], {{.Receiver}}[c] into {{.Receiver}}[a].
-func medianOfThree{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b, c int) {
+func medianOfThree{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, a, b, c int) {
 	m0 := b
 	m1 := a
 	m2 := c
 	// bubble sort on 3 elements
-	if less({{.Receiver}}, m1, m0) {
+	if less({{.Receiver}}[m1], {{.Receiver}}[m0]) {
 		swap{{.Plural}}({{.Receiver}}, m1, m0)
 	}
-	if less({{.Receiver}}, m2, m1) {
+	if less({{.Receiver}}[m2], {{.Receiver}}[m1]) {
 		swap{{.Plural}}({{.Receiver}}, m2, m1)
 	}
-	if less({{.Receiver}}, m1, m0) {
+	if less({{.Receiver}}[m1], {{.Receiver}}[m0]) {
 		swap{{.Plural}}({{.Receiver}}, m1, m0)
 	}
 	// now {{.Receiver}}[m0] <= {{.Receiver}}[m1] <= {{.Receiver}}[m2]
@@ -323,7 +323,7 @@ func swapRange{{.Plural}}({{.Receiver}} {{.Plural}}, a, b, n int) {
 	}
 }
 
-func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, lo, hi int) (midlo, midhi int) {
+func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, lo, hi int) (midlo, midhi int) {
 	m := lo + (hi-lo)/2 // Written like this to avoid integer overflow.
 	if hi-lo > 40 {
 		// Tukey's Ninther, median of three medians of three.
@@ -348,9 +348,9 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, i
 	a, b, c, d := lo+1, lo+1, hi, hi
 	for {
 		for b < c {
-			if less({{.Receiver}}, b, pivot) { // {{.Receiver}}[b] < pivot
+			if less({{.Receiver}}[b], {{.Receiver}}[pivot]) { // {{.Receiver}}[b] < pivot
 				b++
-			} else if !less({{.Receiver}}, pivot, b) { // {{.Receiver}}[b] = pivot
+			} else if !less({{.Receiver}}[pivot], {{.Receiver}}[b]) { // {{.Receiver}}[b] = pivot
 				swap{{.Plural}}({{.Receiver}}, a, b)
 				a++
 				b++
@@ -359,9 +359,9 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, i
 			}
 		}
 		for b < c {
-			if less({{.Receiver}}, pivot, c-1) { // {{.Receiver}}[c-1] > pivot
+			if less({{.Receiver}}[pivot], {{.Receiver}}[c-1]) { // {{.Receiver}}[c-1] > pivot
 				c--
-			} else if !less({{.Receiver}}, c-1, pivot) { // {{.Receiver}}[c-1] = pivot
+			} else if !less({{.Receiver}}[c-1], {{.Receiver}}[pivot]) { // {{.Receiver}}[c-1] = pivot
 				swap{{.Plural}}({{.Receiver}}, c-1, d-1)
 				c--
 				d--
@@ -394,7 +394,7 @@ func doPivot{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, i
 	return lo + b - a, hi - (d - c)
 }
 
-func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int, int) bool, a, b, maxDepth int) {
+func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool, a, b, maxDepth int) {
 	for b-a > 7 {
 		if maxDepth == 0 {
 			heapSort{{.Plural}}({{.Receiver}}, less, a, b)
@@ -417,9 +417,9 @@ func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Plural}}, int,
 	}
 }
 
-func negate{{.Plural}}(less func({{.Plural}}, int, int) bool) func({{.Plural}}, int, int) bool {
-	return func(z {{.Plural}}, a int, b int) bool {
-		return !less(z, a, b)
+func negate{{.Plural}}(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool {
+	return func(a, b {{.Pointer}}{{.Singular}}) bool {
+		return !less(a, b)
 	}
 }
 `
@@ -470,8 +470,8 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Po
 `,
 	"SortBy": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) SortBy{{.Name}}() {{.Parent.Plural}} {
-	less := func(z {{.Parent.Plural}}, a int, b int) bool {
-		return z[a].{{.Name}} < z[b].{{.Name}}
+	less := func(a, b {{.Parent.Pointer}}{{.Parent.Singular}}) bool {
+		return a.{{.Name}} < b.{{.Name}}
 	}
 	return {{.Parent.Receiver}}.Sort(less)
 }

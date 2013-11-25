@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 25 Nov 2013 00:15:15 UTC
+// Mon, 25 Nov 2013 01:15:37 UTC
 
 package models
 
@@ -105,14 +105,14 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 }
 
 // Returns the element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byArea := func(vs Movies, a int, b int) bool {
-//		return vs[a].Area() < vs[b].Area()
+//	byArea := func(a, b *Movie) bool {
+//		return a.Area() < b.Area()
 //	}
 //	roomiest := myMovies.Max(byArea)
 //
 // In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) Max(less func(Movies, int, int) bool) (result *Movie, err error) {
+func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	if len(rcv) == 0 {
 		err = errors.New("Cannot determine the Max of an empty slice")
 		return
@@ -121,13 +121,13 @@ func (rcv Movies) Max(less func(Movies, int, int) bool) (result *Movie, err erro
 }
 
 // Returns the element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byPrice := func(vs Movies, a int, b int) bool {
-//		return vs[a].Price < vs[b].Price
+//	byPrice := func(a, b *Movie) bool {
+//		return a.Price < b.Price
 //	}
 //	cheapest := myMovies.Min(byPrice)
 //
 // In the case of multiple items being equally minimal, the first such element is returned.
-func (rcv Movies) Min(less func(Movies, int, int) bool) (result *Movie, err error) {
+func (rcv Movies) Min(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
 		err = errors.New("Cannot determine the Min of an empty slice")
@@ -135,7 +135,7 @@ func (rcv Movies) Min(less func(Movies, int, int) bool) (result *Movie, err erro
 	}
 	m := 0
 	for i := 1; i < l; i++ {
-		if less(rcv, i, m) {
+		if less(rcv[i], rcv[m]) {
 			m = i
 		}
 	}
@@ -189,11 +189,11 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 // license that can be found in the LICENSE file.
 
 // Returns a new ordered Movies slice, determined by a func defining ‘less’. Example:
-//	byName := func(vs Movies, a int, b int) bool {
-//		return vs[a].LastName < vs[b].LastName
+//	byName := func(a, b *Movie) bool {
+//		return a.LastName < b.LastName
 //	}
 //	roster := myMovies.Sort(byName)
-func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
+func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
 
@@ -209,10 +209,10 @@ func (rcv Movies) Sort(less func(Movies, int, int) bool) Movies {
 }
 
 // Reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See Sort method below.
-func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
+func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
-		if less(rcv, i, i-1) {
+		if less(rcv[i], rcv[i-1]) {
 			return false
 		}
 	}
@@ -225,12 +225,12 @@ func (rcv Movies) IsSorted(less func(Movies, int, int) bool) bool {
 //	}
 //	leaderboard := myMovies.SortDesc(byPoints)
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) SortDesc(less func(Movies, int, int) bool) Movies {
+func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
 	return rcv.Sort(negateMovies(less))
 }
 
 // Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
-func (rcv Movies) IsSortedDesc(less func(Movies, int, int) bool) bool {
+func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
 	return rcv.IsSorted(negateMovies(less))
 }
 
@@ -239,9 +239,9 @@ func swapMovies(rcv Movies, a, b int) {
 }
 
 // Insertion sort
-func insertionSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int) {
+func insertionSortMovies(rcv Movies, less func(*Movie, *Movie) bool, a, b int) {
 	for i := a + 1; i < b; i++ {
-		for j := i; j > a && less(rcv, j, j-1); j-- {
+		for j := i; j > a && less(rcv[j], rcv[j-1]); j-- {
 			swapMovies(rcv, j, j-1)
 		}
 	}
@@ -249,17 +249,17 @@ func insertionSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int)
 
 // siftDown implements the heap property on rcv[lo, hi).
 // first is an offset into the array where the root of the heap lies.
-func siftDownMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi, first int) {
+func siftDownMovies(rcv Movies, less func(*Movie, *Movie) bool, lo, hi, first int) {
 	root := lo
 	for {
 		child := 2*root + 1
 		if child >= hi {
 			break
 		}
-		if child+1 < hi && less(rcv, first+child, first+child+1) {
+		if child+1 < hi && less(rcv[first+child], rcv[first+child+1]) {
 			child++
 		}
-		if !less(rcv, first+root, first+child) {
+		if !less(rcv[first+root], rcv[first+child]) {
 			return
 		}
 		swapMovies(rcv, first+root, first+child)
@@ -267,7 +267,7 @@ func siftDownMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi, first 
 	}
 }
 
-func heapSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int) {
+func heapSortMovies(rcv Movies, less func(*Movie, *Movie) bool, a, b int) {
 	first := a
 	lo := 0
 	hi := b - a
@@ -288,18 +288,18 @@ func heapSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b int) {
 // Engineering a Sort Function, SP&E November 1993.
 
 // medianOfThree moves the median of the three values rcv[a], rcv[b], rcv[c] into rcv[a].
-func medianOfThreeMovies(rcv Movies, less func(Movies, int, int) bool, a, b, c int) {
+func medianOfThreeMovies(rcv Movies, less func(*Movie, *Movie) bool, a, b, c int) {
 	m0 := b
 	m1 := a
 	m2 := c
 	// bubble sort on 3 elements
-	if less(rcv, m1, m0) {
+	if less(rcv[m1], rcv[m0]) {
 		swapMovies(rcv, m1, m0)
 	}
-	if less(rcv, m2, m1) {
+	if less(rcv[m2], rcv[m1]) {
 		swapMovies(rcv, m2, m1)
 	}
-	if less(rcv, m1, m0) {
+	if less(rcv[m1], rcv[m0]) {
 		swapMovies(rcv, m1, m0)
 	}
 	// now rcv[m0] <= rcv[m1] <= rcv[m2]
@@ -311,7 +311,7 @@ func swapRangeMovies(rcv Movies, a, b, n int) {
 	}
 }
 
-func doPivotMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi int) (midlo, midhi int) {
+func doPivotMovies(rcv Movies, less func(*Movie, *Movie) bool, lo, hi int) (midlo, midhi int) {
 	m := lo + (hi-lo)/2 // Written like this to avoid integer overflow.
 	if hi-lo > 40 {
 		// Tukey's Ninther, median of three medians of three.
@@ -336,9 +336,9 @@ func doPivotMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi int) (mi
 	a, b, c, d := lo+1, lo+1, hi, hi
 	for {
 		for b < c {
-			if less(rcv, b, pivot) { // rcv[b] < pivot
+			if less(rcv[b], rcv[pivot]) { // rcv[b] < pivot
 				b++
-			} else if !less(rcv, pivot, b) { // rcv[b] = pivot
+			} else if !less(rcv[pivot], rcv[b]) { // rcv[b] = pivot
 				swapMovies(rcv, a, b)
 				a++
 				b++
@@ -347,9 +347,9 @@ func doPivotMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi int) (mi
 			}
 		}
 		for b < c {
-			if less(rcv, pivot, c-1) { // rcv[c-1] > pivot
+			if less(rcv[pivot], rcv[c-1]) { // rcv[c-1] > pivot
 				c--
-			} else if !less(rcv, c-1, pivot) { // rcv[c-1] = pivot
+			} else if !less(rcv[c-1], rcv[pivot]) { // rcv[c-1] = pivot
 				swapMovies(rcv, c-1, d-1)
 				c--
 				d--
@@ -382,7 +382,7 @@ func doPivotMovies(rcv Movies, less func(Movies, int, int) bool, lo, hi int) (mi
 	return lo + b - a, hi - (d - c)
 }
 
-func quickSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b, maxDepth int) {
+func quickSortMovies(rcv Movies, less func(*Movie, *Movie) bool, a, b, maxDepth int) {
 	for b-a > 7 {
 		if maxDepth == 0 {
 			heapSortMovies(rcv, less, a, b)
@@ -405,9 +405,9 @@ func quickSortMovies(rcv Movies, less func(Movies, int, int) bool, a, b, maxDept
 	}
 }
 
-func negateMovies(less func(Movies, int, int) bool) func(Movies, int, int) bool {
-	return func(z Movies, a int, b int) bool {
-		return !less(z, a, b)
+func negateMovies(less func(*Movie, *Movie) bool) func(*Movie, *Movie) bool {
+	return func(a, b *Movie) bool {
+		return !less(a, b)
 	}
 }
 
@@ -419,8 +419,8 @@ func (rcv Movies) SelectTitle() (result []string) {
 }
 
 func (rcv Movies) SortByTheaters() Movies {
-	less := func(z Movies, a int, b int) bool {
-		return z[a].Theaters < z[b].Theaters
+	less := func(a, b *Movie) bool {
+		return a.Theaters < b.Theaters
 	}
 	return rcv.Sort(less)
 }
@@ -447,8 +447,8 @@ func (rcv Movies) DistinctByStudio() Movies {
 }
 
 func (rcv Movies) SortByStudio() Movies {
-	less := func(z Movies, a int, b int) bool {
-		return z[a].Studio < z[b].Studio
+	less := func(a, b *Movie) bool {
+		return a.Studio < b.Studio
 	}
 	return rcv.Sort(less)
 }

@@ -680,11 +680,11 @@ var getStudio = func(movie *Movie) string {
 var getBoxOffice = func(movie *Movie) int {
 	return movie.BoxOfficeMillions
 }
-var byTitle = func(movies Movies, a, b int) bool {
-	return movies[a].Title < movies[b].Title
+var byTitle = func(a, b *Movie) bool {
+	return a.Title < b.Title
 }
-var byTheaters = func(movies Movies, a, b int) bool {
-	return movies[a].Theaters < movies[b].Theaters
+var byTheaters = func(a, b *Movie) bool {
+	return a.Theaters < b.Theaters
 }
 var concatTitle = func(movie *Movie, acc string) string {
 	return acc + movie.Title
