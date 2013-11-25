@@ -116,32 +116,6 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return
 }
 
-// Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
-//	year := func({{.Loop}} {{.Pointer}}{{.Singular}}) int {
-//		return {{.Loop}}.CreationDate.Year()
-//	}
-//	yearlyReport := my{{.Plural}}.GroupByInt(year)
-func ({{.Receiver}} {{.Plural}}) GroupByInt(fn func({{.Pointer}}{{.Singular}}) int) map[int]{{.Plural}} {
-	result := make(map[int]{{.Plural}})
-	for _, {{.Loop}} := range {{.Receiver}} {
-		result[fn({{.Loop}})] = append(result[fn({{.Loop}})], {{.Loop}})
-	}
-	return result
-}
-
-// Groups {{.Plural}} into a map of Movies, keyed by the result of the passed func. Example:
-//	dept := func({{.Loop}} {{.Pointer}}{{.Singular}}) string {
-//		return {{.Loop}}.DepartmentName
-//	}
-//	byDepartment := my{{.Plural}}.GroupByString(dept)
-func ({{.Receiver}} {{.Plural}}) GroupByString(fn func({{.Pointer}}{{.Singular}}) string) map[string]{{.Plural}} {
-	result := make(map[string]{{.Plural}})
-	for _, {{.Loop}} := range {{.Receiver}} {
-		result[fn({{.Loop}})] = append(result[fn({{.Loop}})], {{.Loop}})
-	}
-	return result
-}
-
 // Returns the element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
 //	byArea := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
 //		return {{.Loop}}s[a].Area() < {{.Loop}}s[b].Area()
@@ -475,6 +449,15 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) DistinctBy{{.Name}}() {{.Parent.P
 		return a.{{.Name}} == b.{{.Name}}
 	}
 	return {{.Parent.Receiver}}.DistinctBy(equal)
+}
+`,
+	"GroupBy": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}} {
+	result := make(map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}})
+	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
+		result[{{.Parent.Loop}}.{{.Name}}] = append(result[{{.Parent.Loop}}.{{.Name}}], {{.Parent.Loop}})
+	}
+	return result
 }
 `,
 	"Select": `

@@ -288,10 +288,10 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["GroupBy"] = []test{
+	tests["GroupByStudio"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.GroupByString(getStudio), nil
+				return many.GroupByStudio(), nil
 			},
 			map[string]Movies{
 				"Miramax":     Movies{first, fifth},
@@ -300,9 +300,12 @@ func getTests() map[string][]test {
 			},
 			false,
 		},
+	}
+
+	tests["GroupByBoxOfficeMillions"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.GroupByInt(getBoxOffice), nil
+				return many.GroupByBoxOfficeMillions(), nil
 			},
 			map[int]Movies{
 				90:  Movies{first, fourth},

@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 24 Nov 2013 19:44:04 UTC
+// Mon, 25 Nov 2013 00:15:15 UTC
 
 package models
 
@@ -102,32 +102,6 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 	}
 	err = errors.New("No Movies elements return true for passed func")
 	return
-}
-
-// Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
-//	year := func(v *Movie) int {
-//		return v.CreationDate.Year()
-//	}
-//	yearlyReport := myMovies.GroupByInt(year)
-func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
-	result := make(map[int]Movies)
-	for _, v := range rcv {
-		result[fn(v)] = append(result[fn(v)], v)
-	}
-	return result
-}
-
-// Groups Movies into a map of Movies, keyed by the result of the passed func. Example:
-//	dept := func(v *Movie) string {
-//		return v.DepartmentName
-//	}
-//	byDepartment := myMovies.GroupByString(dept)
-func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
-	result := make(map[string]Movies)
-	for _, v := range rcv {
-		result[fn(v)] = append(result[fn(v)], v)
-	}
-	return result
 }
 
 // Returns the element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
@@ -477,4 +451,20 @@ func (rcv Movies) SortByStudio() Movies {
 		return z[a].Studio < z[b].Studio
 	}
 	return rcv.Sort(less)
+}
+
+func (rcv Movies) GroupByStudio() map[string]Movies {
+	result := make(map[string]Movies)
+	for _, v := range rcv {
+		result[v.Studio] = append(result[v.Studio], v)
+	}
+	return result
+}
+
+func (rcv Movies) GroupByBoxOfficeMillions() map[int]Movies {
+	result := make(map[int]Movies)
+	for _, v := range rcv {
+		result[v.BoxOfficeMillions] = append(result[v.BoxOfficeMillions], v)
+	}
+	return result
 }
