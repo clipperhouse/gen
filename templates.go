@@ -445,7 +445,7 @@ func getCustomTemplate(name string) (result *template.Template, err error) {
 
 var customTemplates = map[string]string{
 	"Aggregate": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Pointer}}{{.Package}}{{.Type}}, {{.Pointer}}{{.Package}}{{.Type}}) {{.Pointer}}{{.Package}}{{.Type}}) (result {{.Pointer}}{{.Package}}{{.Type}}) {
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Type}}, {{.Type}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = fn(result, {{.Parent.Loop}}.{{.Name}})
 	}
@@ -453,8 +453,8 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Poi
 }
 `,
 	"GroupBy": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}} {
-	result := make(map[{{.Pointer}}{{.Package}}{{.Type}}]{{.Parent.Plural}})
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]{{.Parent.Plural}} {
+	result := make(map[{{.Type}}]{{.Parent.Plural}})
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result[{{.Parent.Loop}}.{{.Name}}] = append(result[{{.Parent.Loop}}.{{.Name}}], {{.Parent.Loop}})
 	}
@@ -462,7 +462,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Pointer
 }
 `,
 	"Select": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Pointer}}{{.Package}}{{.Type}}) {
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = append(result, {{.Parent.Loop}}.{{.Name}})
 	}
@@ -470,7 +470,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Po
 }
 `,
 	"Sum": `
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Sum{{.Name}}() (result {{.Pointer}}{{.Package}}{{.Type}}) {
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Sum{{.Name}}() (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result += {{.Parent.Loop}}.{{.Name}}
 	}

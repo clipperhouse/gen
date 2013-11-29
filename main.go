@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -59,10 +60,8 @@ type structArg struct {
 }
 
 type fieldSpec struct {
-	Package string
 	Name    string
 	Type    string
-	Pointer string
 	Methods []string
 	Parent  *genSpec
 }
@@ -98,8 +97,7 @@ func main() {
 
 	opts := getOptions(args)
 	structArgs := getStructArgs(args)
-	structTypes := getAllStructTypes()
-	genSpecs := getGenSpecs(opts, structArgs, structTypes)
+	genSpecs := getGenSpecs(opts, structArgs)
 
 	for _, n := range notes {
 		fmt.Println("  note: " + n)
@@ -165,19 +163,16 @@ func getStructArgs(args []string) (structArgs []*structArg) {
 	return
 }
 
-func getAllStructTypes() map[string]*ast.StructType {
+func getAllStructTypes(fset *token.FileSet) (types map[string]*ast.StructType) {
 	goFiles := func(f os.FileInfo) bool {
 		return strings.HasSuffix(f.Name(), ".go")
 	}
-
-	fset := token.NewFileSet()
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
 		errs = append(errs, err)
-		return nil
+		return
 	}
-
-	structTypes := make(map[string]*ast.StructType)
+	types = make(map[string]*ast.StructType)
 	for pkg, f := range dir {
 		ast.Inspect(f, func(n ast.Node) bool {
 			switch x := n.(type) {
@@ -185,21 +180,24 @@ func getAllStructTypes() map[string]*ast.StructType {
 				switch y := x.Type.(type) {
 				case *ast.StructType:
 					key := joinName(pkg, x.Name.Name)
-					structTypes[key] = y
+					types[key] = y
 				}
 			}
 			return true
 		})
 	}
-	return structTypes
+	return
 }
 
-func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]*ast.StructType) (genSpecs []*genSpec) {
+func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
+	fset := token.NewFileSet()
+	types := getAllStructTypes(fset)
+
 	for _, structArg := range structArgs {
 		key := joinName(structArg.Package, structArg.Name)
-		typ, known := structTypes[key]
+		typ, known := types[key]
 		if known {
-			fieldSpecs := getFieldSpecs(typ, opts)
+			fieldSpecs := getFieldSpecs(typ, fset, opts)
 			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
 			g.AddFieldSpecs(fieldSpecs)
 			genSpecs = append(genSpecs, g)
@@ -216,8 +214,8 @@ func getGenSpecs(opts *options, structArgs []*structArg, structTypes map[string]
 		}
 	}
 	if opts.All {
-		for key, typ := range structTypes {
-			fieldSpecs := getFieldSpecs(typ, opts)
+		for key, typ := range types {
+			fieldSpecs := getFieldSpecs(typ, fset, opts)
 			pkg, name := splitName(key)
 			if !opts.ExportedOnly || ast.IsExported(name) {
 				g := newGenSpec(opts.AllPointer, pkg, name)
@@ -238,7 +236,7 @@ func splitName(s string) (string, string) {
 	return names[0], names[1]
 }
 
-func getFieldSpecs(typ *ast.StructType, opts *options) (fieldSpecs []*fieldSpec) {
+func getFieldSpecs(typ *ast.StructType, fset *token.FileSet, opts *options) (fieldSpecs []*fieldSpec) {
 	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
 
 	for _, fld := range typ.Fields.List {
@@ -259,37 +257,17 @@ func getFieldSpecs(typ *ast.StructType, opts *options) (fieldSpecs []*fieldSpec)
 			}
 		}
 		for _, name := range fld.Names {
-			var ptr, pkg, typ string
-			ok := true
-			switch x := fld.Type.(type) {
-			default:
-				pkg = fmt.Sprintf("%v", x)
-			case *ast.SelectorExpr:
-				pkg, typ, ok = handleImportedType(x, opts)
-			case *ast.StarExpr:
-				ptr = "*"
-				switch y := x.X.(type) {
-				default:
-					typ = fmt.Sprintf("%v", x.X)
-				case *ast.SelectorExpr:
-					pkg, typ, ok = handleImportedType(y, opts)
-				}
-			}
-			if ok {
-				fieldSpecs = append(fieldSpecs, &fieldSpec{Package: pkg, Name: name.String(), Type: typ, Pointer: ptr, Methods: methods})
-			}
+			t := getSourceString(fld.Type, fset)
+			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: t, Methods: methods})
 		}
 	}
 	return
 }
 
-func handleImportedType(expr *ast.SelectorExpr, opts *options) (pkg, typ string, ok bool) {
-	pkg = fmt.Sprintf("%v.", expr.X)
-	typ = fmt.Sprintf("%v", expr.Sel)
-	desc := fmt.Sprintf("%v%v", pkg, typ)
-	addError(fmt.Sprintf("gen cannot work with imported types, in this case %s. consider making an alias type, e.g., type %v struct { %s }.", desc, typ, desc))
-	ok = opts.Force
-	return
+func getSourceString(node ast.Node, fset *token.FileSet) string {
+	p := fset.Position(node.Pos())
+	b, _ := ioutil.ReadFile(p.Filename)
+	return string(b[node.Pos()-1 : node.End()-1])
 }
 
 func writeFile(genSpecs []*genSpec, opts *options) {
