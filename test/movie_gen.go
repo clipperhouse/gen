@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Fri, 29 Nov 2013 21:23:23 UTC
+// Fri, 29 Nov 2013 21:26:40 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -286,6 +286,23 @@ func (rcv Movies) GroupByBoxOfficeMillions() map[int]Movies {
 		result[v.BoxOfficeMillions] = append(result[v.BoxOfficeMillions], v)
 	}
 	return result
+}
+
+func (rcv Movies) MinBoxOfficeMillions() (result int, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MinBoxOfficeMillions of zero-length Movies")
+		return
+	}
+	result = rcv[0].BoxOfficeMillions
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			if v.BoxOfficeMillions < result {
+				result = v.BoxOfficeMillions
+			}
+		}
+	}
+	return
 }
 
 // ====================

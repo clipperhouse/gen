@@ -72,6 +72,30 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["MinBoxOfficeMillions"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.MinBoxOfficeMillions()
+			},
+			90,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{third}.MinBoxOfficeMillions()
+			},
+			third.BoxOfficeMillions,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.MinBoxOfficeMillions()
+			},
+			0,
+			true,
+		},
+	}
+
 	tests["All"] = []test{
 		test{
 			func() (interface{}, error) {
