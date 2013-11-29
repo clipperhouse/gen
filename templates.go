@@ -461,6 +461,24 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]
 	return result
 }
 `,
+	"Max": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Max{{.Name}}() (result {{.Type}}, err error) {
+	l := len({{.Parent.Receiver}})
+	if l == 0 {
+		err = errors.New("cannot determine Max{{.Name}} of zero-length {{.Parent.Plural}}")
+		return
+	}
+	result = {{.Parent.Receiver}}[0].{{.Name}}
+	if l > 1 {
+		for _, {{.Parent.Loop}} := range {{.Parent.Receiver}}[1:] {
+			if {{.Parent.Loop}}.{{.Name}} > result {
+				result = {{.Parent.Loop}}.{{.Name}}
+			}
+		}
+	}
+	return
+}
+`,
 	"Select": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {

@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Fri, 29 Nov 2013 20:17:55 UTC
+// Fri, 29 Nov 2013 21:23:23 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -251,6 +251,23 @@ func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
 func (rcv Movies) SumTheaters() (result int) {
 	for _, v := range rcv {
 		result += v.Theaters
+	}
+	return
+}
+
+func (rcv Movies) MaxTheaters() (result int, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MaxTheaters of zero-length Movies")
+		return
+	}
+	result = rcv[0].Theaters
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			if v.Theaters > result {
+				result = v.Theaters
+			}
+		}
 	}
 	return
 }

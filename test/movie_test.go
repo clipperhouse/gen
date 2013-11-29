@@ -48,6 +48,30 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["MaxTheaters"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.MaxTheaters()
+			},
+			50,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{second}.MaxTheaters()
+			},
+			second.Theaters,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.MaxTheaters()
+			},
+			0,
+			true,
+		},
+	}
+
 	tests["All"] = []test{
 		test{
 			func() (interface{}, error) {
