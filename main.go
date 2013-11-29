@@ -144,7 +144,7 @@ func getOptions(args []string) *options {
 }
 
 func getStructArgs(args []string) (structArgs []*structArg) {
-	regex := regexp.MustCompile(`^(\*?)(\p{L}+)\.(\p{L}+)$`)
+	regex := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
 
 	for _, s := range args {
 		matches := regex.FindStringSubmatch(s)
@@ -265,9 +265,14 @@ func getFieldSpecs(typ *ast.StructType, fset *token.FileSet, opts *options) (fie
 }
 
 func getSourceString(node ast.Node, fset *token.FileSet) string {
-	p := fset.Position(node.Pos())
-	b, _ := ioutil.ReadFile(p.Filename)
-	return string(b[node.Pos()-1 : node.End()-1])
+	p1 := fset.Position(node.Pos())
+	p2 := fset.Position(node.End())
+
+	b, err := ioutil.ReadFile(p1.Filename)
+	if err != nil {
+		panic(err)
+	}
+	return string(b[p1.Offset:p2.Offset])
 }
 
 func writeFile(genSpecs []*genSpec, opts *options) {
