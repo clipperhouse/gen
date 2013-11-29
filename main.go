@@ -268,11 +268,23 @@ func getSourceString(node ast.Node, fset *token.FileSet) string {
 	p1 := fset.Position(node.Pos())
 	p2 := fset.Position(node.End())
 
-	b, err := ioutil.ReadFile(p1.Filename)
+	b := getFileBytes(p1.Filename)
+	return string(b[p1.Offset:p2.Offset])
+}
+
+var filebytes = make(map[string][]byte) // cache
+func getFileBytes(filename string) []byte {
+	b, exists := filebytes[filename]
+	if exists {
+		return b
+	}
+
+	b2, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
-	return string(b[p1.Offset:p2.Offset])
+	filebytes[filename] = b2
+	return b2
 }
 
 func writeFile(genSpecs []*genSpec, opts *options) {
