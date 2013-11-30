@@ -105,6 +105,19 @@ func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	}
 }
 
+func ({{.Receiver}} {{.Plural}}) Except(x {{.Plural}}) (result {{.Plural}}) {
+	exists := make(map[{{.Pointer}}{{.Singular}}]bool)
+	for _, {{.Loop}} := range x {
+		exists[{{.Loop}}] = true
+	}
+	for _, {{.Loop}} := range {{.Receiver}} {
+		if !exists[{{.Loop}}] {
+			result = append(result, {{.Loop}})
+		}
+	}
+	return
+}
+
 // Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
 //	winner := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
 //		return {{.Loop}}.Placement == "winner"

@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sat, 30 Nov 2013 17:44:42 UTC
+// Sat, 30 Nov 2013 22:49:53 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -91,6 +91,19 @@ func (rcv Movies) Each(fn func(*Movie)) {
 	for _, v := range rcv {
 		fn(v)
 	}
+}
+
+func (rcv Movies) Except(x Movies) (result Movies) {
+	exists := make(map[*Movie]bool)
+	for _, v := range x {
+		exists[v] = true
+	}
+	for _, v := range rcv {
+		if !exists[v] {
+			result = append(result, v)
+		}
+	}
+	return
 }
 
 // Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
