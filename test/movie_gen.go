@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Fri, 29 Nov 2013 21:26:40 UTC
+// Sat, 30 Nov 2013 17:44:42 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -302,6 +302,19 @@ func (rcv Movies) MinBoxOfficeMillions() (result int, err error) {
 			}
 		}
 	}
+	return
+}
+
+func (rcv Movies) AverageBoxOfficeMillions() (result int, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine AverageBoxOfficeMillions of zero-length Movies")
+		return
+	}
+	for _, v := range rcv {
+		result += v.BoxOfficeMillions
+	}
+	result = result / l
 	return
 }
 

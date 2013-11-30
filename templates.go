@@ -452,6 +452,20 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Typ
 	return
 }
 `,
+	"Average": `
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) Average{{.Name}}() (result {{.Type}}, err error) {
+	l := len({{.Parent.Receiver}})
+	if l == 0 {
+		err = errors.New("cannot determine Average{{.Name}} of zero-length {{.Parent.Plural}}")
+		return
+	}
+	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
+		result += {{.Parent.Loop}}.{{.Name}}
+	}
+	result = result / l
+	return
+}
+`,
 	"GroupBy": `
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Type}}]{{.Parent.Plural}})

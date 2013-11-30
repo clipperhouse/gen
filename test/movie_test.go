@@ -96,6 +96,30 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["AverageBoxOfficeMillions"] = []test{
+		test{
+			func() (interface{}, error) {
+				return many.AverageBoxOfficeMillions()
+			},
+			96,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{third}.AverageBoxOfficeMillions()
+			},
+			third.BoxOfficeMillions,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return none.AverageBoxOfficeMillions()
+			},
+			0,
+			true,
+		},
+	}
+
 	tests["All"] = []test{
 		test{
 			func() (interface{}, error) {
