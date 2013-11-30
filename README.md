@@ -14,10 +14,10 @@ This library exists to provide readability and terseness to users’ code. It’
 
 It’s intended to fit well with idiomatic Go. Explicitness and compile-time safety are preferred. For this reason, we are not using interfaces or run-time reflection. (Though if a good case can be made, we’ll listen.)
 
-The goal is to keep the API small. We aim to implement the least number of orthogonal methods which allow the desired range of function.
+The goal is to keep the API small. We aim to implement the **least number of orthogonal methods** which allow the desired range of function.
 
 We avoid methods that feel like wrappers or aliases to existing methods, even if they are convenient. A good proxy is to imagine a user asking the question ‘which method should I use?’. If that’s a reasonable question, the library should be doing less.
 
-We avoid methods that would require many boilerplate implementations by type. For example, we originally had things like GroupByString and SumInt. Clearly, this would lead to requests for SumFloat64 and GroupByByte or what have you. We solved this particular problem by using tagged methods.
+We avoid methods that would require many boilerplate implementations by type. For example, we originally had things like GroupByString and SumInt. Clearly, this would lead to requests for SumFloat64 and GroupByRune or what have you. We solved this particular problem by using [custom methods](http://clipperhouse.github.io/gen/#Custom).
 
-The guidelines are not entirely deterministic! There’s lots of room for judgment and taste, and we look forward to seeing how it evolves.
+These guidelines are not entirely deterministic! There’s lots of room for judgment and taste, and we look forward to seeing how it evolves.
