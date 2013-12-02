@@ -285,16 +285,6 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["Except"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.Except(Movies{second, fifth}), nil
-			},
-			Movies{first, third, fourth},
-			false,
-		},
-	}
-
 	tests["First"] = []test{
 		test{
 			func() (interface{}, error) {
