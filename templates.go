@@ -26,11 +26,7 @@ import "errors"
 // The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 
-// Tests that all elements of {{.Plural}} are true for the passed func. Example:
-//	good := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.Something > 42
-//	}
-//	allGood := my{{.Plural}}.All(good)
+// Tests that all elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if !fn({{.Loop}}) {
@@ -40,11 +36,7 @@ func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	return true
 }
 
-// Tests that one or more elements of {{.Plural}} are true for the passed func. Example:
-//	winner := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.Placement == "winner"
-//	}
-//	weHaveAWinner := my{{.Plural}}.Any(winner)
+// Tests that one or more elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#Any
 func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -54,11 +46,7 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	return false
 }
 
-// Counts the number elements of {{.Plural}} that are true for the passed func. Example:
-//	dracula := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.IsDracula()
-//	}
-//	countDracula := my{{.Plural}}.Count(dracula)
+// Counts the number elements of {{.Plural}} that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count
 func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -68,8 +56,7 @@ func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return
 }
 
-// Returns a new {{.Plural}} slice whose elements are unique. Keep in mind that pointers and values have different concepts of equality, and therefore distinctness. Example:
-//	snowflakes := hipsters.Distinct()
+// Returns a new {{.Plural}} slice whose elements are unique. See: http://clipperhouse.github.io/gen/#Distinct
 func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
 	appended := make(map[{{.Pointer}}{{.Singular}}]bool)
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -81,11 +68,7 @@ func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
 	return result
 }
 
-// Returns a new {{.Plural}} slice whose elements are unique where equality is defined by a passed func. Example:
-//	hairstyle := func(a *Fashionista, b *Fashionista) bool {
-//		a.Hairstyle == b.Hairstyle
-//	}
-//	trendsetters := fashionistas.DistinctBy(hairstyle)
+// Returns a new {{.Plural}} slice whose elements are unique, where equality is defined by a passed func. See: http://clipperhouse.github.io/gen/#DistinctBy
 func ({{.Receiver}} {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		eq := func(_app {{.Pointer}}{{.Singular}}) bool {
@@ -98,18 +81,14 @@ func ({{.Receiver}} {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Singular}}
 	return result
 }
 
-// Iterates over {{.Plural}} and executes the passed func against each element.
+// Iterates over {{.Plural}} and executes the passed func against each element. See: http://clipperhouse.github.io/gen/#Each
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		fn({{.Loop}})
 	}
 }
 
-// Returns the first element that returns true for the passed func. Returns errors if no elements return true. Example:
-//	winner := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.Placement == "winner"
-//	}
-//	theWinner, err := myMovies.First(winner)
+// Returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First
 func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -121,13 +100,8 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return
 }
 
-// Returns the element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byArea := func(a, b {{.Pointer}}{{.Singular}}) bool {
-//		return a.Area() < b.Area()
-//	}
-//	roomiest := my{{.Plural}}.Max(byArea)
+// Returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
 //
-// In the case of multiple items being equally maximal, the last such element is returned.
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	if len(rcv) == 0 {
@@ -137,13 +111,7 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Poi
 	return rcv.Min(negate{{.Plural}}(less))
 }
 
-// Returns the element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. Example:
-//	byPrice := func(a, b {{.Pointer}}{{.Singular}}) bool {
-//		return a.Price < b.Price
-//	}
-//	cheapest := my{{.Plural}}.Min(byPrice)
-//
-// In the case of multiple items being equally minimal, the first such element is returned.
+// Returns an element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
 	if l == 0 {
@@ -160,11 +128,7 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Poi
 	return
 }
 
-// Returns exactly one element that returns true for the passed func. Returns errors if no or multiple elements return true. Example:
-//	byId := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.Id == 5
-//	}
-//	single, err := myMovies.Single(byId)
+// Returns exactly one element of {{.Plural}} that returns true for the passed func. Returns error if no or multiple elements return true. See: http://clipperhouse.github.io/gen/#Single
 func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	var candidate {{.Pointer}}{{.Singular}}
 	found := false
@@ -186,11 +150,7 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 	return
 }
 
-// Returns a new {{.Plural}} slice whose elements return true for func. Example:
-//	incredible := func({{.Loop}} {{.Pointer}}{{.Singular}}) bool {
-//		return {{.Loop}}.Manufacturer == "Apple"
-//	}
-//	wishList := my{{.Plural}}.Where(incredible)
+// Returns a new {{.Plural}} slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
 func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
@@ -200,11 +160,7 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 	return result
 }
 
-// Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
-//	byName := func(a, b {{.Pointer}}{{.Singular}}) bool {
-//		return a.LastName < b.LastName
-//	}
-//	roster := my{{.Plural}}.Sort(byName)
+// Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	result := make({{.Plural}}, len({{.Receiver}}))
 	copy(result, {{.Receiver}})
@@ -220,7 +176,7 @@ func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Pointer}}{{.Singular}}, {{.Po
 	return result
 }
 
-// Reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See Sort method below.
+// Reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	n := len({{.Receiver}})
 	for i := n - 1; i > 0; i-- {
@@ -231,17 +187,14 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {
 	return true
 }
 
-// Returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. Example:
-//	byPoints := func({{.Loop}}s {{.Plural}}, a int, b int) bool {
-//		return {{.Loop}}s[a].Points < {{.Loop}}s[b].Points
-//	}
-//	leaderboard := my{{.Plural}}.SortDesc(byPoints)
+// Returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+//
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	return {{.Receiver}}.Sort(negate{{.Plural}}(less))
 }
 
-// Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See SortDesc method below.
+// Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
 }
@@ -252,7 +205,6 @@ func getSortSupportTemplate() *template.Template {
 }
 
 const sortSupport = `
-// ====================
 // Sort support methods
 
 func swap{{.Plural}}({{.Receiver}} {{.Plural}}, a, b int) {
@@ -445,6 +397,7 @@ func getCustomTemplate(name string) (result *template.Template, err error) {
 
 var customTemplates = map[string]string{
 	"Aggregate": `
+// Iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Type}}, {{.Type}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = fn(result, {{.Parent.Loop}}.{{.Name}})
@@ -453,6 +406,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Typ
 }
 `,
 	"Average": `
+// Sums {{.Name}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Average{{.Name}}() (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -467,6 +421,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Average{{.Name}}() (result {{.Typ
 }
 `,
 	"GroupBy": `
+// Groups elements into a map keyed by {{.Name}}’s value. See: http://clipperhouse.github.io/gen/#GroupBy
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Type}}]{{.Parent.Plural}})
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
@@ -476,6 +431,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]
 }
 `,
 	"Max": `
+// Selects the largest value of {{.Name}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Max{{.Name}}() (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -494,6 +450,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Max{{.Name}}() (result {{.Type}},
 }
 `,
 	"Min": `
+// Selects the least value of {{.Name}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Min{{.Name}}() (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -512,6 +469,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Min{{.Name}}() (result {{.Type}},
 }
 `,
 	"Select": `
+// Returns a slice containing all values of {{.Name}} in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Select
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = append(result, {{.Parent.Loop}}.{{.Name}})
@@ -520,6 +478,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Ty
 }
 `,
 	"Sum": `
+// Sums {{.Name}} over all elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) Sum{{.Name}}() (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result += {{.Parent.Loop}}.{{.Name}}
