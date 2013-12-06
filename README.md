@@ -6,7 +6,7 @@
 
 ## Contributing
 
-It’s early days and the API is likely volatile, but your ideas and contributions are welcome. Have a look at the design principles below. Feel free to offer a pull request or contact Matt Sherman @clipperhouse.
+It’s early days and the API is likely volatile, ideas and contributions are welcome. Have a look at the design principles below. Feel free to [open an issue](//github.com/clipperhouse/gen/issues), send a pull request, or ping Matt Sherman [@clipperhouse](http://twitter.com/clipperhouse).
 
 ## Design principles for contributors
 
