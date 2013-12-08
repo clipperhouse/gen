@@ -129,11 +129,19 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
-	if len(rcv) == 0 {
+	l := len({{.Receiver}})
+	if l == 0 {
 		err = errors.New("Cannot determine the Max of an empty slice")
 		return
 	}
-	return rcv.Min(negate{{.Plural}}(less))
+	m := 0
+	for i := 1; i < l; i++ {
+		if !less({{.Receiver}}[i], {{.Receiver}}[m]) {
+			m = i
+		}
+	}
+	result = {{.Receiver}}[m]
+	return
 }
 `,
 	"Min": `

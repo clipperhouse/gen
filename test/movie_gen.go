@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 08 Dec 2013 19:13:57 UTC
+// Sun, 08 Dec 2013 19:43:26 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -108,11 +108,19 @@ func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error) {
-	if len(rcv) == 0 {
+	l := len(rcv)
+	if l == 0 {
 		err = errors.New("Cannot determine the Max of an empty slice")
 		return
 	}
-	return rcv.Min(negateMovies(less))
+	m := 0
+	for i := 1; i < l; i++ {
+		if !less(rcv[i], rcv[m]) {
+			m = i
+		}
+	}
+	result = rcv[m]
+	return
 }
 
 // Returns an element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
