@@ -209,28 +209,30 @@ func getMethods(typ *ast.StructType) (result []string) {
 	// look for comments of the form gen:"Method,Method", like struct (field) tags but at type level
 	tagged := false
 	include := make(map[string]bool)
-	ast.Inspect(typ, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.Comment:
-			c := strings.Trim(x.Text, " /")
-			parse := genTag.FindStringSubmatch(c)
-			if parse != nil && len(parse) > 1 {
-				tagged = true
-				methods := strings.Split(parse[1], ",")
-				if len(methods) > 0 {
-					for _, m := range methods {
-						_, err := getStandardTemplate(m)
-						if err != nil {
-							errs = append(errs, err)
-						} else {
-							include[m] = true
+	if typ != nil {
+		ast.Inspect(typ, func(n ast.Node) bool {
+			switch x := n.(type) {
+			case *ast.Comment:
+				c := strings.Trim(x.Text, " /")
+				parse := genTag.FindStringSubmatch(c)
+				if parse != nil && len(parse) > 1 {
+					tagged = true
+					methods := strings.Split(parse[1], ",")
+					if len(methods) > 0 {
+						for _, m := range methods {
+							_, err := getStandardTemplate(m)
+							if err != nil {
+								errs = append(errs, err)
+							} else {
+								include[m] = true
+							}
 						}
 					}
 				}
 			}
-		}
-		return !tagged // stop inspecting after found
-	})
+			return !tagged // stop inspecting after found
+		})
+	}
 
 	if !tagged {
 		result = getStandardMethodKeys()
@@ -264,7 +266,9 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 			genSpecs = append(genSpecs, g)
 		} else {
 			addError(fmt.Sprintf("%s is not a known struct type", key))
-			genSpecs = append(genSpecs, newGenSpec(structArg.Pointer, structArg.Package, structArg.Name))
+			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
+			g.Methods = getMethods(nil)
+			genSpecs = append(genSpecs, g)
 		}
 		if opts.ExportedOnly {
 			if ast.IsExported(structArg.Name) {
