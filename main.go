@@ -280,6 +280,7 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 			pkg, name := splitName(key)
 			if !opts.ExportedOnly || ast.IsExported(name) {
 				g := newGenSpec(opts.AllPointer, pkg, name)
+				g.Methods = getMethods(typ)
 				g.AddFieldSpecs(fieldSpecs)
 				genSpecs = append(genSpecs, g)
 			}
