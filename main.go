@@ -295,8 +295,11 @@ func writeFile(genSpecs []*genSpec, opts *options) {
 		}
 		defer file.Close()
 
-		t := getTemplate()
+		t := getHeaderTemplate()
 		t.Execute(file, g)
+
+		t2 := getStandardTemplates()
+		t2.Execute(file, g)
 
 		for _, f := range g.FieldSpecs {
 			for _, m := range f.Methods {

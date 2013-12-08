@@ -3,14 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"text/template"
 )
 
-func getTemplate() *template.Template {
-	return template.Must(template.New("gen").Parse(tmpl))
+func getHeaderTemplate() *template.Template {
+	return template.Must(template.New("header").Parse(header))
 }
 
-const tmpl = `// {{.Command}}
+const header = `// {{.Command}}
 // this file was auto-generated using github.com/clipperhouse/gen
 // {{.Generated}}
 
@@ -25,7 +26,24 @@ import "errors"
 
 // The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
+`
 
+func getStandardTemplates() *template.Template {
+	var keys []string
+	for k := range standardTemplates {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys) // order of keys not guaranteed: http://blog.golang.org/go-maps-in-action#TOC_7.
+
+	var t string
+	for _, k := range keys {
+		t += standardTemplates[k]
+	}
+	return template.Must(template.New("standard").Parse(t))
+}
+
+var standardTemplates = map[string]string{
+	"All": `
 // Tests that all elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -35,7 +53,8 @@ func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	}
 	return true
 }
-
+`,
+	"Any": `
 // Tests that one or more elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#Any
 func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bool {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -45,7 +64,8 @@ func ({{.Receiver}} {{.Plural}}) Any(fn func({{.Pointer}}{{.Singular}}) bool) bo
 	}
 	return false
 }
-
+`,
+	"Count": `
 // Counts the number elements of {{.Plural}} that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count
 func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) (result int) {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -55,7 +75,8 @@ func ({{.Receiver}} {{.Plural}}) Count(fn func({{.Pointer}}{{.Singular}}) bool) 
 	}
 	return
 }
-
+`,
+	"Distinct": `
 // Returns a new {{.Plural}} slice whose elements are unique. See: http://clipperhouse.github.io/gen/#Distinct
 func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
 	appended := make(map[{{.Pointer}}{{.Singular}}]bool)
@@ -67,7 +88,8 @@ func ({{.Receiver}} {{.Plural}}) Distinct() (result {{.Plural}}) {
 	}
 	return result
 }
-
+`,
+	"DistinctBy": `
 // Returns a new {{.Plural}} slice whose elements are unique, where equality is defined by a passed func. See: http://clipperhouse.github.io/gen/#DistinctBy
 func ({{.Receiver}} {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -80,14 +102,16 @@ func ({{.Receiver}} {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Singular}}
 	}
 	return result
 }
-
+`,
+	"Each": `
 // Iterates over {{.Plural}} and executes the passed func against each element. See: http://clipperhouse.github.io/gen/#Each
 func ({{.Receiver}} {{.Plural}}) Each(fn func({{.Pointer}}{{.Singular}})) {
 	for _, {{.Loop}} := range {{.Receiver}} {
 		fn({{.Loop}})
 	}
 }
-
+`,
+	"First": `
 // Returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First
 func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -99,7 +123,8 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 	err = errors.New("No {{.Plural}} elements return true for passed func")
 	return
 }
-
+`,
+	"Max": `
 // Returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
@@ -110,7 +135,8 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Poi
 	}
 	return rcv.Min(negate{{.Plural}}(less))
 }
-
+`,
+	"Min": `
 // Returns an element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
@@ -127,7 +153,8 @@ func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Poi
 	result = {{.Receiver}}[m]
 	return
 }
-
+`,
+	"Single": `
 // Returns exactly one element of {{.Plural}} that returns true for the passed func. Returns error if no or multiple elements return true. See: http://clipperhouse.github.io/gen/#Single
 func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	var candidate {{.Pointer}}{{.Singular}}
@@ -149,7 +176,8 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 	}
 	return
 }
-
+`,
+	"Where": `
 // Returns a new {{.Plural}} slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
 func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) (result {{.Plural}}) {
 	for _, {{.Loop}} := range {{.Receiver}} {
@@ -159,12 +187,12 @@ func ({{.Receiver}} {{.Plural}}) Where(fn func({{.Pointer}}{{.Singular}}) bool) 
 	}
 	return result
 }
-
+`,
+	"Sort": `
 // Returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	result := make({{.Plural}}, len({{.Receiver}}))
 	copy(result, {{.Receiver}})
-
 	// Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.
 	n := len(result)
 	maxDepth := 0
@@ -175,7 +203,8 @@ func ({{.Receiver}} {{.Plural}}) Sort(less func({{.Pointer}}{{.Singular}}, {{.Po
 	quickSort{{.Plural}}(result, less, 0, n, maxDepth)
 	return result
 }
-
+`,
+	"IsSorted": `
 // Reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	n := len({{.Receiver}})
@@ -186,19 +215,22 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {
 	}
 	return true
 }
-
+`,
+	"SortDesc": `
 // Returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
 	return {{.Receiver}}.Sort(negate{{.Plural}}(less))
 }
-
+`,
+	"IsSortedDesc": `
 // Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
 	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
 }
-`
+`,
+}
 
 func getSortSupportTemplate() *template.Template {
 	return template.Must(template.New("sortSupport").Parse(sortSupport))

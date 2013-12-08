@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Wed, 04 Dec 2013 01:19:27 UTC
+// Sun, 08 Dec 2013 19:13:57 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -88,6 +88,22 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 	return
 }
 
+// Reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
+	n := len(rcv)
+	for i := n - 1; i > 0; i-- {
+		if less(rcv[i], rcv[i-1]) {
+			return false
+		}
+	}
+	return true
+}
+
+// Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
+	return rcv.IsSorted(negateMovies(less))
+}
+
 // Returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
@@ -138,21 +154,10 @@ func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 	return
 }
 
-// Returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
-func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
-	for _, v := range rcv {
-		if fn(v) {
-			result = append(result, v)
-		}
-	}
-	return result
-}
-
 // Returns a new ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
-
 	// Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.
 	n := len(result)
 	maxDepth := 0
@@ -164,17 +169,6 @@ func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	return result
 }
 
-// Reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
-	n := len(rcv)
-	for i := n - 1; i > 0; i-- {
-		if less(rcv[i], rcv[i-1]) {
-			return false
-		}
-	}
-	return true
-}
-
 // Returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
@@ -182,9 +176,14 @@ func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
 	return rcv.Sort(negateMovies(less))
 }
 
-// Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
-	return rcv.IsSorted(negateMovies(less))
+// Returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
+func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
+	for _, v := range rcv {
+		if fn(v) {
+			result = append(result, v)
+		}
+	}
+	return result
 }
 
 // Returns a slice containing all values of Title in Movies. See: http://clipperhouse.github.io/gen/#Select
