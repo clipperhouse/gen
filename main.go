@@ -30,7 +30,10 @@ type genSpec struct {
 }
 
 func newGenSpec(ptr, pkg, name string) *genSpec {
-	name = inflect.Singularize(name)
+	plural := inflect.Pluralize(name)
+	if plural == name {
+		plural += "s"
+	}
 	return &genSpec{
 		Pointer:   ptr,
 		Package:   pkg,
