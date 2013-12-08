@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 08 Dec 2013 19:43:26 UTC
+// Sun, 08 Dec 2013 20:30:01 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -101,7 +101,10 @@ func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
 
 // Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
-	return rcv.IsSorted(negateMovies(less))
+	greaterOrEqual := func(a, b *Movie) bool {
+		return !less(a, b)
+	}
+	return rcv.IsSorted(greaterOrEqual)
 }
 
 // Returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
@@ -181,7 +184,10 @@ func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
-	return rcv.Sort(negateMovies(less))
+	greaterOrEqual := func(a, b *Movie) bool {
+		return !less(a, b)
+	}
+	return rcv.Sort(greaterOrEqual)
 }
 
 // Returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
@@ -456,11 +462,5 @@ func quickSortMovies(rcv Movies, less func(*Movie, *Movie) bool, a, b, maxDepth 
 	}
 	if b-a > 1 {
 		insertionSortMovies(rcv, less, a, b)
-	}
-}
-
-func negateMovies(less func(*Movie, *Movie) bool) func(*Movie, *Movie) bool {
-	return func(a, b *Movie) bool {
-		return !less(a, b)
 	}
 }

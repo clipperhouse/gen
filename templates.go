@@ -229,13 +229,19 @@ func ({{.Receiver}} {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Singular}}, {
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func ({{.Receiver}} {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) {{.Plural}} {
-	return {{.Receiver}}.Sort(negate{{.Plural}}(less))
+	greaterOrEqual := func(a, b {{.Pointer}}{{.Singular}}) bool {
+		return !less(a, b)
+	}
+	return {{.Receiver}}.Sort(greaterOrEqual)
 }
 `,
 	"IsSortedDesc": `
 // Reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) bool {
-	return {{.Receiver}}.IsSorted(negate{{.Plural}}(less))
+	greaterOrEqual := func(a, b {{.Pointer}}{{.Singular}}) bool {
+		return !less(a, b)
+	}
+	return {{.Receiver}}.IsSorted(greaterOrEqual)
 }
 `,
 }
@@ -415,12 +421,6 @@ func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Si
 	}
 	if b-a > 1 {
 		insertionSort{{.Plural}}({{.Receiver}}, less, a, b)
-	}
-}
-
-func negate{{.Plural}}(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool {
-	return func(a, b {{.Pointer}}{{.Singular}}) bool {
-		return !less(a, b)
 	}
 }
 `
