@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"text/template"
 )
 
@@ -28,18 +27,21 @@ import "errors"
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 `
 
-func getStandardTemplates() *template.Template {
-	var keys []string
+func getStandardMethodKeys() (result []string) {
 	for k := range standardTemplates {
-		keys = append(keys, k)
+		result = append(result, k)
 	}
-	sort.Strings(keys) // order of keys not guaranteed: http://blog.golang.org/go-maps-in-action#TOC_7.
+	return
+}
 
-	var t string
-	for _, k := range keys {
-		t += standardTemplates[k]
+func getStandardTemplate(name string) (result *template.Template, err error) {
+	t, found := standardTemplates[name]
+	if found {
+		result = template.Must(template.New(name).Parse(t))
+	} else {
+		err = errors.New(fmt.Sprintf("%s is not a known method", name))
 	}
-	return template.Must(template.New("standard").Parse(t))
+	return
 }
 
 var standardTemplates = map[string]string{

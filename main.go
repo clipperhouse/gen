@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -19,6 +20,7 @@ type genSpec struct {
 	Package    string
 	Singular   string
 	FieldSpecs []*fieldSpec
+	Methods    []string
 	Plural     string
 	Receiver   string
 	Loop       string
@@ -51,6 +53,15 @@ func (g *genSpec) AddFieldSpecs(fieldSpecs []*fieldSpec) {
 
 func (g genSpec) String() string {
 	return joinName(g.Package, g.Plural)
+}
+
+func (g genSpec) RequiresSortSupport() bool {
+	for _, m := range g.Methods {
+		if strings.HasPrefix(m, "Sort") {
+			return true
+		}
+	}
+	return false
 }
 
 type structArg struct {
@@ -189,6 +200,52 @@ func getAllStructTypes(fset *token.FileSet) (types map[string]*ast.StructType) {
 	return
 }
 
+var genTag = regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
+
+func getMethods(typ *ast.StructType) (result []string) {
+	// look for comments of the form gen:"Method,Method", like struct (field) tags but at type level
+	tagged := false
+	include := make(map[string]bool)
+	ast.Inspect(typ, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.Comment:
+			c := strings.Trim(x.Text, " /")
+			parse := genTag.FindStringSubmatch(c)
+			if parse != nil && len(parse) > 1 {
+				tagged = true
+				methods := strings.Split(parse[1], ",")
+				if len(methods) > 0 {
+					for _, m := range methods {
+						_, err := getStandardTemplate(m)
+						if err != nil {
+							errs = append(errs, err)
+						} else {
+							include[m] = true
+						}
+					}
+				}
+			}
+		}
+		return !tagged // stop inspecting after found
+	})
+
+	if !tagged {
+		result = getStandardMethodKeys()
+	}
+
+	// dependency
+	if include["SortDesc"] {
+		include["Sort"] = true
+	}
+
+	for k := range include {
+		result = append(result, k)
+	}
+	sort.Strings(result) // order of keys not guaranteed: http://blog.golang.org/go-maps-in-action#TOC_7.
+
+	return
+}
+
 func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 	fset := token.NewFileSet()
 	types := getAllStructTypes(fset)
@@ -199,6 +256,7 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 		if known {
 			fieldSpecs := getFieldSpecs(typ, fset, opts)
 			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
+			g.Methods = getMethods(typ)
 			g.AddFieldSpecs(fieldSpecs)
 			genSpecs = append(genSpecs, g)
 		} else {
@@ -237,8 +295,6 @@ func splitName(s string) (string, string) {
 }
 
 func getFieldSpecs(typ *ast.StructType, fset *token.FileSet, opts *options) (fieldSpecs []*fieldSpec) {
-	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
-
 	for _, fld := range typ.Fields.List {
 		if fld.Tag == nil {
 			continue
@@ -295,11 +351,19 @@ func writeFile(genSpecs []*genSpec, opts *options) {
 		}
 		defer file.Close()
 
-		t := getHeaderTemplate()
-		t.Execute(file, g)
+		h := getHeaderTemplate()
+		h.Execute(file, g)
 
-		t2 := getStandardTemplates()
-		t2.Execute(file, g)
+		for _, m := range g.Methods {
+			t, err := getStandardTemplate(m)
+			if err == nil {
+				t.Execute(file, g)
+			} else if opts.Force {
+				fmt.Printf("  skipping %v method\n", m)
+			} else {
+				panic(err) // shouldn't get here, should have been caught in getMethods
+			}
+		}
 
 		for _, f := range g.FieldSpecs {
 			for _, m := range f.Methods {
@@ -307,15 +371,17 @@ func writeFile(genSpecs []*genSpec, opts *options) {
 				if err == nil {
 					c.Execute(file, f)
 				} else if opts.Force {
-					fmt.Printf("  skipping %v method\n", m)
+					fmt.Printf("  skipping %v custom method\n", m)
 				} else {
 					panic(err) // shouldn't get here, should have been caught in getFieldSpecs
 				}
 			}
 		}
 
-		s := getSortSupportTemplate()
-		s.Execute(file, g)
+		if g.RequiresSortSupport() {
+			s := getSortSupportTemplate()
+			s.Execute(file, g)
+		}
 
 		fmt.Printf("  generated %s, yay!\n", g)
 	}
