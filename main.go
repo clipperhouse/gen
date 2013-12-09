@@ -284,19 +284,17 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 	types := getAllStructTypes(fset)
 
 	for _, structArg := range structArgs {
+		g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
+		genSpecs = append(genSpecs, g)
 		key := joinName(structArg.Package, structArg.Name)
 		typ, known := types[key]
 		if known {
-			fieldSpecs := getFieldSpecs(typ, fset, opts)
-			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
 			g.Methods = getMethods(typ)
+			fieldSpecs := getFieldSpecs(typ, fset, opts)
 			g.AddFieldSpecs(fieldSpecs)
-			genSpecs = append(genSpecs, g)
 		} else {
 			addError(fmt.Sprintf("%s is not a known struct type", key))
-			g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
 			g.Methods = getMethods(nil)
-			genSpecs = append(genSpecs, g)
 		}
 		if opts.ExportedOnly {
 			if ast.IsExported(structArg.Name) {
