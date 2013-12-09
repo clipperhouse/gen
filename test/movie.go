@@ -6,3 +6,8 @@ type Movie struct {
 	Studio            string `gen:"GroupBy"`
 	BoxOfficeMillions int    `gen:"GroupBy,Min,Average"`
 }
+
+type Sub struct {
+	// gen:"Where,Sort"
+	Name string
+}

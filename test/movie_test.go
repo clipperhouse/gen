@@ -535,6 +535,28 @@ func getTests() map[string][]test {
 		},
 	}
 
+	tests["Subs"] = []test{
+		// not intended to test methods,
+		// but correct subsetting
+		test{
+			func() (interface{}, error) {
+				return len(Subs{}.Where(func(sub *Sub) bool {
+					return true
+				})), nil
+			},
+			0,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return len(Subs{}.Sort(func(a, b *Sub) bool {
+					return true
+				})), nil
+			},
+			0,
+			false,
+		},
+	}
 	return tests
 }
 
