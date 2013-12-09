@@ -21,6 +21,7 @@ type genSpec struct {
 	Singular   string
 	FieldSpecs []*fieldSpec
 	Methods    []string
+	Imports    []string
 	Plural     string
 	Receiver   string
 	Loop       string
@@ -56,6 +57,33 @@ func (g *genSpec) AddFieldSpecs(fieldSpecs []*fieldSpec) {
 
 func (g genSpec) String() string {
 	return joinName(g.Package, g.Plural)
+}
+
+func (g *genSpec) DetermineImports() {
+	imports := make(map[string]bool)
+	methodsRequiresErrors := map[string]bool{
+		"First":   true,
+		"Single":  true,
+		"Max":     true,
+		"Min":     true,
+		"Average": true,
+	}
+	for _, m := range g.Methods {
+		if methodsRequiresErrors[m] {
+			imports["errors"] = true
+		}
+	}
+	for _, f := range g.FieldSpecs {
+		for _, m := range f.Methods {
+			if methodsRequiresErrors[m] {
+				imports["errors"] = true
+			}
+		}
+	}
+
+	for k := range imports {
+		g.Imports = append(g.Imports, k)
+	}
 }
 
 func (g genSpec) RequiresSortSupport() bool {
@@ -290,6 +318,11 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 			}
 		}
 	}
+
+	for _, g := range genSpecs {
+		g.DetermineImports()
+	}
+
 	return
 }
 

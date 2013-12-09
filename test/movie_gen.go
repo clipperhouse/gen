@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 08 Dec 2013 20:37:33 UTC
+// Mon, 09 Dec 2013 00:31:52 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -9,7 +9,9 @@
 
 package models
 
-import "errors"
+import (
+	"errors"
+)
 
 // The plural (slice) type of *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
 type Movies []*Movie

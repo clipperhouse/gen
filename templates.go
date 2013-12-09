@@ -20,9 +20,11 @@ const header = `// {{.Command}}
 // license that can be found in the LICENSE file.
 
 package {{.Package}}
-
-import "errors"
-
+{{if gt (len .Imports) 0}}
+import ({{range .Imports}}
+	"{{.}}"
+{{end}})
+{{end}}
 // The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 `
