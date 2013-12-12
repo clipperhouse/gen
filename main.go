@@ -61,7 +61,7 @@ func (g genSpec) String() string {
 
 func (g *genSpec) DetermineImports() {
 	imports := make(map[string]bool)
-	methodsRequiresErrors := map[string]bool{
+	methodRequiresErrors := map[string]bool{
 		"First":   true,
 		"Single":  true,
 		"Max":     true,
@@ -69,13 +69,13 @@ func (g *genSpec) DetermineImports() {
 		"Average": true,
 	}
 	for _, m := range g.Methods {
-		if methodsRequiresErrors[m] {
+		if methodRequiresErrors[m] {
 			imports["errors"] = true
 		}
 	}
 	for _, f := range g.FieldSpecs {
 		for _, m := range f.Methods {
-			if methodsRequiresErrors[m] {
+			if methodRequiresErrors[m] {
 				imports["errors"] = true
 			}
 		}
