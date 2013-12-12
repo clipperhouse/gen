@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/doc"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
@@ -205,7 +206,7 @@ func getStructArgs(args []string) (structArgs []*structArg) {
 	return
 }
 
-func getAllStructTypes(fset *token.FileSet) (types map[string]*ast.StructType) {
+func getAllTypes(fset *token.FileSet) (types map[string]*doc.Type) {
 	goFiles := func(f os.FileInfo) bool {
 		return strings.HasSuffix(f.Name(), ".go")
 	}
@@ -214,52 +215,42 @@ func getAllStructTypes(fset *token.FileSet) (types map[string]*ast.StructType) {
 		errs = append(errs, err)
 		return
 	}
-	types = make(map[string]*ast.StructType)
+	types = make(map[string]*doc.Type)
 	for pkg, f := range dir {
-		ast.Inspect(f, func(n ast.Node) bool {
-			switch x := n.(type) {
-			case *ast.TypeSpec:
-				switch y := x.Type.(type) {
-				case *ast.StructType:
-					key := joinName(pkg, x.Name.Name)
-					types[key] = y
-				}
-			}
-			return true
-		})
+		p := doc.New(f, pkg, doc.AllDecls) // TODO: mode based on -e arg
+		for _, t := range p.Types {
+			key := joinName(pkg, t.Name)
+			types[key] = t
+		}
 	}
 	return
 }
 
 var genTag = regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
 
-func getMethods(typ *ast.StructType) (result []string) {
+func getMethods(typ *doc.Type) (result []string) {
 	// look for comments of the form gen:"Method,Method", like struct (field) tags but at type level
 	tagged := false
 	include := make(map[string]bool)
 	if typ != nil {
-		ast.Inspect(typ, func(n ast.Node) bool {
-			switch x := n.(type) {
-			case *ast.Comment:
-				c := strings.Trim(x.Text, " /")
-				parse := genTag.FindStringSubmatch(c)
-				if parse != nil && len(parse) > 1 {
-					tagged = true
-					methods := strings.Split(parse[1], ",")
-					if len(methods) > 0 {
-						for _, m := range methods {
-							_, err := getStandardTemplate(m)
-							if err != nil {
-								errs = append(errs, err)
-							} else {
-								include[m] = true
-							}
+		docs := strings.Split(typ.Doc, "\n")
+		for _, d := range docs {
+			parse := genTag.FindStringSubmatch(d)
+			if parse != nil && len(parse) > 1 {
+				tagged = true
+				methods := strings.Split(parse[1], ",")
+				if len(methods) > 0 {
+					for _, m := range methods {
+						_, err := getStandardTemplate(m)
+						if err != nil {
+							errs = append(errs, err)
+						} else {
+							include[m] = true
 						}
 					}
 				}
 			}
-			return !tagged // stop inspecting after found
-		})
+		}
 	}
 
 	if !tagged {
@@ -279,9 +270,25 @@ func getMethods(typ *ast.StructType) (result []string) {
 	return
 }
 
+func getStructType(t *doc.Type) (result *ast.StructType, err error) {
+	for _, s := range t.Decl.Specs {
+		switch x := s.(type) {
+		case *ast.TypeSpec:
+			switch y := x.Type.(type) {
+			case *ast.StructType:
+				result = y
+				return
+			}
+		}
+	}
+
+	err = errors.New(t.Name + " is not a struct type")
+	return
+}
+
 func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 	fset := token.NewFileSet()
-	types := getAllStructTypes(fset)
+	types := getAllTypes(fset)
 
 	for _, structArg := range structArgs {
 		g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
@@ -290,8 +297,11 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 		typ, known := types[key]
 		if known {
 			g.Methods = getMethods(typ)
-			fieldSpecs := getFieldSpecs(typ, fset, opts)
-			g.AddFieldSpecs(fieldSpecs)
+			s, err := getStructType(typ)
+			if err == nil {
+				fieldSpecs := getFieldSpecs(s, fset, opts)
+				g.AddFieldSpecs(fieldSpecs)
+			}
 		} else {
 			addError(fmt.Sprintf("%s is not a known struct type", key))
 			g.Methods = getMethods(nil)
@@ -306,12 +316,15 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 	}
 	if opts.All {
 		for key, typ := range types {
-			fieldSpecs := getFieldSpecs(typ, fset, opts)
 			pkg, name := splitName(key)
 			if !opts.ExportedOnly || ast.IsExported(name) {
 				g := newGenSpec(opts.AllPointer, pkg, name)
 				g.Methods = getMethods(typ)
-				g.AddFieldSpecs(fieldSpecs)
+				s, err := getStructType(typ)
+				if err == nil {
+					fieldSpecs := getFieldSpecs(s, fset, opts)
+					g.AddFieldSpecs(fieldSpecs)
+				}
 				genSpecs = append(genSpecs, g)
 			}
 		}

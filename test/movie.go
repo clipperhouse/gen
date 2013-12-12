@@ -7,7 +7,7 @@ type Movie struct {
 	BoxOfficeMillions int    `gen:"GroupBy,Min,Average"`
 }
 
+// gen:"Where,Sort"
 type Sub struct {
-	// gen:"Where,Sort"
 	Name string
 }

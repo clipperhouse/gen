@@ -1,6 +1,6 @@
 // gen *models.Sub
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 09 Dec 2013 00:31:55 UTC
+// Thu, 12 Dec 2013 02:55:46 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
