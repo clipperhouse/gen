@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bitbucket.org/clipperhouse/inflect"
 	"errors"
 	"fmt"
+	"gen/inflect"
 	"go/ast"
 	"go/doc"
 	"go/parser"
