@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"gen/inflect"
+	"github.com/clipperhouse/gen/inflect"
 	"go/ast"
 	"go/doc"
 	"go/parser"
