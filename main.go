@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/clipperhouse/gen/inflect"
 	"go/ast"
 	"go/doc"
 	"go/parser"
@@ -14,6 +13,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/clipperhouse/gen/inflect"
 )
 
 type genSpec struct {
