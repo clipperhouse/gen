@@ -18,6 +18,6 @@ The goal is to keep the API small. We aim to implement the **least number of ort
 
 We avoid methods that feel like wrappers or aliases to existing methods, even if they are convenient. A good proxy is to imagine a user asking the question ‘which method should I use?’. If that’s a reasonable question, the library should be doing less.
 
-We avoid methods that would require many boilerplate implementations by type. For example, we originally had things like GroupByString and SumInt. Clearly, this would lead to requests for SumFloat64 and GroupByRune or what have you. We solved this particular problem by using [custom methods](http://clipperhouse.github.io/gen/#Custom).
+We avoid methods that would require many boilerplate implementations by type. For example, we originally had things like GroupByString and SumInt. Clearly, this would lead to requests for SumFloat64 and GroupByRune or what have you. We solved this particular problem by using [custom methods](http://clipperhouse.github.io/gen/#Custom). [Note: there are [ideas afoot](https://github.com/clipperhouse/gen/issues/8) which may change this guideline.]
 
 These guidelines are not entirely deterministic! There’s lots of room for judgment and taste, and we look forward to seeing how it evolves.
