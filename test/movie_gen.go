@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 12 Dec 2013 02:55:49 UTC
+// Mon, 30 Dec 2013 04:37:07 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -202,95 +202,89 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	return result
 }
 
-// Returns a slice containing all values of Title in Movies. See: http://clipperhouse.github.io/gen/#Select
-func (rcv Movies) SelectTitle() (result []string) {
-	for _, v := range rcv {
-		result = append(result, v.Title)
-	}
-	return
-}
-
 // Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
-func (rcv Movies) AggregateTheaters(fn func(int, int) int) (result int) {
+func (rcv Movies) AggregateInt(fn func(int, *Movie) int) (result int) {
 	for _, v := range rcv {
-		result = fn(result, v.Theaters)
+		result = fn(result, v)
 	}
 	return
 }
 
-// Sums Theaters over all elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
-func (rcv Movies) SumTheaters() (result int) {
-	for _, v := range rcv {
-		result += v.Theaters
-	}
-	return
-}
-
-// Selects the largest value of Theaters in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
-func (rcv Movies) MaxTheaters() (result int, err error) {
+// Sums int over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
+func (rcv Movies) AverageInt(fn func(*Movie) int) (result int, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine MaxTheaters of zero-length Movies")
-		return
-	}
-	result = rcv[0].Theaters
-	if l > 1 {
-		for _, v := range rcv[1:] {
-			if v.Theaters > result {
-				result = v.Theaters
-			}
-		}
-	}
-	return
-}
-
-// Groups elements into a map keyed by Studio’s value. See: http://clipperhouse.github.io/gen/#GroupBy
-func (rcv Movies) GroupByStudio() map[string]Movies {
-	result := make(map[string]Movies)
-	for _, v := range rcv {
-		result[v.Studio] = append(result[v.Studio], v)
-	}
-	return result
-}
-
-// Groups elements into a map keyed by BoxOfficeMillions’s value. See: http://clipperhouse.github.io/gen/#GroupBy
-func (rcv Movies) GroupByBoxOfficeMillions() map[int]Movies {
-	result := make(map[int]Movies)
-	for _, v := range rcv {
-		result[v.BoxOfficeMillions] = append(result[v.BoxOfficeMillions], v)
-	}
-	return result
-}
-
-// Selects the least value of BoxOfficeMillions in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
-func (rcv Movies) MinBoxOfficeMillions() (result int, err error) {
-	l := len(rcv)
-	if l == 0 {
-		err = errors.New("cannot determine MinBoxOfficeMillions of zero-length Movies")
-		return
-	}
-	result = rcv[0].BoxOfficeMillions
-	if l > 1 {
-		for _, v := range rcv[1:] {
-			if v.BoxOfficeMillions < result {
-				result = v.BoxOfficeMillions
-			}
-		}
-	}
-	return
-}
-
-// Sums BoxOfficeMillions over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
-func (rcv Movies) AverageBoxOfficeMillions() (result int, err error) {
-	l := len(rcv)
-	if l == 0 {
-		err = errors.New("cannot determine AverageBoxOfficeMillions of zero-length Movies")
+		err = errors.New("cannot determine AverageInt of zero-length Movies")
 		return
 	}
 	for _, v := range rcv {
-		result += v.BoxOfficeMillions
+		result += fn(v)
 	}
 	result = result / l
+	return
+}
+
+// Groups elements into a map keyed by int. See: http://clipperhouse.github.io/gen/#GroupBy
+func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
+	result := make(map[int]Movies)
+	for _, v := range rcv {
+		key := fn(v)
+		result[key] = append(result[key], v)
+	}
+	return result
+}
+
+// Selects the largest value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+func (rcv Movies) MaxInt(fn func(*Movie) int) (result int, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MaxInt of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f > result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Selects the least value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+func (rcv Movies) MinInt(fn func(*Movie) int) (result int, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MinInt of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f < result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Returns a slice containing all values of SelectInt in Movies. See: http://clipperhouse.github.io/gen/#Select
+func (rcv Movies) SelectInt(fn func(*Movie) int) (result []int) {
+	for _, v := range rcv {
+		result = append(result, fn(v))
+	}
+	return
+}
+
+// Sums SumInt over all elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
+func (rcv Movies) SumInt(fn func(*Movie) int) (result int) {
+	for _, v := range rcv {
+		result += fn(v)
+	}
 	return
 }
 

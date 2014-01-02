@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"text/template"
 )
 
@@ -29,10 +30,18 @@ import ({{range .Imports}}
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 `
 
+func getTemplate(name string) (result *template.Template, err error) {
+	if isProjectionMethod(name) {
+		return getProjectionTemplate(name)
+	}
+	return getStandardTemplate(name)
+}
+
 func getStandardMethodKeys() (result []string) {
 	for k := range standardTemplates {
 		result = append(result, k)
 	}
+	sort.Strings(result)
 	return
 }
 
@@ -429,64 +438,79 @@ func quickSort{{.Plural}}({{.Receiver}} {{.Plural}}, less func({{.Pointer}}{{.Si
 }
 `
 
-func getCustomTemplate(name string) (result *template.Template, err error) {
-	t, found := customTemplates[name]
+func isProjectionMethod(s string) bool {
+	_, ok := projectionTemplates[s]
+	return ok
+}
+
+func getProjectionMethodKeys() (result []string) {
+	for k := range projectionTemplates {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return
+}
+
+func getProjectionTemplate(name string) (result *template.Template, err error) {
+	t, found := projectionTemplates[name]
 	if found {
 		result = template.Must(template.New(name).Parse(t))
 	} else {
-		err = errors.New(fmt.Sprintf("%s is not a known custom method", name))
+		err = errors.New(fmt.Sprintf("%s is not a known projection method", name))
 	}
 	return
 }
 
-var customTemplates = map[string]string{
+var projectionTemplates = map[string]string{
 	"Aggregate": `
 // Iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Aggregate{{.Name}}(fn func({{.Type}}, {{.Type}}) {{.Type}}) (result {{.Type}}) {
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Type}}, {{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
-		result = fn(result, {{.Parent.Loop}}.{{.Name}})
+		result = fn(result, {{.Parent.Loop}})
 	}
 	return
 }
 `,
 	"Average": `
-// Sums {{.Name}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Average{{.Name}}() (result {{.Type}}, err error) {
+// Sums {{.Type}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
-		err = errors.New("cannot determine Average{{.Name}} of zero-length {{.Parent.Plural}}")
+		err = errors.New("cannot determine {{.}} of zero-length {{.Parent.Plural}}")
 		return
 	}
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
-		result += {{.Parent.Loop}}.{{.Name}}
+		result += fn({{.Parent.Loop}})
 	}
 	result = result / l
 	return
 }
 `,
 	"GroupBy": `
-// Groups elements into a map keyed by {{.Name}}’s value. See: http://clipperhouse.github.io/gen/#GroupBy
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) GroupBy{{.Name}}() map[{{.Type}}]{{.Parent.Plural}} {
+// Groups elements into a map keyed by {{.Type}}. See: http://clipperhouse.github.io/gen/#GroupBy
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) map[{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Type}}]{{.Parent.Plural}})
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
-		result[{{.Parent.Loop}}.{{.Name}}] = append(result[{{.Parent.Loop}}.{{.Name}}], {{.Parent.Loop}})
+		key := fn({{.Parent.Loop}})
+		result[key] = append(result[key], {{.Parent.Loop}})
 	}
 	return result
 }
 `,
 	"Max": `
-// Selects the largest value of {{.Name}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Max{{.Name}}() (result {{.Type}}, err error) {
+// Selects the largest value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
-		err = errors.New("cannot determine Max{{.Name}} of zero-length {{.Parent.Plural}}")
+		err = errors.New("cannot determine {{.}} of zero-length {{.Parent.Plural}}")
 		return
 	}
-	result = {{.Parent.Receiver}}[0].{{.Name}}
+	result = fn({{.Parent.Receiver}}[0])
 	if l > 1 {
 		for _, {{.Parent.Loop}} := range {{.Parent.Receiver}}[1:] {
-			if {{.Parent.Loop}}.{{.Name}} > result {
-				result = {{.Parent.Loop}}.{{.Name}}
+			f := fn({{.Parent.Loop}})
+			if f > result {
+				result = f
 			}
 		}
 	}
@@ -494,18 +518,19 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Max{{.Name}}() (result {{.Type}},
 }
 `,
 	"Min": `
-// Selects the least value of {{.Name}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Min{{.Name}}() (result {{.Type}}, err error) {
+// Selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
-		err = errors.New("cannot determine Min{{.Name}} of zero-length {{.Parent.Plural}}")
+		err = errors.New("cannot determine {{.}} of zero-length {{.Parent.Plural}}")
 		return
 	}
-	result = {{.Parent.Receiver}}[0].{{.Name}}
+	result = fn({{.Parent.Receiver}}[0])
 	if l > 1 {
 		for _, {{.Parent.Loop}} := range {{.Parent.Receiver}}[1:] {
-			if {{.Parent.Loop}}.{{.Name}} < result {
-				result = {{.Parent.Loop}}.{{.Name}}
+			f := fn({{.Parent.Loop}})
+			if f < result {
+				result = f
 			}
 		}
 	}
@@ -513,19 +538,19 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) Min{{.Name}}() (result {{.Type}},
 }
 `,
 	"Select": `
-// Returns a slice containing all values of {{.Name}} in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Select
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Select{{.Name}}() (result []{{.Type}}) {
+// Returns a slice containing all values of {{.}} in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Select
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result []{{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
-		result = append(result, {{.Parent.Loop}}.{{.Name}})
+		result = append(result, fn({{.Parent.Loop}}))
 	}
 	return
 }
 `,
 	"Sum": `
-// Sums {{.Name}} over all elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
-func ({{.Parent.Receiver}} {{.Parent.Plural}}) Sum{{.Name}}() (result {{.Type}}) {
+// Sums {{.}} over all elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
+func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
-		result += {{.Parent.Loop}}.{{.Name}}
+		result += fn({{.Parent.Loop}})
 	}
 	return
 }

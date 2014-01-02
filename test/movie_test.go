@@ -17,14 +17,14 @@ func getTests() map[string][]test {
 	tests["AggregateTheaters"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.AggregateTheaters(sumInt), nil
+				return many.AggregateInt(sumTheaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.AggregateTheaters(sumInt), nil
+				return none.AggregateInt(sumTheaters), nil
 			},
 			0,
 			false,
@@ -34,14 +34,14 @@ func getTests() map[string][]test {
 	tests["SumTheaters"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.SumTheaters(), nil
+				return many.SumInt(getTheaters), nil
 			},
 			6 + 9 + 5 + 50 + 20,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.SumTheaters(), nil
+				return none.SumInt(getTheaters), nil
 			},
 			0,
 			false,
@@ -51,21 +51,21 @@ func getTests() map[string][]test {
 	tests["MaxTheaters"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.MaxTheaters()
+				return many.MaxInt(getTheaters)
 			},
 			50,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return Movies{second}.MaxTheaters()
+				return Movies{second}.MaxInt(getTheaters)
 			},
 			second.Theaters,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.MaxTheaters()
+				return none.MaxInt(getTheaters)
 			},
 			0,
 			true,
@@ -75,21 +75,21 @@ func getTests() map[string][]test {
 	tests["MinBoxOfficeMillions"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.MinBoxOfficeMillions()
+				return many.MinInt(getMillions)
 			},
 			90,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return Movies{third}.MinBoxOfficeMillions()
+				return Movies{third}.MinInt(getMillions)
 			},
 			third.BoxOfficeMillions,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.MinBoxOfficeMillions()
+				return none.MinInt(getMillions)
 			},
 			0,
 			true,
@@ -99,21 +99,21 @@ func getTests() map[string][]test {
 	tests["AverageBoxOfficeMillions"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.AverageBoxOfficeMillions()
+				return many.AverageInt(getMillions)
 			},
 			96,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return Movies{third}.AverageBoxOfficeMillions()
+				return Movies{third}.AverageInt(getMillions)
 			},
 			third.BoxOfficeMillions,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.AverageBoxOfficeMillions()
+				return none.AverageInt(getMillions)
 			},
 			0,
 			true,
@@ -268,19 +268,19 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["SelectTitle"] = []test{
+	tests["SelectTheaters"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.SelectTitle(), nil
+				return many.SelectInt(getTheaters), nil
 			},
-			[]string{"first", "second", "third", "fourth", "fifth"},
+			[]int{6, 9, 5, 50, 20},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.SelectTitle(), nil
+				return none.SelectInt(getTheaters), nil
 			},
-			[]string{},
+			[]int{},
 			false,
 		},
 	}
@@ -316,24 +316,10 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["GroupByStudio"] = []test{
-		test{
-			func() (interface{}, error) {
-				return many.GroupByStudio(), nil
-			},
-			map[string]Movies{
-				"Miramax":     Movies{first, fifth},
-				"Universal":   Movies{third, fourth},
-				"Warner Bros": Movies{second},
-			},
-			false,
-		},
-	}
-
 	tests["GroupByBoxOfficeMillions"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.GroupByBoxOfficeMillions(), nil
+				return many.GroupByInt(getMillions), nil
 			},
 			map[int]Movies{
 				90:  Movies{first, fourth},
@@ -534,29 +520,6 @@ func getTests() map[string][]test {
 			false,
 		},
 	}
-
-	tests["Subs"] = []test{
-		// not intended to test methods,
-		// but correct subsetting
-		test{
-			func() (interface{}, error) {
-				return len(Subs{}.Where(func(sub *Sub) bool {
-					return true
-				})), nil
-			},
-			0,
-			false,
-		},
-		test{
-			func() (interface{}, error) {
-				return len(Subs{}.Sort(func(a, b *Sub) bool {
-					return true
-				})), nil
-			},
-			0,
-			false,
-		},
-	}
 	return tests
 }
 
@@ -590,6 +553,23 @@ func TestAll(t *testing.T) {
 				exp := test.Expected.([]string)
 				if len(got) != len(exp) {
 					t.Errorf("%s[%v]: Expected %v strings, got %v", name, i, len(exp), len(got))
+					break
+				}
+				for j := range got {
+					if got[j] != exp[j] {
+						t.Errorf("%s[%v]: Expected %v, got %v", name, i, exp[j], got[j])
+						break
+					}
+				}
+			case []int:
+				_got, err := test.Exec()
+
+				checkErr(test, err)
+
+				got := _got.([]int)
+				exp := test.Expected.([]int)
+				if len(got) != len(exp) {
+					t.Errorf("%s[%v]: Expected %v ints, got %v", name, i, len(exp), len(got))
 					break
 				}
 				for j := range got {
@@ -720,4 +700,13 @@ var byTitle = func(a, b *Movie) bool {
 }
 var byTheaters = func(a, b *Movie) bool {
 	return a.Theaters < b.Theaters
+}
+var getTheaters = func(movie *Movie) int {
+	return movie.Theaters
+}
+var sumTheaters = func(state int, movie *Movie) int {
+	return state + movie.Theaters
+}
+var getMillions = func(movie *Movie) int {
+	return movie.BoxOfficeMillions
 }

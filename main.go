@@ -7,130 +7,22 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
-	"time"
 
-	"github.com/clipperhouse/gen/inflect"
+	_ "code.google.com/p/go.tools/go/gcimporter"
+	"code.google.com/p/go.tools/go/types"
 )
-
-type genSpec struct {
-	Pointer    string
-	Package    string
-	Singular   string
-	FieldSpecs []*fieldSpec
-	Methods    []string
-	Imports    []string
-	Plural     string
-	Receiver   string
-	Loop       string
-	Generated  string
-	Command    string
-	FileName   string
-}
-
-func newGenSpec(ptr, pkg, name string) *genSpec {
-	plural := inflect.Pluralize(name)
-	if plural == name {
-		plural += "s"
-	}
-	return &genSpec{
-		Pointer:   ptr,
-		Package:   pkg,
-		Singular:  name,
-		Plural:    inflect.Pluralize(name),
-		Receiver:  "rcv",
-		Loop:      "v",
-		Generated: time.Now().UTC().Format(time.RFC1123),
-		Command:   fmt.Sprintf("%s %s%s.%s", "gen", ptr, pkg, name),
-		FileName:  strings.ToLower(name) + "_gen.go",
-	}
-}
-
-func (g *genSpec) AddFieldSpecs(fieldSpecs []*fieldSpec) {
-	for _, f := range fieldSpecs {
-		f.Parent = g
-	}
-	g.FieldSpecs = fieldSpecs
-}
-
-func (g genSpec) String() string {
-	return joinName(g.Package, g.Plural)
-}
-
-func (g *genSpec) DetermineImports() {
-	imports := make(map[string]bool)
-	methodRequiresErrors := map[string]bool{
-		"First":   true,
-		"Single":  true,
-		"Max":     true,
-		"Min":     true,
-		"Average": true,
-	}
-	for _, m := range g.Methods {
-		if methodRequiresErrors[m] {
-			imports["errors"] = true
-		}
-	}
-	for _, f := range g.FieldSpecs {
-		for _, m := range f.Methods {
-			if methodRequiresErrors[m] {
-				imports["errors"] = true
-			}
-		}
-	}
-
-	for k := range imports {
-		g.Imports = append(g.Imports, k)
-	}
-}
-
-func (g genSpec) RequiresSortSupport() bool {
-	for _, m := range g.Methods {
-		if strings.HasPrefix(m, "Sort") {
-			return true
-		}
-	}
-	return false
-}
-
-type structArg struct {
-	Pointer string
-	Package string
-	Name    string
-}
-
-type fieldSpec struct {
-	Name    string
-	Type    string
-	Methods []string
-	Parent  *genSpec
-}
-
-type options struct {
-	All          bool
-	AllPointer   string
-	ExportedOnly bool
-	Force        bool
-}
 
 var errs = make([]error, 0)
 var notes = make([]string, 0)
 
-func addError(text string) {
-	errs = append(errs, errors.New(text))
-}
-
 func main() {
-	has_args := len(os.Args) > 1
-	if !has_args {
+	if len(os.Args) <= 1 { // no args, only "gen"
 		fmt.Println(usage)
 		return
 	}
-
 	args := os.Args[1:]
 
 	first := args[0]
@@ -140,8 +32,9 @@ func main() {
 	}
 
 	opts := getOptions(args)
-	structArgs := getStructArgs(args)
-	genSpecs := getGenSpecs(opts, structArgs)
+	typeArgs := getTypeArgs(args)
+	tc := getTypeCheckers()
+	genSpecs := getGenSpecs(opts, typeArgs, tc)
 
 	for _, n := range notes {
 		fmt.Println("  note: " + n)
@@ -161,6 +54,18 @@ func main() {
 	}
 
 	writeFile(genSpecs, opts)
+}
+
+func getTypeArgs(args []string) (typeArgs []typeString) {
+	regex := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
+
+	for _, s := range args {
+		if regex.MatchString(s) {
+			typeArgs = append(typeArgs, typeString(s))
+		}
+	}
+
+	return
 }
 
 func getOptions(args []string) *options {
@@ -187,147 +92,138 @@ func getOptions(args []string) *options {
 	return opts
 }
 
-func getStructArgs(args []string) (structArgs []*structArg) {
-	regex := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
-
-	for _, s := range args {
-		matches := regex.FindStringSubmatch(s)
-
-		if matches == nil {
-			continue
-		}
-
-		ptr := matches[1]
-		pkg := matches[2]
-		typ := matches[3]
-
-		structArgs = append(structArgs, &structArg{ptr, pkg, typ})
-	}
-
-	return
-}
-
-func getAllTypes(fset *token.FileSet) (types map[string]*doc.Type) {
-	goFiles := func(f os.FileInfo) bool {
-		return strings.HasSuffix(f.Name(), ".go")
-	}
-	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
+// Returns one type checker per package found in current directory
+func getTypeCheckers() (result map[string]*typeChecker) {
+	fset := token.NewFileSet()
+	dir, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
 	if err != nil {
 		errs = append(errs, err)
 		return
 	}
-	types = make(map[string]*doc.Type)
-	for pkg, f := range dir {
-		p := doc.New(f, pkg, doc.AllDecls) // TODO: mode based on -e arg
-		for _, t := range p.Types {
-			key := joinName(pkg, t.Name)
-			types[key] = t
+
+	result = make(map[string]*typeChecker)
+
+	for k, v := range dir {
+		files := make([]*ast.File, 0)
+		for _, f := range v.Files {
+			files = append(files, f)
 		}
+
+		p, err := types.Check(k, fset, files)
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		d := doc.New(v, k, doc.AllDecls)
+		typeDocs := make(map[string]string)
+		for _, t := range d.Types {
+			typeDocs[t.Name] = t.Doc
+		}
+
+		result[k] = &typeChecker{p, typeDocs}
+	}
+
+	return
+}
+
+func (g *genSpec) DetermineImports() {
+	imports := make(map[string]bool)
+	methodRequiresErrors := map[string]bool{
+		"First":   true,
+		"Single":  true,
+		"Max":     true,
+		"Min":     true,
+		"Average": true,
+	}
+	for _, m := range g.Methods {
+		if methodRequiresErrors[m] {
+			imports["errors"] = true
+		}
+	}
+	for _, f := range g.Projections {
+		if methodRequiresErrors[f.Method] {
+			imports["errors"] = true
+		}
+	}
+
+	for k := range imports {
+		g.Imports = append(g.Imports, k)
+	}
+}
+
+func (g genSpec) RequiresSortSupport() bool {
+	for _, m := range g.Methods {
+		if strings.HasPrefix(m, "Sort") {
+			return true
+		}
+	}
+	return false
+}
+
+func addError(text string) {
+	errs = append(errs, errors.New(text))
+}
+
+func getSubsettedMethods(t *typeSpec) (result []string) {
+	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
+	parse := genTag.FindStringSubmatch(t.Doc)
+	if parse != nil && len(parse) > 1 {
+		result = strings.Split(parse[1], ",")
 	}
 	return
 }
 
-var genTag = regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
+func getProjectionTypes(t *typeSpec) (result []string) {
+	projectTag := regexp.MustCompile(`\bproject:"([A-Za-z,]+)"`)
+	parse := projectTag.FindStringSubmatch(t.Doc)
+	if parse != nil && len(parse) > 1 {
+		result = strings.Split(parse[1], ",")
+	}
+	return
+}
 
-func getMethods(typ *doc.Type) (result []string) {
-	// look for comments of the form gen:"Method,Method", like struct (field) tags but at type level
-	tagged := false
-	include := make(map[string]bool)
-	if typ != nil {
-		docs := strings.Split(typ.Doc, "\n")
-		for _, d := range docs {
-			parse := genTag.FindStringSubmatch(d)
-			if parse != nil && len(parse) > 1 {
-				tagged = true
-				methods := strings.Split(parse[1], ",")
-				if len(methods) > 0 {
-					for _, m := range methods {
-						_, err := getStandardTemplate(m)
-						if err != nil {
-							errs = append(errs, err)
-						} else {
-							include[m] = true
-						}
+func getGenSpecs(opts *options, typeArgs []typeString, typeCheckers map[string]*typeChecker) (genSpecs []*genSpec) {
+	if len(typeArgs) > 0 && opts.All {
+		addError(fmt.Sprintf("you've specified a type as well as the -all option; please choose one or the other"))
+	}
+
+	typeSpecs := make([]*typeSpec, 0)
+
+	for _, typeArg := range typeArgs {
+		tc := typeCheckers[typeArg.Package()]
+		t, err := tc.getTypeSpec(typeArg.LocalName()) // type checker is already package-specific
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			typeSpecs = append(typeSpecs, &t)
+		}
+	}
+
+	if opts.All {
+		for _, tc := range typeCheckers {
+			for k := range tc.typeDocs {
+				if !opts.ExportedOnly || ast.IsExported(k) {
+					t, err := tc.getTypeSpec(opts.AllPointer + k)
+					if err != nil {
+						errs = append(errs, err)
+					} else {
+						typeSpecs = append(typeSpecs, &t)
 					}
 				}
 			}
 		}
 	}
 
-	if !tagged {
-		result = getStandardMethodKeys()
-	}
-
-	// dependency
-	if include["SortDesc"] {
-		include["Sort"] = true
-	}
-
-	for k := range include {
-		result = append(result, k)
-	}
-	sort.Strings(result) // order of keys not guaranteed: http://blog.golang.org/go-maps-in-action#TOC_7.
-
-	return
-}
-
-func getStructType(t *doc.Type) (result *ast.StructType, err error) {
-	for _, s := range t.Decl.Specs {
-		switch x := s.(type) {
-		case *ast.TypeSpec:
-			switch y := x.Type.(type) {
-			case *ast.StructType:
-				result = y
-				return
-			}
-		}
-	}
-
-	err = errors.New(t.Name + " is not a struct type")
-	return
-}
-
-func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
-	fset := token.NewFileSet()
-	types := getAllTypes(fset)
-
-	for _, structArg := range structArgs {
-		g := newGenSpec(structArg.Pointer, structArg.Package, structArg.Name)
-		genSpecs = append(genSpecs, g)
-		key := joinName(structArg.Package, structArg.Name)
-		typ, known := types[key]
-		if known {
-			g.Methods = getMethods(typ)
-			s, err := getStructType(typ)
-			if err == nil {
-				fieldSpecs := getFieldSpecs(s, fset, opts)
-				g.AddFieldSpecs(fieldSpecs)
-			}
-		} else {
-			addError(fmt.Sprintf("%s is not a known struct type", key))
-			g.Methods = getMethods(nil)
-		}
-		if opts.ExportedOnly {
-			if ast.IsExported(structArg.Name) {
-				notes = append(notes, fmt.Sprintf("the %s type is already exported; the -e[xported] flag is redundant (ignored)", structArg.Name))
-			} else {
-				addError(fmt.Sprintf("the %s type is not exported; the -e[xported] flag conflicts", structArg.Name))
-			}
-		}
-	}
-	if opts.All {
-		for key, typ := range types {
-			pkg, name := splitName(key)
-			if !opts.ExportedOnly || ast.IsExported(name) {
-				g := newGenSpec(opts.AllPointer, pkg, name)
-				g.Methods = getMethods(typ)
-				s, err := getStructType(typ)
-				if err == nil {
-					fieldSpecs := getFieldSpecs(s, fset, opts)
-					g.AddFieldSpecs(fieldSpecs)
-				}
-				genSpecs = append(genSpecs, g)
-			}
+	for _, t := range typeSpecs {
+		fmt.Println(t.Type.String() + " is:")
+		switch x := t.Type.(type) {
+		case *types.Pointer:
+			fmt.Println("Pointer")
+		case *types.Named:
+			fmt.Println("Named")
+		default:
+			fmt.Println("dunno")
+			fmt.Println(x)
 		}
 	}
 
@@ -338,6 +234,51 @@ func getGenSpecs(opts *options, structArgs []*structArg) (genSpecs []*genSpec) {
 	return
 }
 
+func populateGenSpec(g *genSpec, allTypes map[string]*typeSpec) {
+	var subsettedMethods, standardMethods, projectionMethods, projectedTypes []string
+
+	key := joinName("", g.Singular)
+	typ, known := allTypes[key]
+
+	if known {
+		projectedTypes = getProjectionTypes(typ)
+		subsettedMethods = getSubsettedMethods(typ)
+		for _, m := range subsettedMethods {
+			if isProjectionMethod(m) {
+				projectionMethods = append(projectionMethods, m)
+			} else {
+				standardMethods = append(standardMethods, m)
+			}
+		}
+	} else {
+		addError(fmt.Sprintf("%s is not a known type", key))
+	}
+
+	if len(subsettedMethods) > 0 {
+		g.Methods = standardMethods
+		if len(projectedTypes) > 0 {
+			if len(projectionMethods) == 0 { // TODO: reduce nesting
+				addError(fmt.Sprintf("you've included projection types without specifying projection methods on %s", key))
+			}
+			g.Projections = getProjectionSpecs(g, projectionMethods, projectedTypes)
+		}
+	} else {
+		g.Methods = getStandardMethodKeys()
+		if len(projectedTypes) > 0 {
+			g.Projections = getProjectionSpecs(g, getProjectionMethodKeys(), projectedTypes)
+		}
+	}
+}
+
+func getProjectionSpecs(g *genSpec, methods []string, types []string) (result []*projection) {
+	for _, m := range methods {
+		for _, t := range types {
+			result = append(result, &projection{m, t, g})
+		}
+	}
+	return
+}
+
 func joinName(pkg, name string) string {
 	return fmt.Sprintf("%s.%s", pkg, name)
 }
@@ -345,55 +286,6 @@ func joinName(pkg, name string) string {
 func splitName(s string) (string, string) {
 	names := strings.Split(s, ".")
 	return names[0], names[1]
-}
-
-func getFieldSpecs(typ *ast.StructType, fset *token.FileSet, opts *options) (fieldSpecs []*fieldSpec) {
-	for _, fld := range typ.Fields.List {
-		if fld.Tag == nil {
-			continue
-		}
-
-		parse := genTag.FindStringSubmatch(fld.Tag.Value)
-		if parse == nil || len(parse) < 2 {
-			continue
-		}
-
-		methods := strings.Split(parse[1], ",")
-		for _, m := range methods {
-			_, err := getCustomTemplate(m)
-			if err != nil {
-				errs = append(errs, err)
-			}
-		}
-		for _, name := range fld.Names {
-			t := getSourceString(fld.Type, fset)
-			fieldSpecs = append(fieldSpecs, &fieldSpec{Name: name.String(), Type: t, Methods: methods})
-		}
-	}
-	return
-}
-
-func getSourceString(node ast.Node, fset *token.FileSet) string {
-	p1 := fset.Position(node.Pos())
-	p2 := fset.Position(node.End())
-
-	b := getFileBytes(p1.Filename)
-	return string(b[p1.Offset:p2.Offset])
-}
-
-var filebytes = make(map[string][]byte) // cache
-func getFileBytes(filename string) []byte {
-	b, exists := filebytes[filename]
-	if exists {
-		return b
-	}
-
-	b2, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	filebytes[filename] = b2
-	return b2
 }
 
 func writeFile(genSpecs []*genSpec, opts *options) {
@@ -414,20 +306,18 @@ func writeFile(genSpecs []*genSpec, opts *options) {
 			} else if opts.Force {
 				fmt.Printf("  skipping %v method\n", m)
 			} else {
-				panic(err) // shouldn't get here, should have been caught in getMethods
+				panic(err) // shouldn't get here, should have been caught in getSubsettedMethods
 			}
 		}
 
-		for _, f := range g.FieldSpecs {
-			for _, m := range f.Methods {
-				c, err := getCustomTemplate(m)
-				if err == nil {
-					c.Execute(file, f)
-				} else if opts.Force {
-					fmt.Printf("  skipping %v custom method\n", m)
-				} else {
-					panic(err) // shouldn't get here, should have been caught in getFieldSpecs
-				}
+		for _, f := range g.Projections {
+			c, err := getProjectionTemplate(f.Method)
+			if err == nil {
+				c.Execute(file, f)
+			} else if opts.Force {
+				fmt.Printf("  skipping %v projection method\n", f.Method)
+			} else {
+				panic(err) // shouldn't get here, should have been caught in getProjectionSpecs
 			}
 		}
 

@@ -1,13 +1,14 @@
 package models
 
+// Any amount of docs might be here
+// project:"int"
 type Movie struct {
-	Title             string `gen:"Select"`
-	Theaters          int    `gen:"Aggregate,Sum,Max"`
-	Studio            string `gen:"GroupBy"`
-	BoxOfficeMillions int    `gen:"GroupBy,Min,Average"`
+	Title             string
+	Theaters          int
+	Studio            string
+	BoxOfficeMillions int
 }
 
-// gen:"Where,Sort"
-type Sub struct {
-	Name string
-}
+type Thing float64
+
+type Thing2 Thing
