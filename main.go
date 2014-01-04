@@ -56,12 +56,12 @@ func main() {
 	writeFile(genSpecs, opts)
 }
 
-func getTypeArgs(args []string) (typeArgs []typeString) {
+func getTypeArgs(args []string) (typeArgs []string) {
 	regex := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
 
 	for _, s := range args {
 		if regex.MatchString(s) {
-			typeArgs = append(typeArgs, typeString(s))
+			typeArgs = append(typeArgs, s)
 		}
 	}
 
@@ -98,7 +98,6 @@ func getTypeCheckers() (result map[string]*typeChecker) {
 	dir, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
 	if err != nil {
 		errs = append(errs, err)
-		return
 	}
 
 	result = make(map[string]*typeChecker)
@@ -135,11 +134,13 @@ func (g *genSpec) DetermineImports() {
 		"Min":     true,
 		"Average": true,
 	}
+
 	for _, m := range g.Methods {
 		if methodRequiresErrors[m] {
 			imports["errors"] = true
 		}
 	}
+
 	for _, f := range g.Projections {
 		if methodRequiresErrors[f.Method] {
 			imports["errors"] = true
@@ -164,128 +165,104 @@ func addError(text string) {
 	errs = append(errs, errors.New(text))
 }
 
-func getSubsettedMethods(t *typeSpec) (result []string) {
-	genTag := regexp.MustCompile(`gen:"([A-Za-z,]+)"`)
-	parse := genTag.FindStringSubmatch(t.Doc)
-	if parse != nil && len(parse) > 1 {
-		result = strings.Split(parse[1], ",")
-	}
-	return
-}
-
-func getProjectionTypes(t *typeSpec) (result []string) {
-	projectTag := regexp.MustCompile(`\bproject:"([A-Za-z,]+)"`)
-	parse := projectTag.FindStringSubmatch(t.Doc)
-	if parse != nil && len(parse) > 1 {
-		result = strings.Split(parse[1], ",")
-	}
-	return
-}
-
-func getGenSpecs(opts *options, typeArgs []typeString, typeCheckers map[string]*typeChecker) (genSpecs []*genSpec) {
+func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*typeChecker) (genSpecs []*genSpec) {
 	if len(typeArgs) > 0 && opts.All {
 		addError(fmt.Sprintf("you've specified a type as well as the -all option; please choose one or the other"))
 	}
 
+	// 1. gather up info on types to be gen'd; strictly parsing, no validation
 	typeSpecs := make([]*typeSpec, 0)
 
 	for _, typeArg := range typeArgs {
-		tc := typeCheckers[typeArg.Package()]
-		t, err := tc.getTypeSpec(typeArg.LocalName()) // type checker is already package-specific
-		if err != nil {
-			errs = append(errs, err)
-		} else {
-			typeSpecs = append(typeSpecs, &t)
+		p := typeString(typeArg).Package()
+		tc, ok := typeCheckers[p]
+
+		if !ok {
+			addError(fmt.Sprintf("no typeChecker found for package %s", p))
 		}
+
+		typeSpecs = append(typeSpecs, tc.getTypeSpec(typeArg))
 	}
 
 	if opts.All {
-		for _, tc := range typeCheckers {
+		for p, tc := range typeCheckers {
 			for k := range tc.typeDocs {
 				if !opts.ExportedOnly || ast.IsExported(k) {
-					t, err := tc.getTypeSpec(opts.AllPointer + k)
-					if err != nil {
-						errs = append(errs, err)
-					} else {
-						typeSpecs = append(typeSpecs, &t)
-					}
+					typeSpecs = append(typeSpecs, tc.getTypeSpec(opts.AllPointer+p+"."+k))
 				}
 			}
 		}
 	}
 
+	// 2. create specs including type validation
 	for _, t := range typeSpecs {
-		fmt.Println(t.Type.String() + " is:")
-		switch x := t.Type.(type) {
-		case *types.Pointer:
-			fmt.Println("Pointer")
-		case *types.Named:
-			fmt.Println("Named")
-		default:
-			fmt.Println("dunno")
-			fmt.Println(x)
+		g := newGenSpec(t.Pointer, t.Package, t.Name)
+
+		var stdMethods, prjMethods []string
+
+		if len(t.SubsettedMethods) > 0 {
+			for _, m := range t.SubsettedMethods {
+				if isProjectionMethod(m) {
+					prjMethods = append(prjMethods, m)
+				}
+				if isStandardMethod(m) {
+					stdMethods = append(stdMethods, m)
+				}
+				if !isProjectionMethod(m) && !isStandardMethod(m) {
+					addError(fmt.Sprintf("method %s (subsetted on type %s) is unknown", m, g.Type()))
+				}
+			}
+
+			if len(t.ProjectedTypes) > 0 && len(prjMethods) == 0 {
+				addError(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", g.Type()))
+			}
+
+			if len(prjMethods) > 0 && len(t.ProjectedTypes) == 0 {
+				addError(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", g.Type()))
+			}
+		} else {
+			stdMethods = getStandardMethodKeys()
+			if len(t.ProjectedTypes) > 0 {
+				prjMethods = getProjectionMethodKeys()
+			}
 		}
-	}
 
-	for _, g := range genSpecs {
-		g.DetermineImports()
-	}
+		g.Methods = stdMethods
 
-	return
-}
+		for _, s := range t.ProjectedTypes {
+			tc := typeCheckers[t.Package]
+			isNumeric := false
 
-func populateGenSpec(g *genSpec, allTypes map[string]*typeSpec) {
-	var subsettedMethods, standardMethods, projectionMethods, projectedTypes []string
-
-	key := joinName("", g.Singular)
-	typ, known := allTypes[key]
-
-	if known {
-		projectedTypes = getProjectionTypes(typ)
-		subsettedMethods = getSubsettedMethods(typ)
-		for _, m := range subsettedMethods {
-			if isProjectionMethod(m) {
-				projectionMethods = append(projectionMethods, m)
+			typ, err := tc.eval(s)
+			if err != nil {
+				errs = append(errs, err)
 			} else {
-				standardMethods = append(standardMethods, m)
+				switch u := typ.Underlying().(type) {
+				case *types.Basic:
+					isNumeric = u.Info()|types.IsNumeric == types.IsNumeric
+				}
+			}
+
+			for _, m := range prjMethods {
+				pm, ok := projectionMethods[m]
+
+				if !ok {
+					addError(fmt.Sprintf("unknown projection method %v", m))
+					continue
+				}
+
+				if !pm.requiresNumeric || isNumeric || opts.Force {
+					g.Projections = append(g.Projections, &projection{m, s, g})
+				}
 			}
 		}
-	} else {
-		addError(fmt.Sprintf("%s is not a known type", key))
+
+		g.DetermineImports()
+
+		genSpecs = append(genSpecs, g)
 	}
 
-	if len(subsettedMethods) > 0 {
-		g.Methods = standardMethods
-		if len(projectedTypes) > 0 {
-			if len(projectionMethods) == 0 { // TODO: reduce nesting
-				addError(fmt.Sprintf("you've included projection types without specifying projection methods on %s", key))
-			}
-			g.Projections = getProjectionSpecs(g, projectionMethods, projectedTypes)
-		}
-	} else {
-		g.Methods = getStandardMethodKeys()
-		if len(projectedTypes) > 0 {
-			g.Projections = getProjectionSpecs(g, getProjectionMethodKeys(), projectedTypes)
-		}
-	}
-}
-
-func getProjectionSpecs(g *genSpec, methods []string, types []string) (result []*projection) {
-	for _, m := range methods {
-		for _, t := range types {
-			result = append(result, &projection{m, t, g})
-		}
-	}
 	return
-}
-
-func joinName(pkg, name string) string {
-	return fmt.Sprintf("%s.%s", pkg, name)
-}
-
-func splitName(s string) (string, string) {
-	names := strings.Split(s, ".")
-	return names[0], names[1]
 }
 
 func writeFile(genSpecs []*genSpec, opts *options) {

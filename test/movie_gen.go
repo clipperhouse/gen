@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Mon, 30 Dec 2013 04:37:07 UTC
+// Sat, 04 Jan 2014 23:20:33 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -220,7 +220,7 @@ func (rcv Movies) AverageInt(fn func(*Movie) int) (result int, err error) {
 	for _, v := range rcv {
 		result += fn(v)
 	}
-	result = result / l
+	result = result / int(l)
 	return
 }
 
