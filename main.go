@@ -143,13 +143,13 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 	}
 
 	// 2. create specs including type validation
-	for _, t := range typs {
-		g := newGenSpec(t)
+	for _, typ := range typs {
+		g := newGenSpec(typ)
 
 		var stdMethods, prjMethods []string
 
-		if len(t.SubsettedMethods) > 0 {
-			for _, m := range t.SubsettedMethods {
+		if len(typ.SubsettedMethods) > 0 {
+			for _, m := range typ.SubsettedMethods {
 				if isProjectionMethod(m) {
 					prjMethods = append(prjMethods, m)
 				}
@@ -161,33 +161,57 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 				}
 			}
 
-			if len(t.ProjectedTypes) > 0 && len(prjMethods) == 0 {
+			if len(typ.ProjectedTypes) > 0 && len(prjMethods) == 0 {
 				addError(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", g.Type()))
 			}
 
-			if len(prjMethods) > 0 && len(t.ProjectedTypes) == 0 {
+			if len(prjMethods) > 0 && len(typ.ProjectedTypes) == 0 {
 				addError(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", g.Type()))
 			}
 		} else {
 			stdMethods = getStandardMethodKeys()
-			if len(t.ProjectedTypes) > 0 {
+			if len(typ.ProjectedTypes) > 0 {
 				prjMethods = getProjectionMethodKeys()
 			}
 		}
 
 		g.Methods = stdMethods
 
-		for _, s := range t.ProjectedTypes {
-			p := packages[t.Package]
-			isNumeric := false
+		for _, s := range typ.ProjectedTypes {
+			p := packages[typ.Package]
 
-			typ, err := p.Eval(s)
+			isNumeric := false
+			isEquatable := true
+			isComparable := true
+
+			t, err := p.Eval(s)
+			knownType := err == nil
+
 			if err != nil {
-				errs = append(errs, err)
+				addError(fmt.Sprintf("unable to make sense of %s, projected on %s (%s)", s, typ, err))
+				// errs = append(errs, err)
 			} else {
-				switch u := typ.Underlying().(type) {
-				case *types.Basic:
-					isNumeric = u.Info()|types.IsNumeric == types.IsNumeric
+				switch x := t.(type) {
+				case *types.Slice:
+					isEquatable = false
+					isComparable = false
+				case *types.Array:
+					isEquatable = false
+					isComparable = false
+				case *types.Chan:
+					isEquatable = false
+					isComparable = false
+				case *types.Map:
+					isEquatable = false
+					isComparable = false
+				case *types.Struct:
+					isEquatable = true
+					isComparable = false
+				default:
+					switch u := x.Underlying().(type) {
+					case *types.Basic:
+						isNumeric = u.Info()|types.IsNumeric == types.IsNumeric
+					}
 				}
 			}
 
@@ -199,7 +223,9 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 					continue
 				}
 
-				if !pm.requiresNumeric || isNumeric || opts.Force {
+				valid := (knownType || opts.Force) && (!pm.requiresNumeric || isNumeric) && (!pm.requiresEquatable || isEquatable) && (!pm.requiresComparable || isComparable)
+
+				if valid {
 					g.Projections = append(g.Projections, &projection{m, s, g})
 				}
 			}

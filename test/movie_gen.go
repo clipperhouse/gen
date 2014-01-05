@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 05 Jan 2014 05:35:46 UTC
+// Sun, 05 Jan 2014 23:36:05 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -272,7 +272,7 @@ func (rcv Movies) MinInt(fn func(*Movie) int) (result int, err error) {
 	return
 }
 
-// Returns a slice containing all values of SelectInt in Movies. See: http://clipperhouse.github.io/gen/#Select
+// Returns a slice of int in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv Movies) SelectInt(fn func(*Movie) int) (result []int) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
@@ -280,10 +280,112 @@ func (rcv Movies) SelectInt(fn func(*Movie) int) (result []int) {
 	return
 }
 
-// Sums SumInt over all elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
+// Sums int over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
 func (rcv Movies) SumInt(fn func(*Movie) int) (result int) {
 	for _, v := range rcv {
 		result += fn(v)
+	}
+	return
+}
+
+// Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+func (rcv Movies) AggregateThing2(fn func(Thing2, *Movie) Thing2) (result Thing2) {
+	for _, v := range rcv {
+		result = fn(result, v)
+	}
+	return
+}
+
+// Sums Thing2 over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
+func (rcv Movies) AverageThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine AverageThing2 of zero-length Movies")
+		return
+	}
+	for _, v := range rcv {
+		result += fn(v)
+	}
+	result = result / Thing2(l)
+	return
+}
+
+// Groups elements into a map keyed by Thing2. See: http://clipperhouse.github.io/gen/#GroupBy
+func (rcv Movies) GroupByThing2(fn func(*Movie) Thing2) map[Thing2]Movies {
+	result := make(map[Thing2]Movies)
+	for _, v := range rcv {
+		key := fn(v)
+		result[key] = append(result[key], v)
+	}
+	return result
+}
+
+// Selects the largest value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+func (rcv Movies) MaxThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MaxThing2 of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f > result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Selects the least value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+func (rcv Movies) MinThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MinThing2 of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f < result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Returns a slice of Thing2 in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+func (rcv Movies) SelectThing2(fn func(*Movie) Thing2) (result []Thing2) {
+	for _, v := range rcv {
+		result = append(result, fn(v))
+	}
+	return
+}
+
+// Sums Thing2 over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
+func (rcv Movies) SumThing2(fn func(*Movie) Thing2) (result Thing2) {
+	for _, v := range rcv {
+		result += fn(v)
+	}
+	return
+}
+
+// Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+func (rcv Movies) AggregateMapStringInt(fn func(map[string]int, *Movie) map[string]int) (result map[string]int) {
+	for _, v := range rcv {
+		result = fn(result, v)
+	}
+	return
+}
+
+// Returns a slice of map[string]int in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+func (rcv Movies) SelectMapStringInt(fn func(*Movie) map[string]int) (result []map[string]int) {
+	for _, v := range rcv {
+		result = append(result, fn(v))
 	}
 	return
 }

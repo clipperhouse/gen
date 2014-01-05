@@ -16,7 +16,7 @@ import (
 const (
 	tagPattern        = `([\p{L}\p{N},]+)`
 	getTagPattern     = `gen:"` + tagPattern + `"`
-	projectTagPattern = `project:"` + tagPattern + `"`
+	projectTagPattern = `project:"(.+)"`
 )
 
 type Package struct {
