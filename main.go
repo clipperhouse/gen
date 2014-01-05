@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"os"
-	"regexp"
 	"strings"
 
 	_ "code.google.com/p/go.tools/go/gcimporter"
@@ -53,12 +52,11 @@ func main() {
 	writeFile(genSpecs, opts)
 }
 
-func getTypeArgs(args []string) (typeArgs []string) {
-	regex := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
-
+func getTypeArgs(args []string) (result []*typeArg) {
 	for _, s := range args {
-		if regex.MatchString(s) {
-			typeArgs = append(typeArgs, s)
+		t, err := newTypeArg(s) // error is ok, indicates it's not a type argument
+		if err == nil {
+			result = append(result, t)
 		}
 	}
 
@@ -105,7 +103,7 @@ func addError(text string) {
 	errs = append(errs, errors.New(text))
 }
 
-func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package) (genSpecs []*genSpec) {
+func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Package) (genSpecs []*genSpec) {
 	if len(typeArgs) > 0 && opts.All {
 		addError(fmt.Sprintf("you've specified a type as well as the -all option; please choose one or the other"))
 	}
@@ -113,21 +111,19 @@ func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package)
 	// 1. gather up info on types to be gen'd; strictly parsing, no validation
 	typs := make([]*Type, 0)
 
-	for _, typeArg := range typeArgs {
-		ts := typeString(typeArg)
-
-		p, ok := packages[ts.Package()]
+	for _, t := range typeArgs {
+		p, ok := packages[t.Package]
 
 		if ok {
-			t, err := p.GetType(typeArg)
+			typ, err := p.GetType(t)
 			if err != nil {
 				errs = append(errs, err)
 			}
-			typs = append(typs, t)
+			typs = append(typs, typ)
 		} else {
-			addError(fmt.Sprintf("%s is not a known package", ts.Package()))
-			t := &Type{Pointer: ts.Pointer(), Package: ts.Package(), Name: ts.Name()}
-			typs = append(typs, t)
+			addError(fmt.Sprintf("%s is not a known package", t.Package))
+			typ := newType(t)
+			typs = append(typs, typ)
 		}
 	}
 
@@ -135,12 +131,12 @@ func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package)
 		for k, p := range packages {
 			for s := range p.TypeNamesAndDocs {
 				if !opts.ExportedOnly || ast.IsExported(s) {
-					t, err := p.GetType(opts.AllPointer + k + "." + s)
+					t := &typeArg{opts.AllPointer, k, s}
+					typ, err := p.GetType(t)
 					if err != nil {
 						errs = append(errs, err)
 					}
-
-					typs = append(typs, t)
+					typs = append(typs, typ)
 				}
 			}
 		}
@@ -148,7 +144,7 @@ func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package)
 
 	// 2. create specs including type validation
 	for _, t := range typs {
-		g := newGenSpec(t.Pointer, t.Package, t.Name)
+		g := newGenSpec(t)
 
 		var stdMethods, prjMethods []string
 
