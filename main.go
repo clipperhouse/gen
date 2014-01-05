@@ -114,20 +114,33 @@ func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package)
 	typs := make([]*Type, 0)
 
 	for _, typeArg := range typeArgs {
-		p, ok := packages[typeString(typeArg).Package()]
+		ts := typeString(typeArg)
 
-		if !ok {
-			addError(fmt.Sprintf("no Package found for package %s", typeString(typeArg).Package()))
+		p, ok := packages[ts.Package()]
+
+		if ok {
+			t, err := p.GetType(typeArg)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			typs = append(typs, t)
+		} else {
+			addError(fmt.Sprintf("%s is not a known package", ts.Package()))
+			t := &Type{Pointer: ts.Pointer(), Package: ts.Package(), Name: ts.Name()}
+			typs = append(typs, t)
 		}
-
-		typs = append(typs, p.GetType(typeArg))
 	}
 
 	if opts.All {
 		for k, p := range packages {
-			for t := range p.TypeNamesAndDocs {
-				if !opts.ExportedOnly || ast.IsExported(t) {
-					typs = append(typs, p.GetType(opts.AllPointer+k+"."+t))
+			for s := range p.TypeNamesAndDocs {
+				if !opts.ExportedOnly || ast.IsExported(s) {
+					t, err := p.GetType(opts.AllPointer + k + "." + s)
+					if err != nil {
+						errs = append(errs, err)
+					}
+
+					typs = append(typs, t)
 				}
 			}
 		}

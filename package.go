@@ -24,10 +24,14 @@ type Package struct {
 	TypeNamesAndDocs map[string]string // docs keyed by type name
 }
 
-func (p *Package) GetType(s string) *Type {
+func (p *Package) GetType(s string) (result *Type, err error) {
 	ts := typeString(s)
 
-	doc := p.TypeNamesAndDocs[ts.Name()]
+	doc, found := p.TypeNamesAndDocs[ts.Name()]
+
+	if !found {
+		err = errors.New(fmt.Sprintf("%s is not a known type in the current directory", ts))
+	}
 
 	var subsettedMethods []string
 	genTag := regexp.MustCompile(getTagPattern)
@@ -43,9 +47,8 @@ func (p *Package) GetType(s string) *Type {
 		projectedTypes = strings.Split(projectMatch[1], ",")
 	}
 
-	result := &Type{ts.Pointer(), ts.Package(), ts.Name(), subsettedMethods, projectedTypes}
-
-	return result
+	result = &Type{ts.Pointer(), ts.Package(), ts.Name(), subsettedMethods, projectedTypes}
+	return
 }
 
 func (p *Package) Eval(s string) (typ types.Type, err error) {
@@ -54,7 +57,8 @@ func (p *Package) Eval(s string) (typ types.Type, err error) {
 		return
 	}
 
-	typ, _, err = types.Eval(s, p.p, p.p.Scope())
+	ts := typeString(s)
+	typ, _, err = types.Eval(ts.LocalName(), p.p, p.p.Scope())
 	return typ, err
 }
 
