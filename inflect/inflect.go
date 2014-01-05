@@ -57,7 +57,7 @@ func NewRuleset() *Ruleset {
 // set of common English pluralization rules
 func NewDefaultRuleset() *Ruleset {
 	rs := NewRuleset()
-	rs.AddPlural("s", "s")
+	rs.AddPlural("s", "ses")
 	rs.AddPlural("testis", "testes")
 	rs.AddPlural("axis", "axes")
 	rs.AddPlural("octopus", "octopi")
