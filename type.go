@@ -1,6 +1,6 @@
 package main
 
-type typeSpec struct {
+type Type struct {
 	Pointer          string
 	Package          string
 	Name             string

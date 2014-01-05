@@ -111,7 +111,7 @@ func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*type
 	}
 
 	// 1. gather up info on types to be gen'd; strictly parsing, no validation
-	typeSpecs := make([]*typeSpec, 0)
+	typs := make([]*Type, 0)
 
 	for _, typeArg := range typeArgs {
 		p := typeString(typeArg).Package()
@@ -121,21 +121,21 @@ func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*type
 			addError(fmt.Sprintf("no typeChecker found for package %s", p))
 		}
 
-		typeSpecs = append(typeSpecs, tc.getTypeSpec(typeArg))
+		typs = append(typs, tc.getType(typeArg))
 	}
 
 	if opts.All {
 		for p, tc := range typeCheckers {
 			for k := range tc.typeDocs {
 				if !opts.ExportedOnly || ast.IsExported(k) {
-					typeSpecs = append(typeSpecs, tc.getTypeSpec(opts.AllPointer+p+"."+k))
+					typs = append(typs, tc.getType(opts.AllPointer+p+"."+k))
 				}
 			}
 		}
 	}
 
 	// 2. create specs including type validation
-	for _, t := range typeSpecs {
+	for _, t := range typs {
 		g := newGenSpec(t.Pointer, t.Package, t.Name)
 
 		var stdMethods, prjMethods []string

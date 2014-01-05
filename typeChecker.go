@@ -24,7 +24,7 @@ type typeChecker struct {
 	typeDocs map[string]string // docs keyed by type name
 }
 
-func (t *typeChecker) getTypeSpec(s string) *typeSpec {
+func (t *typeChecker) getType(s string) *Type {
 	ts := typeString(s)
 
 	doc := t.typeDocs[ts.Name()]
@@ -43,7 +43,7 @@ func (t *typeChecker) getTypeSpec(s string) *typeSpec {
 		projectedTypes = strings.Split(projectMatch[1], ",")
 	}
 
-	result := &typeSpec{ts.Pointer(), ts.Package(), ts.Name(), subsettedMethods, projectedTypes}
+	result := &Type{ts.Pointer(), ts.Package(), ts.Name(), subsettedMethods, projectedTypes}
 
 	return result
 }
