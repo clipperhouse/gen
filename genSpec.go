@@ -31,7 +31,7 @@ func newGenSpec(ptr, pkg, name string) *genSpec {
 		Pointer:   ptr,
 		Package:   pkg,
 		Singular:  name,
-		Plural:    inflect.Pluralize(name),
+		Plural:    plural,
 		Receiver:  "rcv",
 		Loop:      "v",
 		Generated: time.Now().UTC().Format(time.RFC1123),
