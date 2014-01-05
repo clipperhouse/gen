@@ -19,15 +19,15 @@ const (
 	projectTagPattern = `project:"` + tagPattern + `"`
 )
 
-type typeChecker struct {
-	p        *types.Package
-	typeDocs map[string]string // docs keyed by type name
+type Package struct {
+	p                *types.Package    // only intended for internal use with Eval() below
+	TypeNamesAndDocs map[string]string // docs keyed by type name
 }
 
-func (t *typeChecker) getType(s string) *Type {
+func (p *Package) GetType(s string) *Type {
 	ts := typeString(s)
 
-	doc := t.typeDocs[ts.Name()]
+	doc := p.TypeNamesAndDocs[ts.Name()]
 
 	var subsettedMethods []string
 	genTag := regexp.MustCompile(getTagPattern)
@@ -48,25 +48,25 @@ func (t *typeChecker) getType(s string) *Type {
 	return result
 }
 
-func (t *typeChecker) eval(s string) (typ types.Type, err error) {
-	if t.p == nil {
+func (p *Package) Eval(s string) (typ types.Type, err error) {
+	if p.p == nil {
 		err = errors.New(fmt.Sprintf("unable to evaluate type %s", s))
 		return
 	}
 
-	typ, _, err = types.Eval(s, t.p, t.p.Scope())
+	typ, _, err = types.Eval(s, p.p, p.p.Scope())
 	return typ, err
 }
 
-// Returns one type checker per package found in current directory
-func getTypeCheckers() (result map[string]*typeChecker) {
+// Returns one gen Package per Go package found in current directory, keyed by name
+func getPackages() (result map[string]*Package) {
 	fset := token.NewFileSet()
 	dir, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	result = make(map[string]*typeChecker)
+	result = make(map[string]*Package)
 
 	for k, v := range dir {
 		files := make([]*ast.File, 0)
@@ -85,7 +85,7 @@ func getTypeCheckers() (result map[string]*typeChecker) {
 			typeDocs[t.Name] = t.Doc
 		}
 
-		result[k] = &typeChecker{p, typeDocs}
+		result[k] = &Package{p, typeDocs}
 	}
 
 	return

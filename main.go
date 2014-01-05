@@ -30,8 +30,8 @@ func main() {
 
 	opts := getOptions(args)
 	typeArgs := getTypeArgs(args)
-	tc := getTypeCheckers()
-	genSpecs := getGenSpecs(opts, typeArgs, tc)
+	packages := getPackages()
+	genSpecs := getGenSpecs(opts, typeArgs, packages)
 
 	for _, n := range notes {
 		fmt.Println("  note: " + n)
@@ -105,7 +105,7 @@ func addError(text string) {
 	errs = append(errs, errors.New(text))
 }
 
-func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*typeChecker) (genSpecs []*genSpec) {
+func getGenSpecs(opts *options, typeArgs []string, packages map[string]*Package) (genSpecs []*genSpec) {
 	if len(typeArgs) > 0 && opts.All {
 		addError(fmt.Sprintf("you've specified a type as well as the -all option; please choose one or the other"))
 	}
@@ -114,21 +114,20 @@ func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*type
 	typs := make([]*Type, 0)
 
 	for _, typeArg := range typeArgs {
-		p := typeString(typeArg).Package()
-		tc, ok := typeCheckers[p]
+		p, ok := packages[typeString(typeArg).Package()]
 
 		if !ok {
-			addError(fmt.Sprintf("no typeChecker found for package %s", p))
+			addError(fmt.Sprintf("no Package found for package %s", typeString(typeArg).Package()))
 		}
 
-		typs = append(typs, tc.getType(typeArg))
+		typs = append(typs, p.GetType(typeArg))
 	}
 
 	if opts.All {
-		for p, tc := range typeCheckers {
-			for k := range tc.typeDocs {
-				if !opts.ExportedOnly || ast.IsExported(k) {
-					typs = append(typs, tc.getType(opts.AllPointer+p+"."+k))
+		for k, p := range packages {
+			for t := range p.TypeNamesAndDocs {
+				if !opts.ExportedOnly || ast.IsExported(t) {
+					typs = append(typs, p.GetType(opts.AllPointer+k+"."+t))
 				}
 			}
 		}
@@ -170,10 +169,10 @@ func getGenSpecs(opts *options, typeArgs []string, typeCheckers map[string]*type
 		g.Methods = stdMethods
 
 		for _, s := range t.ProjectedTypes {
-			tc := typeCheckers[t.Package]
+			p := packages[t.Package]
 			isNumeric := false
 
-			typ, err := tc.eval(s)
+			typ, err := p.Eval(s)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
