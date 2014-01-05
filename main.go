@@ -4,9 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/doc"
-	"go/parser"
-	"go/token"
 	"os"
 	"regexp"
 	"strings"
@@ -63,63 +60,6 @@ func getTypeArgs(args []string) (typeArgs []string) {
 		if regex.MatchString(s) {
 			typeArgs = append(typeArgs, s)
 		}
-	}
-
-	return
-}
-
-func getOptions(args []string) *options {
-	opts := &options{}
-
-	allOption := regexp.MustCompile(`^-(\*?)a(ll)?$`)
-	exportedOption := regexp.MustCompile(`^-e(xported)?$`)
-	forceOption := regexp.MustCompile(`^-f(orce)?$`)
-
-	for _, a := range args {
-		allMatches := allOption.FindStringSubmatch(a)
-		if allMatches != nil {
-			opts.All = true
-			opts.AllPointer = allMatches[1]
-		}
-		if exportedOption.MatchString(a) {
-			opts.ExportedOnly = true
-		}
-		if forceOption.MatchString(a) {
-			opts.Force = true
-		}
-	}
-
-	return opts
-}
-
-// Returns one type checker per package found in current directory
-func getTypeCheckers() (result map[string]*typeChecker) {
-	fset := token.NewFileSet()
-	dir, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	result = make(map[string]*typeChecker)
-
-	for k, v := range dir {
-		files := make([]*ast.File, 0)
-		for _, f := range v.Files {
-			files = append(files, f)
-		}
-
-		p, err := types.Check(k, fset, files)
-		if err != nil {
-			errs = append(errs, err)
-		}
-
-		d := doc.New(v, k, doc.AllDecls)
-		typeDocs := make(map[string]string)
-		for _, t := range d.Types {
-			typeDocs[t.Name] = t.Doc
-		}
-
-		result[k] = &typeChecker{p, typeDocs}
 	}
 
 	return
