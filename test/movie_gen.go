@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Thu, 12 Dec 2013 02:55:49 UTC
+// Mon, 06 Jan 2014 23:29:08 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -76,6 +76,19 @@ func (rcv Movies) Each(fn func(*Movie)) {
 	for _, v := range rcv {
 		fn(v)
 	}
+}
+
+// Tests that all elements of one Movies match the corresponding elements of another Movies. See: http://clipperhouse.github.io/gen/#Equals
+func (rcv Movies) Equals(other Movies) bool {
+	if len(rcv) != len(other) {
+		return false
+	}
+	for i, v := range rcv {
+		if v != other[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // Returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First

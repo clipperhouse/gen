@@ -557,6 +557,37 @@ func getTests() map[string][]test {
 			false,
 		},
 	}
+
+	tests["Equals"] = []test{
+		test{
+			func() (interface{}, error) {
+				return none.Equals(none), nil
+			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.Equals(many), nil
+			},
+			true,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return many.Equals(Movies{first, second}), nil
+			},
+			false,
+			false,
+		},
+		test{
+			func() (interface{}, error) {
+				return Movies{first, third}.Equals(Movies{first, second}), nil
+			},
+			false,
+			false,
+		},
+	}
 	return tests
 }
 

@@ -47,6 +47,20 @@ func getStandardTemplate(name string) (result *template.Template, err error) {
 }
 
 var standardTemplates = map[string]string{
+	"Equals": `
+// Tests that all elements of one {{.Plural}} match the corresponding elements of another {{.Plural}}. See: http://clipperhouse.github.io/gen/#Equals
+func ({{.Receiver}} {{.Plural}}) Equals(other {{.Plural}}) bool {
+	if len({{.Receiver}}) != len(other) {
+		return false
+	}
+	for i, v := range rcv {
+		if v != other[i] {
+			return false
+		}
+	}
+	return true
+}
+`,
 	"All": `
 // Tests that all elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func ({{.Receiver}} {{.Plural}}) All(fn func({{.Pointer}}{{.Singular}}) bool) bool {
