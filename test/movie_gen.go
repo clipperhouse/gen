@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 05 Jan 2014 23:36:05 UTC
+// Tue, 07 Jan 2014 03:27:28 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -375,15 +375,63 @@ func (rcv Movies) SumThing2(fn func(*Movie) Thing2) (result Thing2) {
 }
 
 // Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
-func (rcv Movies) AggregateMapStringInt(fn func(map[string]int, *Movie) map[string]int) (result map[string]int) {
+func (rcv Movies) AggregateString(fn func(string, *Movie) string) (result string) {
 	for _, v := range rcv {
 		result = fn(result, v)
 	}
 	return
 }
 
-// Returns a slice of map[string]int in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
-func (rcv Movies) SelectMapStringInt(fn func(*Movie) map[string]int) (result []map[string]int) {
+// Groups elements into a map keyed by string. See: http://clipperhouse.github.io/gen/#GroupBy
+func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
+	result := make(map[string]Movies)
+	for _, v := range rcv {
+		key := fn(v)
+		result[key] = append(result[key], v)
+	}
+	return result
+}
+
+// Selects the largest value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+func (rcv Movies) MaxString(fn func(*Movie) string) (result string, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MaxString of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f > result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Selects the least value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+func (rcv Movies) MinString(fn func(*Movie) string) (result string, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine MinString of zero-length Movies")
+		return
+	}
+	result = fn(rcv[0])
+	if l > 1 {
+		for _, v := range rcv[1:] {
+			f := fn(v)
+			if f < result {
+				result = f
+			}
+		}
+	}
+	return
+}
+
+// Returns a slice of string in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+func (rcv Movies) SelectString(fn func(*Movie) string) (result []string) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
 	}

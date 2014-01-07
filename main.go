@@ -178,18 +178,16 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 		g.Methods = stdMethods
 
 		for _, s := range typ.ProjectedTypes {
-			p := packages[typ.Package]
-
 			isNumeric := false
 			isEquatable := true
 			isComparable := true
 
+			p := packages[typ.Package]
 			t, err := p.Eval(s)
 			knownType := err == nil
 
 			if err != nil {
-				addError(fmt.Sprintf("unable to make sense of %s, projected on %s (%s)", s, typ, err))
-				// errs = append(errs, err)
+				addError(fmt.Sprintf("unable identify type %s, projected on %s (%s)", s, typ, err))
 			} else {
 				switch x := t.(type) {
 				case *types.Slice:
@@ -211,6 +209,7 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 					switch u := x.Underlying().(type) {
 					case *types.Basic:
 						isNumeric = u.Info()|types.IsNumeric == types.IsNumeric
+						isComparable = u.Info()|types.IsOrdered == types.IsOrdered
 					}
 				}
 			}

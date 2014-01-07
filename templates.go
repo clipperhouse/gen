@@ -528,7 +528,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 	}
 	return
 }
-`, true, true, true},
+`, false, false, true},
 	"Min": &projectionMethod{`
 // Selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
@@ -548,7 +548,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 	}
 	return
 }
-`, true, true, true},
+`, false, false, true},
 	"Select": &projectionMethod{`
 // Returns a slice of {{.Type}} in {{.Parent.Plural}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result []{{.Type}}) {
