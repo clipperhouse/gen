@@ -179,7 +179,7 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 
 		for _, s := range typ.ProjectedTypes {
 			isNumeric := false
-			isEquatable := true
+			isComparable := true
 			isOrdered := true
 
 			p := packages[typ.Package]
@@ -191,19 +191,19 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 			} else {
 				switch x := t.(type) {
 				case *types.Slice:
-					isEquatable = false
+					isComparable = false
 					isOrdered = false
 				case *types.Array:
-					isEquatable = false
+					isComparable = false
 					isOrdered = false
 				case *types.Chan:
-					isEquatable = false
+					isComparable = false
 					isOrdered = false
 				case *types.Map:
-					isEquatable = false
+					isComparable = false
 					isOrdered = false
 				case *types.Struct:
-					isEquatable = true
+					isComparable = true
 					isOrdered = false
 				default:
 					switch u := x.Underlying().(type) {
@@ -222,7 +222,7 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 					continue
 				}
 
-				valid := (knownType || opts.Force) && (!pm.requiresNumeric || isNumeric) && (!pm.requiresEquatable || isEquatable) && (!pm.requiresOrdered || isOrdered)
+				valid := (knownType || opts.Force) && (!pm.requiresNumeric || isNumeric) && (!pm.requiresComparable || isComparable) && (!pm.requiresOrdered || isOrdered)
 
 				if valid {
 					g.Projections = append(g.Projections, &projection{m, s, g})
