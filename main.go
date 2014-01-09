@@ -187,7 +187,7 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 			knownType := err == nil
 
 			if err != nil {
-				addError(fmt.Sprintf("unable identify type %s, projected on %s (%s)", s, typ, err))
+				addError(fmt.Sprintf("unable to identify type %s, projected on %s (%s)", s, typ, err))
 			} else {
 				switch x := t.(type) {
 				case *types.Slice:

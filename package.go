@@ -51,7 +51,10 @@ func (p *Package) GetType(t *typeArg) (result *Type, err error) {
 
 func (p *Package) Eval(s string) (typ types.Type, err error) {
 	if p.p == nil {
-		err = errors.New(fmt.Sprintf("unable to evaluate type %s", s))
+		typ, _, err = types.Eval(s, nil, types.Universe)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("unable to evaluate type %s", s))
+		}
 		return
 	}
 
