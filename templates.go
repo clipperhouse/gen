@@ -467,10 +467,10 @@ func getProjectionTemplate(name string) (result *template.Template, err error) {
 }
 
 type projectionMethod struct {
-	template           string
-	requiresNumeric    bool
-	requiresEquatable  bool
-	requiresComparable bool
+	template          string
+	requiresNumeric   bool
+	requiresEquatable bool
+	requiresOrdered   bool
 }
 
 var projectionMethods = map[string]*projectionMethod{
