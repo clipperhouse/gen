@@ -27,8 +27,16 @@ func main() {
 		return
 	}
 
-	opts := getOptions(args)
-	typeArgs := getTypeArgs(args)
+	typeArgs, opts, errs := parseArgs(args)
+
+	if len(errs) > 0 {
+		for _, err := range errs {
+			fmt.Println(err)
+		}
+		fmt.Println("type 'gen' to see usage")
+		return // command-line errors are fatal, other errors can be forced
+	}
+
 	packages := getPackages()
 	genSpecs := getGenSpecs(opts, typeArgs, packages)
 
@@ -50,17 +58,6 @@ func main() {
 	}
 
 	writeFile(genSpecs, opts)
-}
-
-func getTypeArgs(args []string) (result []*typeArg) {
-	for _, s := range args {
-		t, err := newTypeArg(s) // error is ok, indicates it's not a type argument
-		if err == nil {
-			result = append(result, t)
-		}
-	}
-
-	return
 }
 
 func (g *genSpec) DetermineImports() {
