@@ -101,10 +101,6 @@ func addError(text string) {
 }
 
 func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Package) (genSpecs []*genSpec) {
-	if len(typeArgs) > 0 && opts.All {
-		addError(fmt.Sprintf("you've specified a type as well as the -all option; please choose one or the other"))
-	}
-
 	// 1. gather up info on types to be gen'd; strictly parsing, no validation
 	typs := make([]*Type, 0)
 
