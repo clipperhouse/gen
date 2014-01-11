@@ -108,9 +108,9 @@ func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package
 		p, ok := packages[t.Package]
 
 		if ok {
-			typ, err := p.GetType(t)
-			if err != nil {
-				errs = append(errs, err)
+			typ, e := p.GetType(t)
+			if len(e) > 0 {
+				errs = append(errs, e...)
 			}
 			typs = append(typs, typ)
 		} else {
@@ -125,9 +125,9 @@ func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package
 			for s := range p.TypeNamesAndDocs {
 				if !opts.ExportedOnly || ast.IsExported(s) {
 					t := &typeArg{opts.AllPointer, k, s}
-					typ, err := p.GetType(t)
-					if err != nil {
-						errs = append(errs, err)
+					typ, e := p.GetType(t)
+					if len(e) > 0 {
+						errs = append(errs, e...)
 					}
 					typs = append(typs, typ)
 				}

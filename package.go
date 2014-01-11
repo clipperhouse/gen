@@ -24,11 +24,11 @@ type Package struct {
 	TypeNamesAndDocs map[string]string // docs keyed by type name
 }
 
-func (p *Package) GetType(t *typeArg) (result *Type, err error) {
+func (p *Package) GetType(t *typeArg) (result *Type, errs []error) {
 	doc, found := p.TypeNamesAndDocs[t.Name]
 
 	if !found {
-		err = errors.New(fmt.Sprintf("%s is not a known type in the current directory", t))
+		errs = append(errs, errors.New(fmt.Sprintf("%s is not a known type in the current directory", t)))
 	}
 
 	var subsettedMethods []string
@@ -36,6 +36,10 @@ func (p *Package) GetType(t *typeArg) (result *Type, err error) {
 	genMatch := genTag.FindStringSubmatch(doc)
 	if genMatch != nil && len(genMatch) > 1 {
 		subsettedMethods = strings.Split(genMatch[1], ",")
+		d := findDuplicates(subsettedMethods)
+		if len(d) > 0 {
+			errs = append(errs, errors.New(fmt.Sprintf("duplicate subsetted method(s) found on type %s: %v", t, d)))
+		}
 	}
 
 	var projectedTypes []string
@@ -43,6 +47,10 @@ func (p *Package) GetType(t *typeArg) (result *Type, err error) {
 	projectMatch := projectTag.FindStringSubmatch(doc)
 	if projectMatch != nil && len(projectMatch) > 1 {
 		projectedTypes = strings.Split(projectMatch[1], ",")
+		d := findDuplicates(projectedTypes)
+		if len(d) > 0 {
+			errs = append(errs, errors.New(fmt.Sprintf("duplicate projected type(s) found on type %s: %v", t, d)))
+		}
 	}
 
 	result = &Type{t, subsettedMethods, projectedTypes}
@@ -92,5 +100,17 @@ func getPackages() (result map[string]*Package) {
 		result[k] = &Package{p, typeDocs}
 	}
 
+	return
+}
+
+func findDuplicates(a []string) (result []string) {
+	found := make(map[string]bool)
+
+	for _, s := range a {
+		if found[s] {
+			result = append(result, s)
+		}
+		found[s] = true
+	}
 	return
 }
