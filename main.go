@@ -277,17 +277,20 @@ func writeFile(genSpecs []*genSpec, opts *options) {
 	}
 }
 
-const usage = `Usage: gen [[*]package.TypeName] [-[*]all] [-exported]
+const usage = `
+Usage: gen [[*]package.TypeName] [-[*]all] [-exported]
 
-  *package.TypeName    # generate funcs for specified struct type; use leading * to specify pointer type (recommended)
-  -all                 # generate all structs in current directory; use leading * to specify pointer type (recommended); shortcut -a or -*a
-  -exported            # only generate exported structs; shortcut -e
-  -force               # force generate, overriding errors; shortcut -f
+  *package.TypeName    # generate funcs for specified type; use leading * to specify pointer type (recommended)
+  -all                 # generate all types in current directory; use leading * to specify pointer type (recommended); shortcut -a or -*a
+  -exported            # only generate exported types; shortcut -e
+  -force               # force generate, overriding errors; voids warranty; shortcut -f
 
 Examples:
   gen -*models.Movie   # generates funcs for Movie type in the models package; generated Movies type is []*Movie
   gen -models.Movie    # generates funcs for Movie type; generated Movies type is []Movie
-  gen -*all            # generates funcs for all struct types in current directory, as pointers
-  gen -all             # generates funcs for all struct types in current directory, as values
-  gen -*a -e           # generates funcs for all exported struct types in current directory, as pointers
+  gen -*all            # generates funcs for all types in current directory, as pointers
+  gen -all             # generates funcs for all types in current directory, as values
+  gen -*a -e           # generates funcs for all exported types in current directory, as pointers
+
+Documentation is available at http://clipperhouse.github.io/gen
 `
