@@ -63,6 +63,10 @@ func parseArgs(args []string) (typeArgs []*typeArg, opts options, errs []error) 
 		}
 	}
 
+	if opts.ExportedOnly && !opts.All {
+		errs = append(errs, errors.New("the -e(xported) flag is only valid when used with the -a(ll) flag"))
+	}
+
 	if len(typeArgs) == 0 && !opts.All {
 		errs = append(errs, errors.New("at least one type, or the -all flag, is required"))
 	}
