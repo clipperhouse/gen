@@ -100,7 +100,7 @@ func addError(text string) {
 	errs = append(errs, errors.New(text))
 }
 
-func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Package) (genSpecs []*genSpec) {
+func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package) (genSpecs []*genSpec) {
 	// 1. gather up info on types to be gen'd; strictly parsing, no validation
 	typs := make([]*Type, 0)
 
@@ -231,7 +231,7 @@ func getGenSpecs(opts *options, typeArgs []*typeArg, packages map[string]*Packag
 	return
 }
 
-func writeFile(genSpecs []*genSpec, opts *options) {
+func writeFile(genSpecs []*genSpec, opts options) {
 	for _, g := range genSpecs {
 		file, err := os.Create(g.FileName)
 		if err != nil {

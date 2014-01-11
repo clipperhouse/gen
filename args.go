@@ -25,8 +25,8 @@ type options struct {
 	Force        bool
 }
 
-func parseArgs(args []string) (typeArgs []*typeArg, opts *options, errs []error) {
-	opts = &options{}
+func parseArgs(args []string) (typeArgs []*typeArg, opts options, errs []error) {
+	opts = options{}
 
 	typ := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
 	all := regexp.MustCompile(`^-(\*?)a(ll)?$`)
