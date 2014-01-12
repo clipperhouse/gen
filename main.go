@@ -19,13 +19,8 @@ func main() {
 		fmt.Println(usage)
 		return
 	}
-	args := os.Args[1:]
 
-	first := args[0]
-	if first == "-help" || first == "help" || first == "?" {
-		fmt.Println(usage)
-		return
-	}
+	args := os.Args[1:]
 
 	typeArgs, opts, errs := parseArgs(args)
 
