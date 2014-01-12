@@ -25,7 +25,7 @@ type options struct {
 	Force        bool
 }
 
-func parseArgs(args []string) (typeArgs []*typeArg, opts options, errs []error) {
+func parseArgs(args []string) (typeArgs []*typeArg, opts options, err error) {
 	opts = options{}
 
 	typ := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
@@ -59,20 +59,24 @@ func parseArgs(args []string) (typeArgs []*typeArg, opts options, errs []error) 
 		}
 
 		if !known {
-			errs = append(errs, errors.New("unknown argument: "+s))
+			err = errors.New("unknown argument: " + s)
+			return
 		}
 	}
 
 	if opts.ExportedOnly && !opts.All {
-		errs = append(errs, errors.New("the -e(xported) flag is only valid when used with the -a(ll) flag"))
+		err = errors.New("the -e(xported) flag is only valid as a modifier of the -a(ll) flag")
+		return
 	}
 
 	if len(typeArgs) == 0 && !opts.All {
-		errs = append(errs, errors.New("at least one type, or the -all flag, is required"))
+		err = errors.New("at least one type, or the -all flag, is required")
+		return
 	}
 
 	if len(typeArgs) > 0 && opts.All {
-		errs = append(errs, errors.New("either specify a type or use the -all flag; do not do both"))
+		err = errors.New("either specify a type or use the -all flag; do not do both")
+		return
 	}
 
 	return

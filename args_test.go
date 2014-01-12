@@ -15,7 +15,7 @@ func TestPlainTypeArg(t *testing.T) {
 
 func testTypeArg(t *testing.T, s string, num int) {
 	args := strings.Split(s, " ")
-	typeArgs, opts, errs := parseArgs(args)
+	typeArgs, opts, err := parseArgs(args)
 
 	defaultOpts := options{}
 
@@ -27,8 +27,8 @@ func testTypeArg(t *testing.T, s string, num int) {
 		t.Errorf("expected default options %v, got %v", defaultOpts, opts)
 	}
 
-	if len(errs) > 0 {
-		t.Errorf("expected no errors, got %v", errs)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }
 
@@ -106,60 +106,60 @@ func TestSynonymousFlags(t *testing.T) {
 
 func TestUnknownArgs(t *testing.T) {
 	args := strings.Split("pkg.Type -clown", " ")
-	_, _, errs := parseArgs(args)
+	_, _, err := parseArgs(args)
 
-	if len(errs) == 0 {
-		t.Errorf("expected errors for passing invalid flag, got none")
+	if err == nil {
+		t.Errorf("expected error for passing invalid flag, got none")
 	}
 
 	args2 := strings.Split("-b", " ")
-	_, _, errs2 := parseArgs(args2)
+	_, _, err2 := parseArgs(args2)
 
-	if len(errs2) == 0 {
-		t.Errorf("expected errors for passing invalid flag, got none")
+	if err2 == nil {
+		t.Errorf("expected error for passing invalid flag, got none")
 	}
 
 	args3 := strings.Split("*pkgType", " ")
-	_, _, errs3 := parseArgs(args3)
+	_, _, err3 := parseArgs(args3)
 
-	if len(errs3) == 0 {
-		t.Errorf("expected errors for passing invalid type, got none")
+	if err3 == nil {
+		t.Errorf("expected error for passing invalid type, got none")
 	}
 
 	args4 := strings.Split("*pkgType -f", " ")
-	_, _, errs4 := parseArgs(args4)
+	_, _, err4 := parseArgs(args4)
 
-	if len(errs4) == 0 {
-		t.Errorf("expected errors for passing invalid type, got none")
+	if err4 == nil {
+		t.Errorf("expected error for passing invalid type, got none")
 	}
 }
 
 func TestConflictingArgs(t *testing.T) {
 	args := strings.Split("pkg.Type -all", " ")
-	_, _, errs := parseArgs(args)
+	_, _, err := parseArgs(args)
 
-	if len(errs) == 0 {
+	if err == nil {
 		t.Errorf("passing both type and -all should result in error")
 	}
 
 	args2 := strings.Split("-e", " ")
-	_, _, errs2 := parseArgs(args2)
+	_, _, err2 := parseArgs(args2)
 
-	if len(errs2) == 0 {
+	if err2 == nil {
 		t.Errorf("passing -e(xported) without -a(ll) should result in error")
 	}
 
 	args3 := strings.Split("pkg.Type -e", " ")
-	_, _, errs3 := parseArgs(args3)
+	_, _, err3 := parseArgs(args3)
 
-	if len(errs3) == 0 {
+	if err3 == nil {
 		t.Errorf("passing -e(xported) with type should result in error")
 	}
 
 	args4 := strings.Split("-a -e", " ")
-	_, _, errs4 := parseArgs(args4)
+	_, _, err4 := parseArgs(args4)
 
-	if len(errs4) > 0 {
+	if err4 != nil {
 		t.Errorf("passing -a(ll) and -e(exported) should be ok")
 	}
 }

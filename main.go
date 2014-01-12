@@ -21,13 +21,10 @@ func main() {
 	}
 
 	args := os.Args[1:]
+	typeArgs, opts, err := parseArgs(args)
 
-	typeArgs, opts, errs := parseArgs(args)
-
-	if len(errs) > 0 {
-		for _, err := range errs {
-			fmt.Println(err)
-		}
+	if err != nil {
+		fmt.Println(err)
 		fmt.Println("type 'gen' to see usage")
 		return // command-line errors are fatal, other errors can be forced
 	}
