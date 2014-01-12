@@ -109,7 +109,7 @@ func TestEval(t *testing.T) {
 	}
 
 	if typ == nil {
-		t.Errorf("valid type %s should not be nil")
+		t.Errorf("valid type %v should not be nil", typ)
 	}
 
 	typ2, err := real.Eval("dummy")
@@ -119,7 +119,7 @@ func TestEval(t *testing.T) {
 	}
 
 	if typ2 != nil {
-		t.Errorf("invalid type %s should Eval to nil")
+		t.Errorf("invalid type %v should Eval to nil", typ2)
 	}
 
 	typ3, err := real.Eval("*test")
