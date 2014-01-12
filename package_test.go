@@ -32,7 +32,7 @@ func TestTagParsing(t *testing.T) {
 	type1, errs := pkg.GetType(typeArg1)
 
 	if len(errs) > 0 || type1 == nil {
-		t.Errorf("should have been found '%s' without error", typeArg1)
+		t.Errorf("should have found '%v' without error", typeArg1)
 	}
 
 	if len(type1.SubsettedMethods) > 0 {
@@ -47,7 +47,7 @@ func TestTagParsing(t *testing.T) {
 	type2, errs := pkg.GetType(typeArg2)
 
 	if len(errs) > 0 || type2 == nil {
-		t.Errorf("should have been found '%s' without error", typeArg2)
+		t.Errorf("should have found '%v' without error", typeArg2)
 	}
 
 	if len(type2.SubsettedMethods) == 0 {
@@ -62,7 +62,7 @@ func TestTagParsing(t *testing.T) {
 	type3, errs := pkg.GetType(typeArg3)
 
 	if len(errs) > 0 || type3 == nil {
-		t.Errorf("should have been found '%s' without error", typeArg3)
+		t.Errorf("should have found '%v' without error", typeArg3)
 	}
 
 	if len(type3.SubsettedMethods) > 0 {
@@ -77,7 +77,7 @@ func TestTagParsing(t *testing.T) {
 	type4, errs := pkg.GetType(typeArg4)
 
 	if len(errs) > 0 || type4 == nil {
-		t.Errorf("should have been found '%s' without error", typeArg4)
+		t.Errorf("should have found '%v' without error", typeArg4)
 	}
 
 	if len(type4.SubsettedMethods) == 0 {
@@ -96,7 +96,7 @@ func TestTagParsingErrors(t *testing.T) {
 	type5, errs := pkg.GetType(typeArg5)
 
 	if len(errs) != 2 {
-		t.Errorf("should have been found 2 errors for duplicates on '%s'", type5)
+		t.Errorf("should have found 2 errors for duplicates on '%v'", type5)
 	}
 
 	typeArg6 := &typeArg{"", "main", "dummy"}
