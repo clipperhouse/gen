@@ -58,15 +58,12 @@ func (p *Package) GetType(t *typeArg) (result *Type, errs []error) {
 }
 
 func (p *Package) Eval(s string) (typ types.Type, err error) {
-	if p.p == nil {
-		typ, _, err = types.Eval(s, nil, types.Universe)
-		if err != nil {
-			err = errors.New(fmt.Sprintf("unable to evaluate type %s", s))
-		}
-		return
+	scope := types.Universe
+	if p.p != nil {
+		scope = p.p.Scope()
 	}
 
-	typ, _, err = types.Eval(s, p.p, p.p.Scope())
+	typ, _, err = types.Eval(s, p.p, scope) // calling with nil p.p will assume Universe scope but being defensive
 	return typ, err
 }
 
