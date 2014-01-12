@@ -20,15 +20,15 @@ func testTypeArg(t *testing.T, s string, num int) {
 	defaultOpts := options{}
 
 	if len(typeArgs) != num {
-		t.Errorf("expected %v typeArg(s), got %v", num, len(typeArgs))
+		t.Errorf("expected %d typeArg(s), got %d", num, len(typeArgs))
 	}
 
 	if opts != defaultOpts {
-		t.Errorf("expected default options %v, got %v", defaultOpts, opts)
+		t.Errorf("expected default options '%v', got '%v'", defaultOpts, opts)
 	}
 
 	if err != nil {
-		t.Errorf("expected no error, got %v", err)
+		t.Errorf("expected no errors, got '%v'", errs)
 	}
 }
 
