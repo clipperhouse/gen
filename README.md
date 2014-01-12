@@ -4,6 +4,8 @@
 
 ####<a href="http://clipperhouse.github.io/gen/">Introduction and docs...</a>
 
+**Note:** there is a refactor in the works out on [this branch](https://github.com/clipperhouse/gen/tree/projection). Rationale is [here](https://github.com/clipperhouse/gen/issues/8).
+
 ## Contributing
 
 It’s early days and the API is likely volatile, ideas and contributions are welcome. Have a look at the design principles below. Feel free to [open an issue](//github.com/clipperhouse/gen/issues), send a pull request, or ping Matt Sherman [@clipperhouse](http://twitter.com/clipperhouse).
