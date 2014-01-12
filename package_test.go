@@ -29,9 +29,9 @@ func TestTagParsing(t *testing.T) {
 	pkg := packages["main"]
 
 	typeArg1 := &typeArg{"", "main", "test"}
-	type1, errs := pkg.GetType(typeArg1)
+	type1, err1 := pkg.GetType(typeArg1)
 
-	if len(errs) > 0 || type1 == nil {
+	if err1 != nil || type1 == nil {
 		t.Errorf("should have been found %s without error", typeArg1)
 	}
 
@@ -44,9 +44,9 @@ func TestTagParsing(t *testing.T) {
 	}
 
 	typeArg2 := &typeArg{"", "main", "test2"}
-	type2, errs := pkg.GetType(typeArg2)
+	type2, err2 := pkg.GetType(typeArg2)
 
-	if len(errs) > 0 || type2 == nil {
+	if err2 != nil || type2 == nil {
 		t.Errorf("should have been found %s without error", typeArg2)
 	}
 
@@ -59,9 +59,9 @@ func TestTagParsing(t *testing.T) {
 	}
 
 	typeArg3 := &typeArg{"", "main", "test3"}
-	type3, errs := pkg.GetType(typeArg3)
+	type3, err3 := pkg.GetType(typeArg3)
 
-	if len(errs) > 0 || type3 == nil {
+	if err3 != nil || type3 == nil {
 		t.Errorf("should have been found %s without error", typeArg3)
 	}
 
@@ -74,9 +74,9 @@ func TestTagParsing(t *testing.T) {
 	}
 
 	typeArg4 := &typeArg{"", "main", "test4"}
-	type4, errs := pkg.GetType(typeArg4)
+	type4, err4 := pkg.GetType(typeArg4)
 
-	if len(errs) > 0 || type4 == nil {
+	if err4 != nil || type4 == nil {
 		t.Errorf("should have been found %s without error", typeArg4)
 	}
 
@@ -92,18 +92,11 @@ func TestTagParsing(t *testing.T) {
 func TestTagParsingErrors(t *testing.T) {
 	pkg := packages["main"]
 
-	typeArg5 := &typeArg{"", "main", "test5"}
-	type5, errs := pkg.GetType(typeArg5)
+	typeArg1 := &typeArg{"", "main", "dummy"}
+	type1, err1 := pkg.GetType(typeArg1)
 
-	if len(errs) != 2 {
-		t.Errorf("should have been found 2 errors for duplicates on %s", type5)
-	}
-
-	typeArg6 := &typeArg{"", "main", "dummy"}
-	type6, errs := pkg.GetType(typeArg6)
-
-	if len(errs) != 1 {
-		t.Errorf("should have returned 1 error for an unknown type %s", type6)
+	if err1 == nil {
+		t.Errorf("should have returned 1 error for an unknown type %s", type1)
 	}
 }
 

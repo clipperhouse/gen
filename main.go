@@ -100,9 +100,9 @@ func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package
 		p, ok := packages[t.Package]
 
 		if ok {
-			typ, e := p.GetType(t)
-			if len(e) > 0 {
-				errs = append(errs, e...)
+			typ, err := p.GetType(t)
+			if err != nil {
+				errs = append(errs, err)
 			}
 			typs = append(typs, typ)
 		} else {
@@ -117,9 +117,9 @@ func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package
 			for s := range p.TypeNamesAndDocs {
 				if !opts.ExportedOnly || ast.IsExported(s) {
 					t := &typeArg{opts.AllPointer, k, s}
-					typ, e := p.GetType(t)
-					if len(e) > 0 {
-						errs = append(errs, e...)
+					typ, err := p.GetType(t)
+					if err != nil {
+						errs = append(errs, err)
 					}
 					typs = append(typs, typ)
 				}
@@ -127,8 +127,17 @@ func getGenSpecs(opts options, typeArgs []*typeArg, packages map[string]*Package
 		}
 	}
 
-	// 2. create specs including type validation
+	// 2. create specs including validation
+
 	for _, typ := range typs {
+		if d := findDuplicateStrings(typ.SubsettedMethods); len(d) > 0 {
+			errs = append(errs, errors.New(fmt.Sprintf("duplicate subsetted method(s) found on type %s: %v", typ, d)))
+		}
+
+		if d := findDuplicateStrings(typ.ProjectedTypes); len(d) > 0 {
+			errs = append(errs, errors.New(fmt.Sprintf("duplicate projected type(s) found on type %s: %v", typ, d)))
+		}
+
 		g := newGenSpec(typ)
 
 		var stdMethods, prjMethods []string

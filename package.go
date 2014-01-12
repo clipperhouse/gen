@@ -13,10 +13,9 @@ import (
 	"strings"
 )
 
-const (
-	tagPattern        = `([\p{L}\p{N},]+)`
-	getTagPattern     = `gen:"` + tagPattern + `"`
-	projectTagPattern = `project:"(.+)"`
+var (
+	genTag     = regexp.MustCompile(`gen:"(.+)"`)
+	projectTag = regexp.MustCompile(`project:"(.+)"`)
 )
 
 type Package struct {
@@ -24,33 +23,24 @@ type Package struct {
 	TypeNamesAndDocs map[string]string // docs keyed by type name
 }
 
-func (p *Package) GetType(t *typeArg) (result *Type, errs []error) {
+func (p *Package) GetType(t *typeArg) (result *Type, err error) {
 	doc, found := p.TypeNamesAndDocs[t.Name]
 
 	if !found {
-		errs = append(errs, errors.New(fmt.Sprintf("%s is not a known type in the current directory", t)))
+		err = errors.New(fmt.Sprintf("%s is not a known type in the current directory", t))
+		return
 	}
 
 	var subsettedMethods []string
-	genTag := regexp.MustCompile(getTagPattern)
-	genMatch := genTag.FindStringSubmatch(doc)
-	if genMatch != nil && len(genMatch) > 1 {
-		subsettedMethods = strings.Split(genMatch[1], ",")
-		d := findDuplicates(subsettedMethods)
-		if len(d) > 0 {
-			errs = append(errs, errors.New(fmt.Sprintf("duplicate subsetted method(s) found on type %s: %v", t, d)))
-		}
+
+	if matches := genTag.FindStringSubmatch(doc); matches != nil && len(matches) > 1 {
+		subsettedMethods = strings.Split(matches[1], ",")
 	}
 
 	var projectedTypes []string
-	projectTag := regexp.MustCompile(projectTagPattern)
-	projectMatch := projectTag.FindStringSubmatch(doc)
-	if projectMatch != nil && len(projectMatch) > 1 {
-		projectedTypes = strings.Split(projectMatch[1], ",")
-		d := findDuplicates(projectedTypes)
-		if len(d) > 0 {
-			errs = append(errs, errors.New(fmt.Sprintf("duplicate projected type(s) found on type %s: %v", t, d)))
-		}
+
+	if matches := projectTag.FindStringSubmatch(doc); matches != nil && len(matches) > 1 {
+		projectedTypes = strings.Split(matches[1], ",")
 	}
 
 	result = &Type{t, subsettedMethods, projectedTypes}
@@ -97,17 +87,5 @@ func getPackages() (result map[string]*Package) {
 		result[k] = &Package{p, typeDocs}
 	}
 
-	return
-}
-
-func findDuplicates(a []string) (result []string) {
-	found := make(map[string]bool)
-
-	for _, s := range a {
-		if found[s] {
-			result = append(result, s)
-		}
-		found[s] = true
-	}
 	return
 }
