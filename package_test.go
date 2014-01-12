@@ -105,3 +105,49 @@ func TestTagParsingErrors(t *testing.T) {
 		t.Errorf("should have returned 1 error for an unknown type %s", type6)
 	}
 }
+
+func TestEval(t *testing.T) {
+	real := packages["main"]
+	typ, err := real.Eval("test")
+
+	if err != nil {
+		t.Errorf("valid type %s should Eval", "test")
+	}
+
+	if typ == nil {
+		t.Errorf("valid type %s should not be nil")
+	}
+
+	typ2, err := real.Eval("dummy")
+
+	if err == nil {
+		t.Errorf("invalid type %s should fail to Eval", "test")
+	}
+
+	if typ2 != nil {
+		t.Errorf("invalid type %s should Eval to nil")
+	}
+
+	fake := &Package{}
+
+	typ3, err := fake.Eval("test")
+
+	if err == nil {
+		t.Errorf("valid named type %s should fail to Eval for invalid package", "test")
+	}
+
+	if typ3 != nil {
+		t.Errorf("named valid type %s should fail to Eval for invalid package", "test")
+	}
+
+	typ4, err := fake.Eval("float64")
+
+	if err != nil {
+		t.Errorf("valid builtin type %s should Eval (Universe scope) for invalid package", "int")
+	}
+
+	if typ4 == nil {
+		t.Errorf("valid builtin type %s should Eval (Universe scope) for invalid package", "int")
+	}
+
+}
