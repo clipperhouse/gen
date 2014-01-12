@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -128,26 +129,39 @@ func TestEval(t *testing.T) {
 		t.Errorf("invalid type %s should Eval to nil")
 	}
 
+	typ3, err := real.Eval("*test")
+
+	if err != nil {
+		t.Errorf("pointer type %s should Eval", "*test")
+	}
+
+	if typ3 == nil {
+		t.Errorf("pointer type %s should Eval", "*test")
+	}
+
+	if !strings.HasPrefix(typ3.String(), "*") {
+		t.Errorf("type %s should Eval to pointer type", "*test")
+	}
+
 	fake := &Package{}
 
-	typ3, err := fake.Eval("test")
+	typ4, err := fake.Eval("test")
 
 	if err == nil {
 		t.Errorf("valid named type %s should fail to Eval for invalid package", "test")
 	}
 
-	if typ3 != nil {
+	if typ4 != nil {
 		t.Errorf("named valid type %s should fail to Eval for invalid package", "test")
 	}
 
-	typ4, err := fake.Eval("float64")
+	typ5, err := fake.Eval("float64")
 
 	if err != nil {
 		t.Errorf("valid builtin type %s should Eval (Universe scope) for invalid package", "int")
 	}
 
-	if typ4 == nil {
+	if typ5 == nil {
 		t.Errorf("valid builtin type %s should Eval (Universe scope) for invalid package", "int")
 	}
-
 }
