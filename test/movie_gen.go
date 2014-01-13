@@ -1,6 +1,6 @@
 // gen *models.Movie
 // this file was auto-generated using github.com/clipperhouse/gen
-// Tue, 07 Jan 2014 03:27:28 UTC
+// Sun, 12 Jan 2014 21:16:36 UTC
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -13,10 +13,10 @@ import (
 	"errors"
 )
 
-// The plural (slice) type of *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
+// Movies is a slice of type *Movie, for use with gen methods below. Use this type where you would use []*Movie. (This is required because slices cannot be method receivers.)
 type Movies []*Movie
 
-// Tests that all elements of Movies return true for the passed func. See: http://clipperhouse.github.io/gen/#All
+// All verifies that all elements of Movies return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func (rcv Movies) All(fn func(*Movie) bool) bool {
 	for _, v := range rcv {
 		if !fn(v) {
@@ -26,7 +26,7 @@ func (rcv Movies) All(fn func(*Movie) bool) bool {
 	return true
 }
 
-// Tests that one or more elements of Movies return true for the passed func. See: http://clipperhouse.github.io/gen/#Any
+// Any verifies that one or more elements of Movies return true for the passed func. See: http://clipperhouse.github.io/gen/#Any
 func (rcv Movies) Any(fn func(*Movie) bool) bool {
 	for _, v := range rcv {
 		if fn(v) {
@@ -36,7 +36,7 @@ func (rcv Movies) Any(fn func(*Movie) bool) bool {
 	return false
 }
 
-// Counts the number elements of Movies that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count
+// Count gives the number elements of Movies that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count
 func (rcv Movies) Count(fn func(*Movie) bool) (result int) {
 	for _, v := range rcv {
 		if fn(v) {
@@ -46,7 +46,7 @@ func (rcv Movies) Count(fn func(*Movie) bool) (result int) {
 	return
 }
 
-// Returns a new Movies slice whose elements are unique. See: http://clipperhouse.github.io/gen/#Distinct
+// Distinct returns a new Movies slice whose elements are unique. See: http://clipperhouse.github.io/gen/#Distinct
 func (rcv Movies) Distinct() (result Movies) {
 	appended := make(map[*Movie]bool)
 	for _, v := range rcv {
@@ -58,7 +58,7 @@ func (rcv Movies) Distinct() (result Movies) {
 	return result
 }
 
-// Returns a new Movies slice whose elements are unique, where equality is defined by a passed func. See: http://clipperhouse.github.io/gen/#DistinctBy
+// DistinctBy returns a new Movies slice whose elements are unique, where equality is defined by a passed func. See: http://clipperhouse.github.io/gen/#DistinctBy
 func (rcv Movies) DistinctBy(equal func(*Movie, *Movie) bool) (result Movies) {
 	for _, v := range rcv {
 		eq := func(_app *Movie) bool {
@@ -71,14 +71,14 @@ func (rcv Movies) DistinctBy(equal func(*Movie, *Movie) bool) (result Movies) {
 	return result
 }
 
-// Iterates over Movies and executes the passed func against each element. See: http://clipperhouse.github.io/gen/#Each
+// Each iterates over Movies and executes the passed func against each element. See: http://clipperhouse.github.io/gen/#Each
 func (rcv Movies) Each(fn func(*Movie)) {
 	for _, v := range rcv {
 		fn(v)
 	}
 }
 
-// Returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First
+// First returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First
 func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 	for _, v := range rcv {
 		if fn(v) {
@@ -86,11 +86,11 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 			return
 		}
 	}
-	err = errors.New("No Movies elements return true for passed func")
+	err = errors.New("no Movies elements return true for passed func")
 	return
 }
 
-// Reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+// IsSorted reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
@@ -101,7 +101,7 @@ func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
 	return true
 }
 
-// Reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+// IsSortedDesc reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
 	greaterOrEqual := func(a, b *Movie) bool {
 		return !less(a, b)
@@ -109,13 +109,13 @@ func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
 	return rcv.IsSorted(greaterOrEqual)
 }
 
-// Returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+// Max returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("Cannot determine the Max of an empty slice")
+		err = errors.New("cannot determine the Max of an empty slice")
 		return
 	}
 	m := 0
@@ -128,11 +128,11 @@ func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error)
 	return
 }
 
-// Returns an element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
+// Min returns an element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
 func (rcv Movies) Min(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("Cannot determine the Min of an empty slice")
+		err = errors.New("cannot determine the Min of an empty slice")
 		return
 	}
 	m := 0
@@ -145,14 +145,14 @@ func (rcv Movies) Min(less func(*Movie, *Movie) bool) (result *Movie, err error)
 	return
 }
 
-// Returns exactly one element of Movies that returns true for the passed func. Returns error if no or multiple elements return true. See: http://clipperhouse.github.io/gen/#Single
+// Single returns exactly one element of Movies that returns true for the passed func. Returns error if no or multiple elements return true. See: http://clipperhouse.github.io/gen/#Single
 func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 	var candidate *Movie
 	found := false
 	for _, v := range rcv {
 		if fn(v) {
 			if found {
-				err = errors.New("Multiple Movies elements return true for passed func")
+				err = errors.New("multiple Movies elements return true for passed func")
 				return
 			}
 			candidate = v
@@ -162,12 +162,12 @@ func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 	if found {
 		result = candidate
 	} else {
-		err = errors.New("No Movies elements return true for passed func")
+		err = errors.New("no Movies elements return true for passed func")
 	}
 	return
 }
 
-// Returns a new ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+// Sort returns a new ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
@@ -182,7 +182,7 @@ func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	return result
 }
 
-// Returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+// SortDesc returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
@@ -192,7 +192,7 @@ func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
 	return rcv.Sort(greaterOrEqual)
 }
 
-// Returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
+// Where returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
 func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	for _, v := range rcv {
 		if fn(v) {
@@ -202,7 +202,7 @@ func (rcv Movies) Where(fn func(*Movie) bool) (result Movies) {
 	return result
 }
 
-// Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+// AggregateInt iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func (rcv Movies) AggregateInt(fn func(int, *Movie) int) (result int) {
 	for _, v := range rcv {
 		result = fn(result, v)
@@ -210,7 +210,7 @@ func (rcv Movies) AggregateInt(fn func(int, *Movie) int) (result int) {
 	return
 }
 
-// Sums int over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
+// AverageInt sums int over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
 func (rcv Movies) AverageInt(fn func(*Movie) int) (result int, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -224,7 +224,7 @@ func (rcv Movies) AverageInt(fn func(*Movie) int) (result int, err error) {
 	return
 }
 
-// Groups elements into a map keyed by int. See: http://clipperhouse.github.io/gen/#GroupBy
+// GroupByInt groups elements into a map keyed by int. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
 	result := make(map[int]Movies)
 	for _, v := range rcv {
@@ -234,7 +234,7 @@ func (rcv Movies) GroupByInt(fn func(*Movie) int) map[int]Movies {
 	return result
 }
 
-// Selects the largest value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+// MaxInt selects the largest value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func (rcv Movies) MaxInt(fn func(*Movie) int) (result int, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -253,7 +253,7 @@ func (rcv Movies) MaxInt(fn func(*Movie) int) (result int, err error) {
 	return
 }
 
-// Selects the least value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+// MinInt selects the least value of int in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func (rcv Movies) MinInt(fn func(*Movie) int) (result int, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -272,7 +272,7 @@ func (rcv Movies) MinInt(fn func(*Movie) int) (result int, err error) {
 	return
 }
 
-// Returns a slice of int in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+// SelectInt returns a slice of int in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv Movies) SelectInt(fn func(*Movie) int) (result []int) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
@@ -280,7 +280,7 @@ func (rcv Movies) SelectInt(fn func(*Movie) int) (result []int) {
 	return
 }
 
-// Sums int over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
+// SumInt sums int over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
 func (rcv Movies) SumInt(fn func(*Movie) int) (result int) {
 	for _, v := range rcv {
 		result += fn(v)
@@ -288,7 +288,7 @@ func (rcv Movies) SumInt(fn func(*Movie) int) (result int) {
 	return
 }
 
-// Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+// AggregateThing2 iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func (rcv Movies) AggregateThing2(fn func(Thing2, *Movie) Thing2) (result Thing2) {
 	for _, v := range rcv {
 		result = fn(result, v)
@@ -296,21 +296,7 @@ func (rcv Movies) AggregateThing2(fn func(Thing2, *Movie) Thing2) (result Thing2
 	return
 }
 
-// Sums Thing2 over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
-func (rcv Movies) AverageThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
-	l := len(rcv)
-	if l == 0 {
-		err = errors.New("cannot determine AverageThing2 of zero-length Movies")
-		return
-	}
-	for _, v := range rcv {
-		result += fn(v)
-	}
-	result = result / Thing2(l)
-	return
-}
-
-// Groups elements into a map keyed by Thing2. See: http://clipperhouse.github.io/gen/#GroupBy
+// GroupByThing2 groups elements into a map keyed by Thing2. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv Movies) GroupByThing2(fn func(*Movie) Thing2) map[Thing2]Movies {
 	result := make(map[Thing2]Movies)
 	for _, v := range rcv {
@@ -320,7 +306,7 @@ func (rcv Movies) GroupByThing2(fn func(*Movie) Thing2) map[Thing2]Movies {
 	return result
 }
 
-// Selects the largest value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+// MaxThing2 selects the largest value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func (rcv Movies) MaxThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -339,7 +325,7 @@ func (rcv Movies) MaxThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
 	return
 }
 
-// Selects the least value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+// MinThing2 selects the least value of Thing2 in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func (rcv Movies) MinThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -358,7 +344,7 @@ func (rcv Movies) MinThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
 	return
 }
 
-// Returns a slice of Thing2 in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+// SelectThing2 returns a slice of Thing2 in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv Movies) SelectThing2(fn func(*Movie) Thing2) (result []Thing2) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
@@ -366,15 +352,7 @@ func (rcv Movies) SelectThing2(fn func(*Movie) Thing2) (result []Thing2) {
 	return
 }
 
-// Sums Thing2 over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
-func (rcv Movies) SumThing2(fn func(*Movie) Thing2) (result Thing2) {
-	for _, v := range rcv {
-		result += fn(v)
-	}
-	return
-}
-
-// Iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+// AggregateString iterates over Movies, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func (rcv Movies) AggregateString(fn func(string, *Movie) string) (result string) {
 	for _, v := range rcv {
 		result = fn(result, v)
@@ -382,7 +360,7 @@ func (rcv Movies) AggregateString(fn func(string, *Movie) string) (result string
 	return
 }
 
-// Groups elements into a map keyed by string. See: http://clipperhouse.github.io/gen/#GroupBy
+// GroupByString groups elements into a map keyed by string. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 	result := make(map[string]Movies)
 	for _, v := range rcv {
@@ -392,7 +370,7 @@ func (rcv Movies) GroupByString(fn func(*Movie) string) map[string]Movies {
 	return result
 }
 
-// Selects the largest value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+// MaxString selects the largest value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func (rcv Movies) MaxString(fn func(*Movie) string) (result string, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -411,7 +389,7 @@ func (rcv Movies) MaxString(fn func(*Movie) string) (result string, err error) {
 	return
 }
 
-// Selects the least value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+// MinString selects the least value of string in Movies. Returns error on Movies with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func (rcv Movies) MinString(fn func(*Movie) string) (result string, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -430,7 +408,7 @@ func (rcv Movies) MinString(fn func(*Movie) string) (result string, err error) {
 	return
 }
 
-// Returns a slice of string in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+// SelectString returns a slice of string in Movies, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv Movies) SelectString(fn func(*Movie) string) (result []string) {
 	for _, v := range rcv {
 		result = append(result, fn(v))

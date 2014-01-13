@@ -26,7 +26,7 @@ import ({{range .Imports}}
 	"{{.}}"
 {{end}})
 {{end}}
-// The plural (slice) type of {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
+// {{.Plural}} is a slice of type {{.Pointer}}{{.Singular}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Singular}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Singular}}
 `
 
@@ -55,7 +55,7 @@ func getStandardTemplate(name string) (result *template.Template, err error) {
 	if found {
 		result = template.Must(template.New(name).Parse(t))
 	} else {
-		err = errors.New(fmt.Sprintf("%s is not a known method", name))
+		err = fmt.Errorf("%s is not a known method", name)
 	}
 	return
 }
@@ -138,7 +138,7 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 			return
 		}
 	}
-	err = errors.New("No {{.Plural}} elements return true for passed func")
+	err = errors.New("no {{.Plural}} elements return true for passed func")
 	return
 }
 `,
@@ -149,7 +149,7 @@ func ({{.Receiver}} {{.Plural}}) First(fn func({{.Pointer}}{{.Singular}}) bool) 
 func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
 	if l == 0 {
-		err = errors.New("Cannot determine the Max of an empty slice")
+		err = errors.New("cannot determine the Max of an empty slice")
 		return
 	}
 	m := 0
@@ -167,7 +167,7 @@ func ({{.Receiver}} {{.Plural}}) Max(less func({{.Pointer}}{{.Singular}}, {{.Poi
 func ({{.Receiver}} {{.Plural}}) Min(less func({{.Pointer}}{{.Singular}}, {{.Pointer}}{{.Singular}}) bool) (result {{.Pointer}}{{.Singular}}, err error) {
 	l := len({{.Receiver}})
 	if l == 0 {
-		err = errors.New("Cannot determine the Min of an empty slice")
+		err = errors.New("cannot determine the Min of an empty slice")
 		return
 	}
 	m := 0
@@ -188,7 +188,7 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 	for _, {{.Loop}} := range {{.Receiver}} {
 		if fn({{.Loop}}) {
 			if found {
-				err = errors.New("Multiple {{.Plural}} elements return true for passed func")
+				err = errors.New("multiple {{.Plural}} elements return true for passed func")
 				return
 			}
 			candidate = {{.Loop}}
@@ -198,7 +198,7 @@ func ({{.Receiver}} {{.Plural}}) Single(fn func({{.Pointer}}{{.Singular}}) bool)
 	if found {
 		result = candidate
 	} else {
-		err = errors.New("No {{.Plural}} elements return true for passed func")
+		err = errors.New("no {{.Plural}} elements return true for passed func")
 	}
 	return
 }
@@ -475,7 +475,7 @@ type projectionMethod struct {
 
 var projectionMethods = map[string]*projectionMethod{
 	"Aggregate": &projectionMethod{`
-// Aggregate iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
+// {{.MethodName}} iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}, {{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = fn(result, {{.Parent.Loop}})
@@ -484,7 +484,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}
 }
 `, false, false, false},
 	"Average": &projectionMethod{`
-// Average sums {{.Type}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
+// {{.MethodName}} sums {{.Type}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -499,7 +499,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 }
 `, true, false, false},
 	"GroupBy": &projectionMethod{`
-// GroupBy groups elements into a map keyed by {{.Type}}. See: http://clipperhouse.github.io/gen/#GroupBy
+// {{.MethodName}} groups elements into a map keyed by {{.Type}}. See: http://clipperhouse.github.io/gen/#GroupBy
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) map[{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Type}}]{{.Parent.Plural}})
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
@@ -510,7 +510,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 }
 `, false, true, false},
 	"Max": &projectionMethod{`
-// Max selects the largest value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
+// {{.MethodName}} selects the largest value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -530,7 +530,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 }
 `, false, false, true},
 	"Min": &projectionMethod{`
-// Min selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
+// {{.MethodName}} selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len({{.Parent.Receiver}})
 	if l == 0 {
@@ -550,7 +550,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 }
 `, false, false, true},
 	"Select": &projectionMethod{`
-// Select returns a slice of {{.Type}} in {{.Parent.Plural}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+// {{.MethodName}} returns a slice of {{.Type}} in {{.Parent.Plural}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result []{{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result = append(result, fn({{.Parent.Loop}}))
@@ -559,7 +559,7 @@ func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent
 }
 `, false, false, false},
 	"Sum": &projectionMethod{`
-// Sum sums {{.Type}} over elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
+// {{.MethodName}} sums {{.Type}} over elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
 func ({{.Parent.Receiver}} {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Singular}}) {{.Type}}) (result {{.Type}}) {
 	for _, {{.Parent.Loop}} := range {{.Parent.Receiver}} {
 		result += fn({{.Parent.Loop}})
