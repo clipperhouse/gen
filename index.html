@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=980, initial-scale=1">
+        <title>gen - a generics library for Go</title>
+        <meta name="description" content="gen is a tool for adding generics-like functionality to Go, in the style of C#'s Linq or JavaScript's underscore.">
+        <meta name="keywords" content="golang generics linq underscore">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="gen.css">
+        <link rel="icon" type="image/png" href="gopher.png">
+    </head>
+    <body>
+        <div id="sidebar">
+            <nav>
+                <h4><a href="#Concepts">Concepts</a></h4>
+                <h4><a href="#Installation">Installation</a></h4>
+                <h4><a href="#Usage">Usage</a></h4>
+                <h4><a href="#Methods">Standard Methods</a></h4>
+                <p class="methods">
+                    <a href="#Where">- Where</a>
+                    <a href="#Count">- Count</a>
+                    <a href="#Any">- Any</a>
+                    <a href="#All">- All</a>
+                    <a href="#First">- First</a>
+                    <a href="#Single">- Single</a>
+                    <a href="#Each">- Each</a>
+                    <a href="#Sort">- Sort</a>
+                    <a href="#Distinct">- Distinct</a>
+                    <a href="#DistinctBy">- DistinctBy</a>
+                    <a href="#Min">- Min</a>
+                    <a href="#Max">- Max</a>
+                </p>
+                <h4><a href="#Subsetting">Subsetting</a></h4>
+                <h4><a href="#Custom">Custom Methods</a></h4>
+                <p class="methods">
+                    <a href="#Select">- Select</a>
+                    <a href="#GroupBy">- GroupBy</a>
+                    <a href="#Sum">- Sum</a>
+                    <a href="#Average">- Average</a>
+                    <a href="#MaxCustom">- Max</a>
+                    <a href="#MinCustom">- Min</a>
+                    <a href="#Aggregate">- Aggregate</a>
+                </p>
+                <h4><a href="#FAQ">FAQ</a></h4><br />
+                <a href="https://github.com/clipperhouse/gen" id="github">Source</a><br /><br />
+                <a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a>
+            </nav>
+        </div>
+        <div id="content">
+            <a href="https://github.com/DisposaBoy/GoSublime"><img src="completion.png" id="completion"></a>
+            <h1>gen <span class="alpha">alpha</span></h1>
+            <h3>
+                A library for bringing generics-like functionality to Go
+            </h3>
+            <p>
+                gen is an attempt to bring some generics-like functionality to Go, with inspiration from C#’s <a href="http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.110).aspx">Linq</a>, JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods">Array methods</a> and the <a href="http://underscorejs.org/">underscore</a> library. Operations include filtering, grouping, sorting and more.
+            </p>
+
+            <p>The pattern is to pass func’s as you would pass lambdas in Linq or functions in JavaScript.</p>
+
+            <h2 id="Concepts">Concepts</h2>
+            <p>gen generates code for your types, at development time, using the command line. gen is not an import; the generated source becomes part of your project and takes no external dependencies.</p>
+
+            <p>The generated code implements the <a href="#Methods">methods</a> described below. To make this possible, a new slice type is generated for the struct types you specify. We call it the <strong>plural type</strong>. For example, if you gen an existing type Thing, a new plural type will be created:</p>
+
+<pre>
+type Things []Thing
+</pre>
+
+            <p>…and you’ll use this wherever you would otherwise use a slice.</p>
+
+<pre>
+myThings := Things{...}
+otherThings := myThings.Where(func).Sort(func)
+</pre>
+            <h2 id="Installation">Installation</h2>
+            <p>Of course, start by installing Go, <a href="http://golang.org/doc/code.html">setting up paths</a>, etc. Then:</p>
+
+<pre>
+go get github.com/clipperhouse/gen
+</pre>
+            <p>To see usage, simply type:</p>
+<pre>
+gen
+</pre>
+
+            <p>Create a new Go project, and <span class="cmd">cd</span> into it. Create a main.go file and define a struct type in it. To quickly create the gen methods:</p>
+<pre>
+gen package.Thing
+</pre>
+
+            <p>…using your package and type names. You should see a new file, named [your struct]_gen.go. Have a look around. Try out that plural type.</p>
+
+            <h2 id="Usage">Usage</h2>
+
+            <p>After <a href="#Installation">installation</a>, you should have access to a new <span class="cmd">gen</span> command. <span class="cmd">cd</span> into the directory containing the type(s) you wish to gen. Simply type <span class="cmd">gen</span> to see usage.</p>
+
+            <div class="pre">
+                <table id="usage">
+                    <tbody>
+                        <tr>
+                            <td>
+                                package.TypeName<br />
+                                *package.TypeName
+                            </td>
+                            <td>Generate plural type &amp; methods for specified type name within the specified package. Prepend with optional * to operate on pointers (recommended) or omit it to use values.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                -all<br />
+                                -*all
+                            </td>
+                            <td>Generate plural type &amp; methods for all struct types discovered within the current directory. Prepend with optional * to operate on pointers (recommended) or omit it to use values. Abbreviate <span class="nowrap">-a</span>.</td>
+                        </tr>
+                        <tr>
+                            <td>-exported</td>
+                            <td>Limit generation to exported struct types, i.e., those starting with capital letters. Useful with -all. Abbreviate <span class="nowrap">-e</span>.</td>
+                        </tr>
+                        <tr>
+                            <td>-force</td>
+                            <td>Force generation to continue even if errors. Abbreviate <span class="nowrap">-f</span>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 id="Methods">Methods</h2>
+
+            <h4>Signatures use the example type *Thing.</h4>
+
+            <h3 id="Where">Where</h3>
+            <p>
+                Returns a new slice (plural type) whose elements return true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534803(v=vs.110).aspx">Where</a> and JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">filter</a>.
+            </p>
+<pre>
+func (rcv Things) Where(fn func(*Thing) bool) Things
+</pre>
+            <p>Example:</p>
+
+<pre>
+shiny := func(p *Product) bool {
+    return p.Manufacturer == "Apple"
+}
+wishlist := products.Where(shiny)
+</pre>
+
+            <h3 id="Count">Count</h3>
+            <p>
+                Returns an int representing the number of elements which return true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535181(v=vs.110).aspx">Count</a>.
+            </p>
+<pre>
+func (rcv Things) Count(fn func(*Thing) bool) int
+</pre>
+            <p>Example:</p>
+
+<pre>
+countDracula := monsters.Count(func(m *Monster) bool {
+    return m.HasFangs()
+})
+</pre>
+
+            <h3 id="Any">Any</h3>
+            <p>
+                Returns true if one or more elements returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534972(v=vs.110).aspx">Any</a> or underscore’s <a href="http://underscorejs.org/#some">some</a>.
+            </p>
+<pre>
+func (rcv Things) Any(fn func(*Thing) bool) bool
+</pre>
+            <p>Example:</p>
+
+<pre>
+bueller := func(s *Student) bool {
+    return s.IsTruant
+}
+willBeHijinks := students.Any(bueller)
+</pre>
+
+            <h3 id="All">All</h3>
+            <p>
+                Returns true if every element returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548541(v=vs.110).aspx">All</a> or underscore’s <a href="http://underscorejs.org/#every">every</a>.
+            </p>
+<pre>
+func (rcv Things) All(fn func(*Thing) bool) bool
+</pre>
+            <p>Example:</p>
+
+<pre>
+mustPass := func(t *Thing) bool {
+    return !t.IsEternal
+}
+cliché := things.All(mustPass)
+</pre>
+
+            <h3 id="First">First</h3>
+            <p>
+                Returns first element which returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535050(v=vs.110).aspx">First</a> or underscore’s <a href="http://underscorejs.org/#find">find</a>.
+            </p>
+<pre>
+func (rcv Things) First(fn func(*Thing) bool) (*Thing, error)
+</pre>
+            <p>Example:</p>
+
+<pre>
+come := func(c *Customer) bool {
+    return c.IsHere
+}
+served, err := people.First(come)
+</pre>
+            <p>Returns error if no elements satisfy the func.</p>
+
+            <h3 id="Single">Single</h3>
+            <p>
+                Returns unique element which returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535118(v=vs.110).aspx">Single</a>.
+            </p>
+<pre>
+func (rcv Things) Single(fn func(*Thing) bool) (*Thing, error)
+</pre>
+            <p>Example:</p>
+
+<pre>
+id := request.Id
+byId := func(t *Thing) bool {
+    return t.Id == id
+}
+item, err := things.Single(byId)
+</pre>
+            <p>Returns error if multiple or no elements satisfy the func.</p>
+
+            <h3 id="Each">Each</h3>
+            <p>
+                Invokes passed func on every element. Comparable to underscore’s <a href="http://underscorejs.org/#each">each</a>.
+            </p>
+<pre>
+func (rcv Things) Each(fn func(*Thing))
+</pre>
+            <p>Example:</p>
+
+<pre>
+update := func(s *Score) {
+    s.Recalc()
+}
+scores.Each(update)
+</pre>
+
+            <h3 id="Sort">Sort</h3>
+            <p>
+                Returns a new slice (plural type) whose elements are sorted based on a func defining ‘less’. The less func takes two elements, and returns true if the first element is less than the second element. 
+            </p>
+<pre>
+func (rcv Things) Sort(less func(*Thing, *Thing) bool) Things
+</pre>
+            <p>Example:</p>
+
+<pre>
+byRank := func(a, b *Player) bool {
+    return a.Rank &lt; b.Rank
+}
+leaderboard := player.Sort(byRank)
+</pre>
+
+            <p><strong>SortDesc</strong> works similarly, returning the elements in reverse order. Its implementation negates ‘less’, so is effectively Sort(equalOrGreater).</p>
+
+            <p><strong>IsSorted(Desc)</strong> uses a similar idiom, returning true if the elements are sorted according to the ‘less’ comparer.</p>
+
+            <h3 id="Distinct">Distinct</h3>
+            <p>
+                Returns a new slice (plural type) representing unique elements. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/system.linq.enumerable.distinct(v=vs.110).aspx">Distinct</a> or underscore’s <a href="http://underscorejs.org/#uniq">uniq</a>.
+            </p>
+<pre>
+func (rcv Things) Distinct() Things
+</pre>
+            <p>Example:</p>
+
+<pre>
+snowflakes := hipsters.Distinct()
+</pre>
+
+<p>Keep in mind that pointers and values have different notions of <a href="http://golang.org/doc/go1#equality">equality</a>, and therefore distinctness.</p>
+
+            <h3 id="DistinctBy">DistinctBy</h3>
+            <p>
+                Returns a new slice (plural type) representing unique elements, where equality is defined by a passed func.
+            </p>
+<pre>
+func (rcv Things) DistinctBy(func(*Thing, *Thing) bool) Things
+</pre>
+            <p>Example:</p>
+
+<pre>
+hairstyle := func(a *Fashionista, b *Fashionista) bool {
+    a.Hairstyle == b.Hairstyle
+}
+trendsetters := fashionistas.DistinctBy(hairstyle)</pre>
+
+            <h3 id="Min">Min</h3>
+<pre>
+func (rcv Things) Min(less func(*Thing, *Thing) bool) (*Thing, error)
+</pre>
+            <p>Returns the element containing the minimum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
+
+<p>Example:</p>
+
+<pre>
+byPrice := func(a, b *Product) bool {
+    return a.Price &lt; b.Price
+}
+cheapest, err := products.Min(byPrice)
+</pre>
+
+            <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
+
+            <h3 id="Max">Max</h3>
+<pre>
+func (rcv Things) Max(less func(*Thing, *Thing) bool) (*Thing, error)
+</pre>
+            <p>Returns the element containing the maximum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
+
+<p>Example:</p>
+
+<pre>
+byArea := func(a, b *House) bool {
+    return a.Area() &lt; b.Area()
+}
+roomiest, err := houses.Max(byArea)
+</pre>
+
+            <h2 id="Subsetting">Subsetting</h2>
+
+            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <span class="cmd">gen</span> a type. If you would prefer only to generate specific methods, you can include a specially-formatted “tag” comment, which follows the convention of <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a>.</p>
+
+<pre>
+// gen:"Count,Where,Sort"
+type Thing struct {
+    Name  string
+    Year  int  
+    Sales float64
+}
+</pre>
+
+            <p>Give the comment its own line adjacent to the type defintion as you would with (or in addition to) godocs, and avoid spaces.</p>
+
+            <p>(Note: previous versions of gen put the comment <em>within</em> the type definition.)</p>
+
+            <h2 id="Custom">Custom methods</h2>
+
+            <p><strong>Note:</strong> Custom methods are likely to be deprecated in favor of more-flexible “projection methods”. See this <a href="https://github.com/clipperhouse/gen/issues/8">GitHub issue</a> for details.</p>
+
+            <h4>Custom methods use <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a> to project fields of a struct.</h4>
+
+            <p>Given an example type:</p>
+<pre>
+type Thing struct {
+    Name  string  `gen:"Select,Aggregate"`
+    Year  int     `gen:"GroupBy,Select,Min"`
+    Sales float64 `gen:"Sum,Max,Average"`
+}
+</pre>
+            <p>You can infer the format from above. (Avoid spaces between methods.)</p>
+
+            <p>Below, {{Name}} and {{Type}} represent the name and type of a tagged field. The actual name will be substituted when you gen.</p>
+
+            <h3 id="Select">Select</h3>
+<pre>
+func (rcv Things) Select{{Name}}() []string
+</pre>
+            <p>Returns a slice of a specific field. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548891(v=vs.110).aspx">Select</a> or underscore’s <a href="http://underscorejs.org/#pluck">pluck</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+names := myThings.SelectName() // => ["Thing One", "Thing Two"]
+</pre>
+
+            <h3 id="GroupBy">GroupBy</h3>
+<pre>
+func (rcv Things) GroupBy{{Name}}() map[{{Type}}]Things
+</pre>
+            <p>Groups elements into a map keyed by the tagged field’s value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534501(v=vs.110).aspx">GroupBy</a> or underscore’s <a href="http://underscorejs.org/#groupBy">groupBy</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+report := myThings.GroupByYear() // => { 1995: ['Thing One', 'Thing Two'], 2007: ['Thing Three', 'Thing Four'] }
+</pre>
+
+            <h3 id="Sum">Sum</h3>
+<pre>
+func (rcv Things) Sum{{Name}}() {{Type}}
+</pre>
+            <p>Sums a field over all elements of Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb298381(v=vs.110).aspx">Sum</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+revenue := myThings.SumSales() // => 68885.74
+</pre>
+
+            <h3 id="Average">Average</h3>
+<pre>
+func (rcv Things) Average{{Name}}() {{Type}}
+</pre>
+            <p>Sums a field over all elements and divides by len(Things). Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb358946(v=vs.110).aspx">Average</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+avg := myThings.AverageSales() // => 30005.74
+</pre>
+
+            <h3 id="MaxCustom">Max</h3>
+<pre>
+func (rcv Things) Max{{Name}}() {{Type}}
+</pre>
+            <p>Selects the largest value of a field in Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534962(v=vs.110).aspx">Max</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+bigmoney := myThings.MaxSales() // => 685698.99
+</pre>
+
+            <h3 id="MinCustom">Min</h3>
+<pre>
+func (rcv Things) Min{{Name}}() {{Type}}
+</pre>
+            <p>Selects the least value of a field in Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548741(v=vs.110).aspx">Min</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+earliest := myThings.MinYear() // => 1995
+</pre>
+
+            <h3 id="Aggregate">Aggregate</h3>
+<pre>
+func (rcv Things) Aggregate{{Name}}(fn func({{Type}}, {{Type}}) {{Type}}) {{Type}}
+</pre>
+            <p>Iterates over Things, operating on each element while maintaining ‘state’. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548651(v=vs.110).aspx">Aggregate</a> or underscore’s <a href="http://underscorejs.org/#reduce">reduce</a>.</p>
+
+<p>Example:</p>
+
+<pre>
+var join = func(state string, value string) string {
+    if state != "" {
+        state += ", "
+    }
+    return state + value
+}
+list := myThings.AggregateName(join) // => "Title One, Title Two, etc"
+</pre>
+
+            <h2 id="FAQ">FAQ</h2>
+
+            <p>First off: we’re alpha! Caveat emptor. Feedback welcome.</p>
+
+            <h4>Why?</h4>
+            <p>Go doesn't (yet) offer generic types, and we are accustomed to many of their use cases. Perhaps you are similarly accustomed, or would find them useful.</p>
+
+            <h4>Code generation, really?</h4>
+            <p>Yes. We do it to ensure compile-time safety, and to minimize magic. It’s just code, and you can read it.</p>
+            <p>Codegen is not without its risks, we understand. But keep in mind that languages which do support generics are in fact doing <a href="http://msdn.microsoft.com/en-us/library/vstudio/f4a6ta2h(v=vs.110).aspx">something like code generation</a>, so perhaps gen’s approach is not that far out.</p>
+
+            <h4>What’s that <a href="#Concepts">plural type</a> business?</h4>
+            <p>gen creates a new slice type for your selected struct(s) because method receivers cannot be slices. It’s clearer and less verbose to type myThings.Where(fn) than package.Where(myThings, fn). Not to mention, the latter wouldn’t work for multiple struct types in the same package.</p>
+
+            <h4>You re-implemented sort?</h4>
+            <p>Yes. Go’s <a href="http://godoc.org/sort">sort package</a> requires the fulfillment of three <a href="http://golang.org/pkg/sort/#Interface">interface members</a>, two of which are usually boilerplate. If you want to sort by different criteria, you need to implement multiple ‘alias’ types.</p>
+            <p>gen’s <a href="#Sort">Sort</a> requires a single argument defining ‘less’, and no interface implementation. You can call ad-hoc sorts simply by passing a different func.</p>
+            <p>gen’s implementation is a strongly-typed port of Go’s <a href="http://golang.org/src/pkg/sort/sort.go">implementation</a>. Performance characteristics should be similar.</p>
+
+            <h4>Could some of this be achieved using reflection or interfaces + type assertions?</h4>
+            <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
+
+            <h4>What about imported types?</h4>
+            <p>gen doesn’t support imported types that might be members of your struct, reason being that we’d have to resolve those dependencies and include them in the generated code. This isn’t impossible, we may get there.</p>
+
+            <p>As a workaround, you might create a local ‘alias’ type, something like:</p>
+
+<pre>
+type MyType otherPackage.Type
+
+// or...
+
+type MyType struct {
+    otherPackage.Type
+}
+</pre>
+
+            <h4>Why didn’t you implement X method?</h4>
+            <p>Most likely:</p>
+            <ul>
+                <li>We haven’t gotten to it yet, or</li>
+                <li>We haven’t found an idiomatic way to do it, or</li>
+                <li>It doesn’t save you any code, or</li>
+                <li>It duplicates something that Go does well.</li>
+            </ul>
+
+            <p>Here are some <a href="https://github.com/clipperhouse/gen#design-principles-for-contributors">design criteria</a>.</p>
+
+            <h4>Can I use it?</h4>
+            <p>We’d be thrilled if you would test it out and offer feedback. It’s still very early alpha bits, caveat emptor for production use. The API will likely be volatile prior to 1.0.</p>
+
+            <h4>Can I help?</h4>
+            <p>Sure, the code is <a href="https://github.com/clipperhouse/gen">here</a>.</p>
+
+            <h4>Who is ‘we’?</h4>
+            <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. <a href="https://github.com/mjibson">Matt Jibson</a> is helping out as well.</p>
+</div>
+</body>
+</html>
