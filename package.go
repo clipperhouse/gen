@@ -91,7 +91,7 @@ func getPackages() (result []*Package) {
 				}
 			}
 
-			typ := &Type{Spec: genLine, Package: pkg, Pointer: pointer, Name: docType.Name, StandardMethods: standardMethods}
+			typ := &Type{Package: pkg, Pointer: pointer, Name: docType.Name, StandardMethods: standardMethods}
 
 			// assemble projections with type verification
 			for _, s := range projectedTypes {

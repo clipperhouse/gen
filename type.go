@@ -7,7 +7,6 @@ import (
 )
 
 type Type struct {
-	Spec            string
 	Package         *Package
 	Pointer         string
 	Name            string
