@@ -7,7 +7,6 @@ import (
 )
 
 var errs = make([]error, 0)
-var notes = make([]string, 0)
 
 func main() {
 	args := os.Args[1:]
@@ -24,10 +23,6 @@ func main() {
 	}
 
 	packages := getPackages()
-
-	for _, n := range notes {
-		fmt.Println("  note: " + n)
-	}
 
 	if len(errs) > 0 {
 		for _, e := range errs {
