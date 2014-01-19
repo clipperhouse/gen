@@ -17,6 +17,12 @@ type Package struct {
 	Types []*Type
 }
 
+type GenSpec struct {
+	Pointer          string
+	SubsettedMethods []string
+	ProjectedTypes   []string
+}
+
 // Returns one gen Package per Go package found in current directory
 func getPackages() (result []*Package) {
 	fset := token.NewFileSet()
@@ -36,35 +42,16 @@ func getPackages() (result []*Package) {
 		docPkg := doc.New(astPackage, name, doc.AllDecls)
 		for _, docType := range docPkg.Types {
 			// identify marked-up types
-			genLine, found := getGenLine(docType)
+			spec, found := getGenSpec(docType.Doc)
 			if !found {
 				continue
 			}
 
-			// parse out tags & pointer
-			spaces := regexp.MustCompile(" +")
-			parts := spaces.Split(genLine, -1)
-
-			var pointer string
-			var subsettedMethods, projectedTypes []string
-
-			for _, s := range parts {
-				if s == "*" {
-					pointer = s
-				}
-				if x, found := parseTag("methods", genLine); found {
-					subsettedMethods = x
-				}
-				if x, found := parseTag("projections", genLine); found {
-					projectedTypes = x
-				}
-			}
-
 			var standardMethods, projectionMethods []string
 
-			if len(subsettedMethods) > 0 {
+			if len(spec.SubsettedMethods) > 0 {
 				// categorize subsetted methods as standard or projection
-				for _, m := range subsettedMethods {
+				for _, m := range spec.SubsettedMethods {
 					if isStandardMethod(m) {
 						standardMethods = append(standardMethods, m)
 					}
@@ -76,25 +63,25 @@ func getPackages() (result []*Package) {
 					}
 				}
 
-				if len(projectedTypes) > 0 && len(projectionMethods) == 0 {
+				if len(spec.ProjectedTypes) > 0 && len(projectionMethods) == 0 {
 					addError(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", docType.Name))
 				}
 
-				if len(projectionMethods) > 0 && len(projectedTypes) == 0 {
+				if len(projectionMethods) > 0 && len(spec.ProjectedTypes) == 0 {
 					addError(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", docType.Name))
 				}
 			} else {
 				// default to all if not subsetted
 				standardMethods = getStandardMethodKeys()
-				if len(projectedTypes) > 0 {
+				if len(spec.ProjectedTypes) > 0 {
 					projectionMethods = getProjectionMethodKeys()
 				}
 			}
 
-			typ := &Type{Package: pkg, Pointer: pointer, Name: docType.Name, StandardMethods: standardMethods}
+			typ := &Type{Package: pkg, Pointer: spec.Pointer, Name: docType.Name, StandardMethods: standardMethods}
 
 			// assemble projections with type verification
-			for _, s := range projectedTypes {
+			for _, s := range spec.ProjectedTypes {
 				numeric := false
 				comparable := true // sensible default?
 				ordered := false
@@ -140,12 +127,31 @@ func getPackages() (result []*Package) {
 	return
 }
 
-func getGenLine(t *doc.Type) (result string, found bool) {
-	lines := strings.Split(t.Doc, "\n")
+func getGenSpec(s string) (result *GenSpec, found bool) {
+	lines := strings.Split(s, "\n")
 	for _, line := range lines {
 		if line = strings.TrimLeft(line, "/ "); strings.HasPrefix(line, "+gen") {
+			// parse out tags & pointer
+			spaces := regexp.MustCompile(" +")
+			parts := spaces.Split(line, -1)
+
+			var pointer string
+			var subsettedMethods, projectedTypes []string
+
+			for _, s := range parts {
+				if s == "*" {
+					pointer = s
+				}
+				if x, found := parseTag("methods", line); found {
+					subsettedMethods = x
+				}
+				if x, found := parseTag("projections", line); found {
+					projectedTypes = x
+				}
+			}
+
 			found = true
-			result = line
+			result = &GenSpec{pointer, subsettedMethods, projectedTypes}
 			return
 		}
 	}
