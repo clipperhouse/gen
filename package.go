@@ -3,6 +3,7 @@ package main
 import (
 	_ "code.google.com/p/go.tools/go/gcimporter"
 	"code.google.com/p/go.tools/go/types"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/doc"
@@ -18,9 +19,12 @@ type Package struct {
 }
 
 type GenSpec struct {
-	Pointer          string
-	SubsettedMethods []string
-	ProjectedTypes   []string
+	Pointer, Name        string // Name is included mainly for informative error messages
+	Methods, Projections *GenTag
+}
+
+type GenTag struct {
+	Items []string
 }
 
 // Returns one gen Package per Go package found in current directory
@@ -41,74 +45,51 @@ func getPackages() (result []*Package) {
 
 		docPkg := doc.New(astPackage, name, doc.AllDecls)
 		for _, docType := range docPkg.Types {
+
 			// identify marked-up types
-			spec, found := getGenSpec(docType.Doc)
+			spec, found := getGenSpec(docType.Doc, docType.Name)
 			if !found {
 				continue
 			}
 
-			var standardMethods, projectionMethods []string
-
-			if len(spec.SubsettedMethods) > 0 {
-				// categorize subsetted methods as standard or projection
-				for _, m := range spec.SubsettedMethods {
-					if isStandardMethod(m) {
-						standardMethods = append(standardMethods, m)
-					}
-					if isProjectionMethod(m) {
-						projectionMethods = append(projectionMethods, m)
-					}
-					if !isStandardMethod(m) && !isProjectionMethod(m) {
-						addError(fmt.Sprintf("method %s (subsetted on type %s) is unknown", m, docType.Name))
-					}
-				}
-
-				if len(spec.ProjectedTypes) > 0 && len(projectionMethods) == 0 {
-					addError(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", docType.Name))
-				}
-
-				if len(projectionMethods) > 0 && len(spec.ProjectedTypes) == 0 {
-					addError(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", docType.Name))
-				}
-			} else {
-				// default to all if not subsetted
-				standardMethods = getStandardMethodKeys()
-				if len(spec.ProjectedTypes) > 0 {
-					projectionMethods = getProjectionMethodKeys()
-				}
+			standardMethods, projectionMethods, err := determineMethods(spec)
+			if err != nil {
+				errs = append(errs, err)
 			}
 
 			typ := &Type{Package: pkg, Pointer: spec.Pointer, Name: docType.Name, StandardMethods: standardMethods}
 
 			// assemble projections with type verification
-			for _, s := range spec.ProjectedTypes {
-				numeric := false
-				comparable := true // sensible default?
-				ordered := false
+			if spec.Projections != nil {
+				for _, s := range spec.Projections.Items {
+					numeric := false
+					comparable := true // sensible default?
+					ordered := false
 
-				t, _, err := types.Eval(s, typesPkg, typesPkg.Scope())
-				known := err == nil
+					t, _, err := types.Eval(s, typesPkg, typesPkg.Scope())
+					known := err == nil
 
-				if !known {
-					addError(fmt.Sprintf("unable to identify type %s, projected on %s (%s)", s, docType.Name, err))
-				} else {
-					numeric = isNumeric(t)
-					comparable = isComparable(t)
-					ordered = isOrdered(t)
-				}
-
-				for _, m := range projectionMethods {
-					pm, ok := ProjectionMethods[m]
-
-					if !ok {
-						addError(fmt.Sprintf("unknown projection method %v", m))
-						continue
+					if !known {
+						addError(fmt.Sprintf("unable to identify type %s, projected on %s (%s)", s, docType.Name, err))
+					} else {
+						numeric = isNumeric(t)
+						comparable = isComparable(t)
+						ordered = isOrdered(t)
 					}
 
-					valid := (!pm.requiresNumeric || numeric) && (!pm.requiresComparable || comparable) && (!pm.requiresOrdered || ordered)
+					for _, m := range projectionMethods {
+						pm, ok := ProjectionMethods[m]
 
-					if valid {
-						typ.AddProjection(m, s)
+						if !ok {
+							addError(fmt.Sprintf("unknown projection method %v", m))
+							continue
+						}
+
+						valid := (!pm.requiresNumeric || numeric) && (!pm.requiresComparable || comparable) && (!pm.requiresOrdered || ordered)
+
+						if valid {
+							typ.AddProjection(m, s)
+						}
 					}
 				}
 			}
@@ -127,8 +108,9 @@ func getPackages() (result []*Package) {
 	return
 }
 
-func getGenSpec(s string) (result *GenSpec, found bool) {
-	lines := strings.Split(s, "\n")
+// getGenSpec identifies gen-marked types and parses tags
+func getGenSpec(doc, name string) (result *GenSpec, found bool) {
+	lines := strings.Split(doc, "\n")
 	for _, line := range lines {
 		if line = strings.TrimLeft(line, "/ "); strings.HasPrefix(line, "+gen") {
 			// parse out tags & pointer
@@ -136,23 +118,55 @@ func getGenSpec(s string) (result *GenSpec, found bool) {
 			parts := spaces.Split(line, -1)
 
 			var pointer string
-			var subsettedMethods, projectedTypes []string
+			var subsettedMethods, projectedTypes *GenTag
 
 			for _, s := range parts {
 				if s == "*" {
 					pointer = s
 				}
-				if x, found := parseTag("methods", line); found {
-					subsettedMethods = x
+				if x, found := parseTag("methods", s); found {
+					subsettedMethods = &GenTag{x}
 				}
-				if x, found := parseTag("projections", line); found {
-					projectedTypes = x
+				if x, found := parseTag("projections", s); found {
+					projectedTypes = &GenTag{x}
 				}
 			}
 
 			found = true
-			result = &GenSpec{pointer, subsettedMethods, projectedTypes}
+			result = &GenSpec{pointer, name, subsettedMethods, projectedTypes}
 			return
+		}
+	}
+	return
+}
+
+func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []string, err error) {
+	if spec.Methods != nil {
+		// categorize subsetted methods as standard or projection
+		for _, m := range spec.Methods.Items {
+			if isStandardMethod(m) {
+				standardMethods = append(standardMethods, m)
+			}
+			if isProjectionMethod(m) {
+				projectionMethods = append(projectionMethods, m)
+			}
+			if !isStandardMethod(m) && !isProjectionMethod(m) {
+				err = errors.New(fmt.Sprintf("method %s is unknown", m, spec.Name))
+			}
+		}
+
+		if spec.Projections != nil && len(projectionMethods) == 0 {
+			err = errors.New(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", spec.Name))
+		}
+
+		if len(projectionMethods) > 0 && spec.Projections == nil {
+			err = errors.New(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", spec.Name))
+		}
+	} else {
+		// default to all if not subsetted
+		standardMethods = getStandardMethodKeys()
+		if spec.Projections != nil {
+			projectionMethods = getProjectionMethodKeys()
 		}
 	}
 	return
@@ -167,11 +181,14 @@ func getAstFiles(p *ast.Package) (result []*ast.File) {
 }
 
 func parseTag(name, s string) (result []string, found bool) {
-	pattern := fmt.Sprintf(`%s:"(.+)"`, name)
+	pattern := fmt.Sprintf(`%s:"(.*)"`, name)
 	r := regexp.MustCompile(pattern)
 	if matches := r.FindStringSubmatch(s); matches != nil && len(matches) > 1 {
 		found = true
-		result = strings.Split(matches[1], ",")
+		match := matches[1]
+		if len(match) > 0 {
+			result = strings.Split(match, ",")
+		}
 	}
 	return
 }
