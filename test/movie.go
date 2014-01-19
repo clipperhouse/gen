@@ -1,7 +1,6 @@
 package models
 
-// Any amount of docs might be here
-// project:"int,Thing2,string"
+// +gen * projections:"int,Thing2,string"
 type Movie struct {
 	Title             string
 	Theaters          int

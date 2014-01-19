@@ -1,6 +1,5 @@
-// gen *models.Movie
-// this file was auto-generated using github.com/clipperhouse/gen
-// Sun, 12 Jan 2014 21:16:36 UTC
+// This file was auto-generated using github.com/clipperhouse/gen
+// Modifying this file is not recommended as it will likely be overwritten in the future
 
 // Sort functions are a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
@@ -296,6 +295,20 @@ func (rcv Movies) AggregateThing2(fn func(Thing2, *Movie) Thing2) (result Thing2
 	return
 }
 
+// AverageThing2 sums Thing2 over all elements and divides by len(Movies). See: http://clipperhouse.github.io/gen/#Average
+func (rcv Movies) AverageThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine AverageThing2 of zero-length Movies")
+		return
+	}
+	for _, v := range rcv {
+		result += fn(v)
+	}
+	result = result / Thing2(l)
+	return
+}
+
 // GroupByThing2 groups elements into a map keyed by Thing2. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv Movies) GroupByThing2(fn func(*Movie) Thing2) map[Thing2]Movies {
 	result := make(map[Thing2]Movies)
@@ -348,6 +361,14 @@ func (rcv Movies) MinThing2(fn func(*Movie) Thing2) (result Thing2, err error) {
 func (rcv Movies) SelectThing2(fn func(*Movie) Thing2) (result []Thing2) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
+	}
+	return
+}
+
+// SumThing2 sums Thing2 over elements in Movies. See: http://clipperhouse.github.io/gen/#Sum
+func (rcv Movies) SumThing2(fn func(*Movie) Thing2) (result Thing2) {
+	for _, v := range rcv {
+		result += fn(v)
 	}
 	return
 }
