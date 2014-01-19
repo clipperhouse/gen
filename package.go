@@ -95,9 +95,9 @@ func getPackages() (result []*Package) {
 
 			// assemble projections with type verification
 			for _, s := range projectedTypes {
-				isNumeric := false
-				isComparable := true
-				isOrdered := false
+				numeric := false
+				comparable := true // sensible default?
+				ordered := false
 
 				t, _, err := types.Eval(s, typesPkg, typesPkg.Scope())
 				known := err == nil
@@ -105,29 +105,9 @@ func getPackages() (result []*Package) {
 				if !known {
 					addError(fmt.Sprintf("unable to identify type %s, projected on %s (%s)", s, docType.Name, err))
 				} else {
-					switch x := t.(type) {
-					case *types.Slice:
-						isComparable = false
-						isOrdered = false
-					case *types.Array:
-						isComparable = false
-						isOrdered = false
-					case *types.Chan:
-						isComparable = true
-						isOrdered = false
-					case *types.Map:
-						isComparable = false
-						isOrdered = false
-					case *types.Struct:
-						isComparable = true
-						isOrdered = false
-					default:
-						switch u := x.Underlying().(type) {
-						case *types.Basic:
-							isNumeric = u.Info()|types.IsNumeric == types.IsNumeric
-							isOrdered = u.Info()|types.IsOrdered == types.IsOrdered
-						}
-					}
+					numeric = isNumeric(t)
+					comparable = isComparable(t)
+					ordered = isOrdered(t)
 				}
 
 				for _, m := range projectionMethods {
@@ -138,7 +118,7 @@ func getPackages() (result []*Package) {
 						continue
 					}
 
-					valid := (!pm.requiresNumeric || isNumeric) && (!pm.requiresComparable || isComparable) && (!pm.requiresOrdered || isOrdered)
+					valid := (!pm.requiresNumeric || numeric) && (!pm.requiresComparable || comparable) && (!pm.requiresOrdered || ordered)
 
 					if valid {
 						typ.AddProjection(m, s)
