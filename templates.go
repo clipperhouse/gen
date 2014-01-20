@@ -248,6 +248,39 @@ func ({{.Receiver}} {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Singular}
 	return {{.Receiver}}.IsSorted(greaterOrEqual)
 }
 `,
+  "Future": `
+type {{.Singular}}Future struct {
+  c chan {{.Singular}}
+}
+
+func Make{{.Singular}}Future(f func() {{.Singular}}) (h {{.Singular}}Future){
+  h.c = make(chan {{.Singular}}, 1)
+  go func() {
+    h.c <- f()
+  }()
+  return h
+}
+
+func (h {{.Singular}}Future) Get() {{.Singular}} {
+  hash := <-h.c
+  h.c <- hash
+  return hash
+}
+// Cancel is provided, but doesn't make much sense as-written.
+func (h {{.Singular}}Future) Cancel() {
+  close(h.c)
+}
+
+func (h {{.Singular}}Future) IsDone() bool {
+  select {
+  case t := <-h.c:
+    h.c <- t
+    return true
+  default:
+    return false
+  }
+}
+`,
 }
 
 func getSortSupportTemplate() *template.Template {
