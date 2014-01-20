@@ -209,7 +209,8 @@ func getStructArgs(args []string) (structArgs []*structArg) {
 
 func getAllTypes(fset *token.FileSet) (types map[string]*doc.Type) {
 	goFiles := func(f os.FileInfo) bool {
-		return strings.HasSuffix(f.Name(), ".go")
+		return strings.HasSuffix(f.Name(), ".go") &&
+			!strings.HasSuffix(f.Name(), "_gen.go")
 	}
 	dir, err := parser.ParseDir(fset, "./", goFiles, parser.ParseComments)
 	if err != nil {
