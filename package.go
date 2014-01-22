@@ -43,8 +43,19 @@ func getPackages() (result []*Package) {
 			errs = append(errs, err)
 		}
 
+		// fall back to Universe scope if types.Check fails; "best-effort" to handle primitives, at least
+		scope := types.Universe
+		if typesPkg != nil {
+			scope = typesPkg.Scope()
+		}
+
 		docPkg := doc.New(astPackage, name, doc.AllDecls)
 		for _, docType := range docPkg.Types {
+
+			// look for deprecated struct tags, used for 'custom methods' in older version of gen
+			if t, _, err := types.Eval(docType.Name, typesPkg, scope); err == nil {
+				checkDeprecatedTags(t)
+			}
 
 			// identify marked-up types
 			spec, found := getGenSpec(docType.Doc, docType.Name)
@@ -55,12 +66,6 @@ func getPackages() (result []*Package) {
 			standardMethods, projectionMethods, err := determineMethods(spec)
 			if err != nil {
 				errs = append(errs, err)
-			}
-
-			// fall back to Universe scope if types.Check fails; "best-effort" to handle primitives, at least
-			scope := types.Universe
-			if typesPkg != nil {
-				scope = typesPkg.Scope()
 			}
 
 			typ := &Type{Package: pkg, Pointer: spec.Pointer, Name: docType.Name, StandardMethods: standardMethods}
@@ -233,4 +238,17 @@ func (t *Type) requiresSortSupport() bool {
 		}
 	}
 	return false
+}
+
+func checkDeprecatedTags(t types.Type) {
+	// give informative errors for use of deprecated custom methods
+	switch x := t.Underlying().(type) {
+	case *types.Struct:
+		for i := 0; i < x.NumFields(); i++ {
+			_, found := parseTag("gen", x.Tag(i))
+			if found {
+				addError(fmt.Sprintf(`custom methods (%s on %s) have been deprecated, see %s`, x.Tag(i), x.Field(i).Name(), deprecationUrl))
+			}
+		}
+	}
 }

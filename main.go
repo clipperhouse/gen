@@ -94,3 +94,5 @@ const usage = `Documentation is available at http://clipperhouse.github.io/gen
 Usage: gen [-force]
   -force    # forces generation to continue despite errors; voids warranty; shortcut -f
 `
+
+const deprecationUrl = `https://github.com/clipperhouse/gen/blob/projection/CHANGELOG.md`
