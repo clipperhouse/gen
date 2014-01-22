@@ -57,6 +57,12 @@ func getPackages() (result []*Package) {
 				errs = append(errs, err)
 			}
 
+			// fall back to Universe scope if types.Check fails; "best-effort" to handle primitives, at least
+			scope := types.Universe
+			if typesPkg != nil {
+				scope = typesPkg.Scope()
+			}
+
 			typ := &Type{Package: pkg, Pointer: spec.Pointer, Name: docType.Name, StandardMethods: standardMethods}
 
 			// assemble projections with type verification
@@ -66,7 +72,7 @@ func getPackages() (result []*Package) {
 					comparable := true // sensible default?
 					ordered := false
 
-					t, _, err := types.Eval(s, typesPkg, typesPkg.Scope())
+					t, _, err := types.Eval(s, typesPkg, scope)
 					known := err == nil
 
 					if !known {
