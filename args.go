@@ -28,6 +28,26 @@ func parseArgs(args []string) (opts options, err error) {
 			known = true
 		}
 
+		// give informative errors for use of deprecated api
+		// TODO: update URLs below after merge with master
+		typ := regexp.MustCompile(`^(\*?)([\p{L}\p{N}]+)\.([\p{L}\p{N}]+)$`)
+		if typ.MatchString(s) {
+			err = errors.New("passing type arguments at the command line has been deprecated, see https://github.com/clipperhouse/gen/blob/projection/CHANGELOG.md")
+			return
+		}
+
+		all := regexp.MustCompile(`^-(\*?)a(ll)?$`)
+		if all.MatchString(s) {
+			err = errors.New("the -all flag has been deprecated, see https://github.com/clipperhouse/gen/blob/projection/CHANGELOG.md")
+			return
+		}
+
+		exported := regexp.MustCompile(`^-e(xported)?$`)
+		if exported.MatchString(s) {
+			err = errors.New("the -exported flag has been deprecated, see https://github.com/clipperhouse/gen/blob/projection/CHANGELOG.md")
+			return
+		}
+
 		if !known {
 			err = errors.New("unknown argument: " + s)
 			return
