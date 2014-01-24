@@ -94,3 +94,7 @@ p, pre, div.pre {
 	white-space: nowrap;
 }
 
+.strike {
+	text-decoration: line-through;
+}
+

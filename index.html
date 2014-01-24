@@ -16,7 +16,7 @@
         <div id="sidebar">
             <nav>
                 <h4><a href="#Concepts">Concepts</a></h4>
-                <h4><a href="#Installation">Installation</a></h4>
+                <h4><a href="#Quick">Quick start</a></h4>
                 <h4><a href="#Usage">Usage</a></h4>
                 <h4><a href="#Methods">Standard Methods</a></h4>
                 <p class="methods">
@@ -33,20 +33,25 @@
                     <a href="#Min">- Min</a>
                     <a href="#Max">- Max</a>
                 </p>
-                <h4><a href="#Subsetting">Subsetting</a></h4>
-                <h4><a href="#Custom">Custom Methods</a></h4>
+                <h4><a href="#Projections">Projection Methods</a></h4>
                 <p class="methods">
                     <a href="#Select">- Select</a>
                     <a href="#GroupBy">- GroupBy</a>
                     <a href="#Sum">- Sum</a>
                     <a href="#Average">- Average</a>
-                    <a href="#MaxCustom">- Max</a>
-                    <a href="#MinCustom">- Min</a>
+                    <a href="#MaxProjection">- Max</a>
+                    <a href="#MinProjection">- Min</a>
                     <a href="#Aggregate">- Aggregate</a>
                 </p>
+
+                <h4><a href="#Subsetting">Subsetting</a></h4>
                 <h4><a href="#FAQ">FAQ</a></h4><br />
+
                 <a href="https://github.com/clipperhouse/gen" id="github">Source</a><br /><br />
-                <a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a>
+                <a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a><br /><br />
+
+                <h4><a href="#Custom" class="strike">Custom Methods</a></h4><br />
+
             </nav>
         </div>
         <div id="content">
@@ -64,7 +69,9 @@
             <h2 id="Concepts">Concepts</h2>
             <p>gen generates code for your types, at development time, using the command line. gen is not an import; the generated source becomes part of your project and takes no external dependencies.</p>
 
-            <p>The generated code implements the <a href="#Methods">methods</a> described below. To make this possible, a new slice type is generated for the struct types you specify. We call it the <strong>plural type</strong>. For example, if you gen an existing type Thing, a new plural type will be created:</p>
+            <p>You specify which of your types you’d like to generate <a href="#Methods">methods</a> on by marking them up with simple tags.</p>
+
+            <p>A new slice type is generated for the types you specify. We call it the <strong>plural type</strong>. For example, if you gen an existing type Thing, a new plural type will be created:</p>
 
 <pre>
 type Things []Thing
@@ -76,56 +83,54 @@ type Things []Thing
 myThings := Things{...}
 otherThings := myThings.Where(func).Sort(func)
 </pre>
-            <h2 id="Installation">Installation</h2>
+            <h2 id="Quick">Quick start</h2>
             <p>Of course, start by installing Go, <a href="http://golang.org/doc/code.html">setting up paths</a>, etc. Then:</p>
 
 <pre>
 go get github.com/clipperhouse/gen
 </pre>
-            <p>To see usage, simply type:</p>
+            <p>Create a new Go project, and <span class="cmd">cd</span> into it. Create a main.go file and define a type in it.</p>
+
+            <p>Now, mark it up with a simple <span class="cmd">+gen</span> tag in an adjacent comment like so:</p>
+<pre>
+// +gen
+type MyType struct {
+    ...
+}
+</pre>
+            <p>And at the command line, simply type</p>
 <pre>
 gen
 </pre>
 
-            <p>Create a new Go project, and <span class="cmd">cd</span> into it. Create a main.go file and define a struct type in it. To quickly create the gen methods:</p>
-<pre>
-gen package.Thing
-</pre>
-
-            <p>…using your package and type names. You should see a new file, named [your struct]_gen.go. Have a look around. Try out that plural type.</p>
+            <p>You should see a new file, named [your struct]_gen.go. Have a look around. Try out that plural type.</p>
 
             <h2 id="Usage">Usage</h2>
 
-            <p>After <a href="#Installation">installation</a>, you should have access to a new <span class="cmd">gen</span> command. <span class="cmd">cd</span> into the directory containing the type(s) you wish to gen. Simply type <span class="cmd">gen</span> to see usage.</p>
+            <p>If you’d like to generate methods that take pointers instead of value types, add the <span class="cmd">*</span> directive.</p>
+<pre>
+// +gen *
+type MyType struct {
+    ...
+}
+</pre>
+            <p>To select only a <a href="#Subsetting">subset</a> of methods, use:</p>
+<pre>
+// +gen * methods:"Any,Where,Count"
+type MyType struct {
+    ...
+}
+</pre>
+            <p>(You’ll recognize this as the syntax of  <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a>.)</p>
 
-            <div class="pre">
-                <table id="usage">
-                    <tbody>
-                        <tr>
-                            <td>
-                                package.TypeName<br />
-                                *package.TypeName
-                            </td>
-                            <td>Generate plural type &amp; methods for specified type name within the specified package. Prepend with optional * to operate on pointers (recommended) or omit it to use values.</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                -all<br />
-                                -*all
-                            </td>
-                            <td>Generate plural type &amp; methods for all struct types discovered within the current directory. Prepend with optional * to operate on pointers (recommended) or omit it to use values. Abbreviate <span class="nowrap">-a</span>.</td>
-                        </tr>
-                        <tr>
-                            <td>-exported</td>
-                            <td>Limit generation to exported struct types, i.e., those starting with capital letters. Useful with -all. Abbreviate <span class="nowrap">-e</span>.</td>
-                        </tr>
-                        <tr>
-                            <td>-force</td>
-                            <td>Force generation to continue even if errors. Abbreviate <span class="nowrap">-f</span>.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <p>To include <a href="#Projections">projection methods</a>, specify projected types:</p>
+            
+<pre>
+// +gen * projections:"int,OtherType"
+type MyType struct {
+    ...
+}
+</pre>
 
             <h2 id="Methods">Methods</h2>
 
@@ -327,129 +332,126 @@ byArea := func(a, b *House) bool {
 roomiest, err := houses.Max(byArea)
 </pre>
 
-            <h2 id="Subsetting">Subsetting</h2>
+            <h2 id="Projections">Projections</h2>
 
-            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <span class="cmd">gen</span> a type. If you would prefer only to generate specific methods, you can include a specially-formatted “tag” comment, which follows the convention of <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a>.</p>
+            <h4>Projections allow ad-hoc mapping of one type to another.</h4>
 
+            <p>Projections are specified by listing types in a <span class="cmd">projection</span> tag. Here’s a marked-up type and some handy func’s, used in the examples below:</p>
 <pre>
-// gen:"Count,Where,Sort"
-type Thing struct {
-    Name  string
-    Year  int  
-    Sales float64
++gen projections:"int,string"
+type Thing struct { 
+    Department string
+    Year       int
+    Sales      float64
+    ...
+}
+
+getYear := func(t *Thing) int {
+    return t.Year
+}
+
+getSales := func(t *Thing) float64 {
+    return t.Sales
 }
 </pre>
-
-            <p>Give the comment its own line adjacent to the type defintion as you would with (or in addition to) godocs, and avoid spaces.</p>
-
-            <p>(Note: previous versions of gen put the comment <em>within</em> the type definition.)</p>
-
-            <h2 id="Custom">Custom methods</h2>
-
-            <p><strong>Note:</strong> Custom methods are likely to be deprecated in favor of more-flexible “projection methods”. See this <a href="https://github.com/clipperhouse/gen/issues/8">GitHub issue</a> for details.</p>
-
-            <h4>Custom methods use <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a> to project fields of a struct.</h4>
-
-            <p>Given an example type:</p>
-<pre>
-type Thing struct {
-    Name  string  `gen:"Select,Aggregate"`
-    Year  int     `gen:"GroupBy,Select,Min"`
-    Sales float64 `gen:"Sum,Max,Average"`
-}
-</pre>
-            <p>You can infer the format from above. (Avoid spaces between methods.)</p>
-
-            <p>Below, {{Name}} and {{Type}} represent the name and type of a tagged field. The actual name will be substituted when you gen.</p>
-
             <h3 id="Select">Select</h3>
-<pre>
-func (rcv Things) Select{{Name}}() []string
-</pre>
-            <p>Returns a slice of a specific field. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548891(v=vs.110).aspx">Select</a> or underscore’s <a href="http://underscorejs.org/#pluck">pluck</a>.</p>
+
+            <p>Returns a projected slice given a func which maps Thing to {{Type}}. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548891(v=vs.110).aspx">Select</a> or underscore’s <a href="http://underscorejs.org/#map">map</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-names := myThings.SelectName() // => ["Thing One", "Thing Two"]
+names := myThings.SelectString(func(t *Thing) string {
+    return t.Department
+})
+// => ["Widgets", "Doodads"]
 </pre>
 
             <h3 id="GroupBy">GroupBy</h3>
-<pre>
-func (rcv Things) GroupBy{{Name}}() map[{{Type}}]Things
-</pre>
-            <p>Groups elements into a map keyed by the tagged field’s value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534501(v=vs.110).aspx">GroupBy</a> or underscore’s <a href="http://underscorejs.org/#groupBy">groupBy</a>.</p>
+
+            <p>Groups elements into a map keyed by {{Type}}. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534501(v=vs.110).aspx">GroupBy</a> or underscore’s <a href="http://underscorejs.org/#groupBy">groupBy</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-report := myThings.GroupByYear() // => { 1995: ['Thing One', 'Thing Two'], 2007: ['Thing Three', 'Thing Four'] }
+report := myThings.GroupByInt(getYear)
+// => { "1995": [Thing1, Thing2], "2008": [Thing3, Thing4] }
 </pre>
 
             <h3 id="Sum">Sum</h3>
-<pre>
-func (rcv Things) Sum{{Name}}() {{Type}}
-</pre>
-            <p>Sums a field over all elements of Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb298381(v=vs.110).aspx">Sum</a>.</p>
+
+            <p>Sums over all elements. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb298381(v=vs.110).aspx">Sum</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-revenue := myThings.SumSales() // => 68885.74
+revenue := myThings.SumFloat64(getSales)
+// => 9457846.74
 </pre>
 
             <h3 id="Average">Average</h3>
-<pre>
-func (rcv Things) Average{{Name}}() {{Type}}
-</pre>
-            <p>Sums a field over all elements and divides by len(Things). Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb358946(v=vs.110).aspx">Average</a>.</p>
+
+            <p>Sums over all elements and divides by len(Things). Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb358946(v=vs.110).aspx">Average</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-avg := myThings.AverageSales() // => 30005.74
+avg := myThings.AverageFloat64(getSales)
+// => 30005.74
 </pre>
 
-            <h3 id="MaxCustom">Max</h3>
-<pre>
-func (rcv Things) Max{{Name}}() {{Type}}
-</pre>
-            <p>Selects the largest value of a field in Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534962(v=vs.110).aspx">Max</a>.</p>
+            <h3 id="MaxProjection">Max</h3>
+
+            <p>Selects the largest projected value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534962(v=vs.110).aspx">Max</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-bigmoney := myThings.MaxSales() // => 685698.99
+bigmoney := myThings.MaxFloat64(getSales)
+// => 68598.99
 </pre>
 
-            <h3 id="MinCustom">Min</h3>
-<pre>
-func (rcv Things) Min{{Name}}() {{Type}}
-</pre>
-            <p>Selects the least value of a field in Things. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548741(v=vs.110).aspx">Min</a>.</p>
+            <h3 id="MinProjection">Min</h3>
+
+            <p>Selects the least projected value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548741(v=vs.110).aspx">Min</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-earliest := myThings.MinYear() // => 1995
+earliest := myThings.MinInt(getYear)
+// => 1995
 </pre>
 
             <h3 id="Aggregate">Aggregate</h3>
-<pre>
-func (rcv Things) Aggregate{{Name}}(fn func({{Type}}, {{Type}}) {{Type}}) {{Type}}
-</pre>
+
             <p>Iterates over Things, operating on each element while maintaining ‘state’. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548651(v=vs.110).aspx">Aggregate</a> or underscore’s <a href="http://underscorejs.org/#reduce">reduce</a>.</p>
 
 <p>Example:</p>
 
 <pre>
-var join = func(state string, value string) string {
+var join = func(state string, value Thing) string {
     if state != "" {
         state += ", "
     }
-    return state + value
+    return state + value.Department
 }
-list := myThings.AggregateName(join) // => "Title One, Title Two, etc"
+list := myThings.AggregateString(join)
+// => "Sales, Marketing, Finance"
+</pre>
+
+            <h2 id="Subsetting">Subsetting</h2>
+
+            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <span class="cmd">gen</span> a type. Similarly, all of the above <a href="#Projections">projection methods</a> are generated when you include a <span class="cmd">projections</span> tag.</p>
+
+            <p>If you would prefer only to generate specific methods, you can do so with a <span class="cmd">methods</span> tag.</p>
+
+<pre>
+// +gen methods:"Count,Where,Select,GroupBy"
+type Thing struct {
+    Name  string
+    Year  int  
+    Sales float64
+}
 </pre>
 
             <h2 id="FAQ">FAQ</h2>
@@ -475,9 +477,7 @@ list := myThings.AggregateName(join) // => "Title One, Title Two, etc"
             <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
 
             <h4>What about imported types?</h4>
-            <p>gen doesn’t support imported types that might be members of your struct, reason being that we’d have to resolve those dependencies and include them in the generated code. This isn’t impossible, we may get there.</p>
-
-            <p>As a workaround, you might create a local ‘alias’ type, something like:</p>
+            <p>gen doesn’t support imported types, not least because one can’t define methods on them. You might instead create a local ‘alias’ type, something like:</p>
 
 <pre>
 type MyType otherPackage.Type
@@ -501,13 +501,19 @@ type MyType struct {
             <p>Here are some <a href="https://github.com/clipperhouse/gen#design-principles-for-contributors">design criteria</a>.</p>
 
             <h4>Can I use it?</h4>
-            <p>We’d be thrilled if you would test it out and offer feedback. It’s still very early alpha bits, caveat emptor for production use. The API will likely be volatile prior to 1.0.</p>
+            <p>We’d be thrilled if you would test it out and offer feedback. It’s still early bits, caveat emptor for production use. The API will likely be volatile prior to 1.0.</p>
+
+            <p>Please let us know what you think via <a href="https://github.com/clipperhouse/gen/issues">GitHub issues</a> or ping Matt on Twitter <a href="https://twitter.com/clipperhouse">@clipperhouse</a>.</p>
 
             <h4>Can I help?</h4>
             <p>Sure, the code is <a href="https://github.com/clipperhouse/gen">here</a>.</p>
 
             <h4>Who is ‘we’?</h4>
-            <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. <a href="https://github.com/mjibson">Matt Jibson</a> is helping out as well.</p>
+            <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. We have are ramping up with <a href="https://github.com/clipperhouse/gen/graphs/contributors">contributors</a> too.</p>
+
+            <h4 id="Custom">What happened to custom methods?</h4>
+
+            <p>They've been deprecated in favor of more-flexible <a href="#Projections">projections</a>. The rationale is <a href="https://github.com/clipperhouse/gen/issues/8">here</a>.</p>
 </div>
 </body>
 </html>
