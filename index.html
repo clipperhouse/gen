@@ -480,6 +480,7 @@ type Thing struct {
             <p>Yes. Go’s <a href="http://godoc.org/sort">sort package</a> requires the fulfillment of three <a href="http://golang.org/pkg/sort/#Interface">interface members</a>, two of which are usually boilerplate. If you want to sort by different criteria, you need to implement multiple ‘alias’ types.</p>
             <p>gen’s <a href="#Sort">Sort</a> requires a single argument defining ‘less’, and no interface implementation. You can call ad-hoc sorts simply by passing a different func.</p>
             <p>gen’s implementation is a strongly-typed port of Go’s <a href="http://golang.org/src/pkg/sort/sort.go">implementation</a>. Performance characteristics should be similar.</p>
+            <p>(There is an <a href="https://github.com/clipperhouse/gen/issues/25">open issue</a> to use the builtin sort package for primitive types where possible, which will limit the need for above.)</p>
 
             <h4>Could some of this be achieved using reflection or interfaces + type assertions?</h4>
             <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
