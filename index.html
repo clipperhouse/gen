@@ -45,8 +45,10 @@
                 </p>
 
                 <h4><a href="#Subsetting">Subsetting</a></h4>
-                <h4><a href="#FAQ">FAQ</a></h4><br />
+                <h4><a href="#Tips">Tips</a></h4>
+                <h4><a href="#FAQ">FAQ</a></h4>
 
+                <br />
                 <a href="https://github.com/clipperhouse/gen" id="github">Source</a><br /><br />
                 <a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a><br /><br />
 
@@ -67,9 +69,9 @@
             <p>The pattern is to pass func’s as you would pass lambdas in Linq or functions in JavaScript.</p>
 
             <h2 id="Concepts">Concepts</h2>
-            <p>gen generates code for your types, at development time, using the command line. gen is not an import; the generated source becomes part of your project and takes no external dependencies.</p>
+            <p>gen generates code for your types, at development time, using the <strong>command line</strong>. gen is not an import; the generated source becomes part of your project and takes no external dependencies.</p>
 
-            <p>You specify which of your types you’d like to generate <a href="#Methods">methods</a> on by marking them up with simple tags.</p>
+            <p>You specify which of your types you’d like to generate <a href="#Methods">methods</a> on by marking them up with <strong>tags</strong>.</p>
 
             <p>A new slice type is generated for the types you specify. We call it the <strong>plural type</strong>. For example, if you gen an existing type Thing, a new plural type will be created:</p>
 
@@ -103,7 +105,7 @@ type MyType struct {
 gen
 </pre>
 
-            <p>You should see a new file, named [your struct]_gen.go. Have a look around. Try out that plural type.</p>
+            <p>You should see a new file, named <span class="cmd">mytype_gen.go</span>. Have a look around. Try out that plural type.</p>
 
             <h2 id="Usage">Usage</h2>
 
@@ -446,7 +448,7 @@ list := myThings.AggregateString(join)
             <p>If you would prefer only to generate specific methods, you can do so with a <span class="cmd">methods</span> tag.</p>
 
 <pre>
-// +gen methods:"Count,Where,Select,GroupBy"
+// +gen methods:"Count,Where,Select,GroupBy" projections:"string,float64"
 type Thing struct {
     Name  string
     Year  int  
@@ -454,9 +456,15 @@ type Thing struct {
 }
 </pre>
 
-            <h2 id="FAQ">FAQ</h2>
+            <h2 id="Tips">Tips</h2>
 
-            <p>First off: we’re alpha! Caveat emptor. Feedback welcome.</p>
+            <h4>Start with buildable code</h4>
+            <p>gen parses your source and evaluates types. If your code doesn’t parse or build, gen’s ability to reason about it is nearly zero. It will return errors at the command line.</p>
+
+            <h4>-force</h4>
+            <p>If you find yourself getting errors that you can’t resolve, you can use <span class="cmd">gen -force</span> at the command line. gen will do its best with limited information, but your warranty is voided. The official party line is that this is undefined behavior.</p>
+
+            <h2 id="FAQ">FAQ</h2>
 
             <h4>Why?</h4>
             <p>Go doesn't (yet) offer generic types, and we are accustomed to many of their use cases. Perhaps you are similarly accustomed, or would find them useful.</p>
@@ -475,6 +483,9 @@ type Thing struct {
 
             <h4>Could some of this be achieved using reflection or interfaces + type assertions?</h4>
             <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
+
+            <h4>Not all projection methods are generated for every type.</h4>
+            <p>gen only generates methods that are meningful for a type. It won’t generate an average of strings, for example, and it won’t key a map with any type that doesn’t support equality.</p>
 
             <h4>What about imported types?</h4>
             <p>gen doesn’t support imported types, not least because one can’t define methods on them. You might instead create a local ‘alias’ type, something like:</p>
@@ -511,9 +522,9 @@ type MyType struct {
             <h4>Who is ‘we’?</h4>
             <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. We have are ramping up with <a href="https://github.com/clipperhouse/gen/graphs/contributors">contributors</a> too.</p>
 
-            <h4 id="Custom">What happened to custom methods?</h4>
+            <h2 id="Custom">Custom methods</h2>
 
-            <p>They've been deprecated in favor of more-flexible <a href="#Projections">projections</a>. The rationale is <a href="https://github.com/clipperhouse/gen/issues/8">here</a>.</p>
+            <p>...have been deprecated in favor of more-flexible <a href="#Projections">projections</a>. The rationale is <a href="https://github.com/clipperhouse/gen/issues/8">here</a>.</p>
 </div>
 </body>
 </html>
