@@ -235,3 +235,85 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should be none")
 	}
 }
+
+// +gen
+type Thing1 int
+
+type Thing2 Thing1
+
+// +gen * methods:"Any,Where"
+type Thing3 float64
+
+// +gen projections:"int,Thing2"
+type Thing4 struct{}
+
+// +gen methods:"Count,GroupBy,Select,Aggregate" projections:"string,Thing4"
+type Thing5 Thing4
+
+func TestStandardMethods(t *testing.T) {
+	packages := getPackages()
+
+	if len(packages) != 1 {
+		t.Errorf("should find one package")
+	}
+
+	// put into a map for convenience
+	types := make(map[string]*Type)
+	for _, typ := range packages[0].Types {
+		types[typ.Name] = typ
+	}
+
+	thing1, ok1 := types["Thing1"]
+
+	if !ok1 || thing1 == nil {
+		t.Errorf("Thing1 should have been identified as a gen Type")
+	}
+
+	if len(thing1.Pointer) != 0 {
+		t.Errorf("Thing1 should not generate pointers")
+	}
+
+	if len(thing1.StandardMethods) != len(standardTemplates) {
+		t.Errorf("Thing1 should have all standard methods")
+	}
+
+	if len(thing1.Projections) != 0 {
+		t.Errorf("Thing1 should have no projections")
+	}
+
+	thing2, ok2 := types["Thing2"]
+
+	if ok2 || thing2 != nil {
+		t.Errorf("Thing2 should not have been identified as a gen Type")
+	}
+
+	thing3 := types["Thing3"]
+
+	if thing3.Pointer != "*" {
+		t.Errorf("Thing3 should generate pointers")
+	}
+
+	if len(thing3.StandardMethods) != 2 {
+		t.Errorf("Thing3 should have subsetted Any and Where, but has: %v", thing3.StandardMethods)
+	}
+
+	if len(thing1.Projections) != 0 {
+		t.Errorf("Thing3 should have no projections, but has: %v", thing3.Projections)
+	}
+
+	thing4 := types["Thing4"]
+
+	if len(thing4.Projections) != 2*len(ProjectionMethods) {
+		t.Errorf("Thing4 should have all projection methods for 2 types, but has: %v", thing4.Projections)
+	}
+
+	thing5 := types["Thing5"]
+
+	if len(thing5.StandardMethods) != 1 {
+		t.Errorf("Thing5 should have 1 subsetted standard method, but has: %v", thing5.StandardMethods)
+	}
+
+	if len(thing5.Projections) != 2*3 {
+		t.Errorf("Thing4 should have 3 subsetted projection methods for 2 types, but has: %v", thing5.Projections)
+	}
+}
