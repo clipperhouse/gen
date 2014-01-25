@@ -96,7 +96,7 @@ func getPackages() (result []*Package) {
 							continue
 						}
 
-						valid := (!pm.requiresNumeric || numeric) && (!pm.requiresComparable || comparable) && (!pm.requiresOrdered || ordered)
+						valid := (!pm.RequiresNumeric || numeric) && (!pm.RequiresComparable || comparable) && (!pm.RequiresOrdered || ordered)
 
 						if valid {
 							typ.AddProjection(m, s)

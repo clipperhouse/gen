@@ -7,8 +7,72 @@ import (
 	"text/template"
 )
 
+type Template struct {
+	Text               string
+	RequiresNumeric    bool
+	RequiresComparable bool
+	RequiresOrdered    bool
+}
+
+func getTemplate(name string) (result *template.Template, err error) {
+	if isProjectionMethod(name) {
+		return getProjectionTemplate(name)
+	}
+	return getStandardTemplate(name)
+}
+
 func getHeaderTemplate() *template.Template {
 	return template.Must(template.New("header").Parse(header))
+}
+
+func getStandardTemplate(name string) (result *template.Template, err error) {
+	t, found := standardTemplates[name]
+	if found {
+		result = template.Must(template.New(name).Parse(t.Text))
+	} else {
+		err = fmt.Errorf("%s is not a known method", name)
+	}
+	return
+}
+
+func isStandardMethod(s string) bool {
+	_, ok := standardTemplates[s]
+	return ok
+}
+
+func getStandardMethodKeys() (result []string) {
+	for k := range standardTemplates {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return
+}
+
+func getProjectionTemplate(name string) (result *template.Template, err error) {
+	t, found := ProjectionMethods[name]
+	if found {
+		result = template.Must(template.New(name).Parse(t.Text))
+	} else {
+		err = errors.New(fmt.Sprintf("%s is not a known projection method", name))
+	}
+	return
+}
+
+func isProjectionMethod(s string) bool {
+	_, ok := ProjectionMethods[s]
+	return ok
+}
+
+func getProjectionMethodKeys() (result []string) {
+	for k := range ProjectionMethods {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return
+}
+
+func getSortSupportTemplate() *template.Template {
+	return template.Must(template.New("sortSupport").Parse(sortSupport))
 }
 
 const header = `// This file was auto-generated using github.com/clipperhouse/gen
@@ -29,38 +93,10 @@ import ({{range .Imports}}
 type {{.Plural}} []{{.Pointer}}{{.Name}}
 `
 
-func getTemplate(name string) (result *template.Template, err error) {
-	if isProjectionMethod(name) {
-		return getProjectionTemplate(name)
-	}
-	return getStandardTemplate(name)
-}
+var standardTemplates = map[string]*Template{
 
-func isStandardMethod(s string) bool {
-	_, ok := standardTemplates[s]
-	return ok
-}
-
-func getStandardMethodKeys() (result []string) {
-	for k := range standardTemplates {
-		result = append(result, k)
-	}
-	sort.Strings(result)
-	return
-}
-
-func getStandardTemplate(name string) (result *template.Template, err error) {
-	t, found := standardTemplates[name]
-	if found {
-		result = template.Must(template.New(name).Parse(t))
-	} else {
-		err = fmt.Errorf("%s is not a known method", name)
-	}
-	return
-}
-
-var standardTemplates = map[string]string{
-	"All": `
+	"All": &Template{
+		Text: `
 // All verifies that all elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func (rcv {{.Plural}}) All(fn func({{.Pointer}}{{.Name}}) bool) bool {
 	for _, v := range rcv {
@@ -70,8 +106,10 @@ func (rcv {{.Plural}}) All(fn func({{.Pointer}}{{.Name}}) bool) bool {
 	}
 	return true
 }
-`,
-	"Any": `
+`},
+
+	"Any": &Template{
+		Text: `
 // Any verifies that one or more elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#Any
 func (rcv {{.Plural}}) Any(fn func({{.Pointer}}{{.Name}}) bool) bool {
 	for _, v := range rcv {
@@ -81,8 +119,10 @@ func (rcv {{.Plural}}) Any(fn func({{.Pointer}}{{.Name}}) bool) bool {
 	}
 	return false
 }
-`,
-	"Count": `
+`},
+
+	"Count": &Template{
+		Text: `
 // Count gives the number elements of {{.Plural}} that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count
 func (rcv {{.Plural}}) Count(fn func({{.Pointer}}{{.Name}}) bool) (result int) {
 	for _, v := range rcv {
@@ -92,8 +132,10 @@ func (rcv {{.Plural}}) Count(fn func({{.Pointer}}{{.Name}}) bool) (result int) {
 	}
 	return
 }
-`,
-	"Distinct": `
+`},
+
+	"Distinct": &Template{
+		Text: `
 // Distinct returns a new {{.Plural}} slice whose elements are unique. See: http://clipperhouse.github.io/gen/#Distinct
 func (rcv {{.Plural}}) Distinct() (result {{.Plural}}) {
 	appended := make(map[{{.Pointer}}{{.Name}}]bool)
@@ -106,7 +148,11 @@ func (rcv {{.Plural}}) Distinct() (result {{.Plural}}) {
 	return result
 }
 `,
-	"DistinctBy": `
+		RequiresComparable: true,
+	},
+
+	"DistinctBy": &Template{
+		Text: `
 // DistinctBy returns a new {{.Plural}} slice whose elements are unique, where equality is defined by a passed func. See: http://clipperhouse.github.io/gen/#DistinctBy
 func (rcv {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Plural}}) {
 	for _, v := range rcv {
@@ -119,16 +165,20 @@ func (rcv {{.Plural}}) DistinctBy(equal func({{.Pointer}}{{.Name}}, {{.Pointer}}
 	}
 	return result
 }
-`,
-	"Each": `
+`},
+
+	"Each": &Template{
+		Text: `
 // Each iterates over {{.Plural}} and executes the passed func against each element. See: http://clipperhouse.github.io/gen/#Each
 func (rcv {{.Plural}}) Each(fn func({{.Pointer}}{{.Name}})) {
 	for _, v := range rcv {
 		fn(v)
 	}
 }
-`,
-	"First": `
+`},
+
+	"First": &Template{
+		Text: `
 // First returns the first element that returns true for the passed func. Returns error if no elements return true. See: http://clipperhouse.github.io/gen/#First
 func (rcv {{.Plural}}) First(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	for _, v := range rcv {
@@ -140,8 +190,10 @@ func (rcv {{.Plural}}) First(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Poi
 	err = errors.New("no {{.Plural}} elements return true for passed func")
 	return
 }
-`,
-	"MaxBy": `
+`},
+
+	"MaxBy": &Template{
+		Text: `
 // MaxBy returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
@@ -160,8 +212,10 @@ func (rcv {{.Plural}}) MaxBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Nam
 	result = rcv[m]
 	return
 }
-`,
-	"MinBy": `
+`},
+
+	"MinBy": &Template{
+		Text: `
 // MinBy returns an element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MinBy
 func (rcv {{.Plural}}) MinBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	l := len(rcv)
@@ -178,8 +232,10 @@ func (rcv {{.Plural}}) MinBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Nam
 	result = rcv[m]
 	return
 }
-`,
-	"Single": `
+`},
+
+	"Single": &Template{
+		Text: `
 // Single returns exactly one element of {{.Plural}} that returns true for the passed func. Returns error if no or multiple elements return true. See: http://clipperhouse.github.io/gen/#Single
 func (rcv {{.Plural}}) Single(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	var candidate {{.Pointer}}{{.Name}}
@@ -201,8 +257,10 @@ func (rcv {{.Plural}}) Single(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Po
 	}
 	return
 }
-`,
-	"Where": `
+`},
+
+	"Where": &Template{
+		Text: `
 // Where returns a new {{.Plural}} slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
 func (rcv {{.Plural}}) Where(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Plural}}) {
 	for _, v := range rcv {
@@ -212,8 +270,10 @@ func (rcv {{.Plural}}) Where(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Plu
 	}
 	return result
 }
-`,
-	"SortBy": `
+`},
+
+	"SortBy": &Template{
+		Text: `
 // SortBy returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) SortBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
 	result := make({{.Plural}}, len(rcv))
@@ -228,8 +288,10 @@ func (rcv {{.Plural}}) SortBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Na
 	quickSort{{.Plural}}(result, less, 0, n, maxDepth)
 	return result
 }
-`,
-	"IsSortedBy": `
+`},
+
+	"IsSortedBy": &Template{
+		Text: `
 // IsSortedBy reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
 	n := len(rcv)
@@ -240,8 +302,10 @@ func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 	}
 	return true
 }
-`,
-	"SortByDesc": `
+`},
+
+	"SortByDesc": &Template{
+		Text: `
 // SortByDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
@@ -251,8 +315,10 @@ func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 	}
 	return rcv.SortBy(greaterOrEqual)
 }
-`,
-	"IsSortedDesc": `
+`},
+
+	"IsSortedDesc": &Template{
+		Text: `
 // IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
 	greaterOrEqual := func(a, b {{.Pointer}}{{.Name}}) bool {
@@ -260,11 +326,7 @@ func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointe
 	}
 	return rcv.IsSortedBy(greaterOrEqual)
 }
-`,
-}
-
-func getSortSupportTemplate() *template.Template {
-	return template.Must(template.New("sortSupport").Parse(sortSupport))
+`},
 }
 
 const sortSupport = `
@@ -442,38 +504,9 @@ func quickSort{{.Plural}}(rcv {{.Plural}}, less func({{.Pointer}}{{.Name}}, {{.P
 }
 `
 
-func isProjectionMethod(s string) bool {
-	_, ok := ProjectionMethods[s]
-	return ok
-}
-
-func getProjectionMethodKeys() (result []string) {
-	for k := range ProjectionMethods {
-		result = append(result, k)
-	}
-	sort.Strings(result)
-	return
-}
-
-func getProjectionTemplate(name string) (result *template.Template, err error) {
-	t, found := ProjectionMethods[name]
-	if found {
-		result = template.Must(template.New(name).Parse(t.template))
-	} else {
-		err = errors.New(fmt.Sprintf("%s is not a known projection method", name))
-	}
-	return
-}
-
-type ProjectionMethod struct {
-	template           string
-	requiresNumeric    bool
-	requiresComparable bool
-	requiresOrdered    bool
-}
-
-var ProjectionMethods = map[string]*ProjectionMethod{
-	"Aggregate": &ProjectionMethod{`
+var ProjectionMethods = map[string]*Template{
+	"Aggregate": &Template{
+		Text: `
 // {{.MethodName}} iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}, {{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}) {
 	for _, v := range rcv {
@@ -481,8 +514,10 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}, {{.Parent.Point
 	}
 	return
 }
-`, false, false, false},
-	"Average": &ProjectionMethod{`
+`},
+
+	"Average": &Template{
+		Text: `
 // {{.MethodName}} sums {{.Type}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len(rcv)
@@ -496,8 +531,12 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	result = result / {{.Type}}(l)
 	return
 }
-`, true, false, false},
-	"GroupBy": &ProjectionMethod{`
+`,
+		RequiresNumeric: true,
+	},
+
+	"GroupBy": &Template{
+		Text: `
 // {{.MethodName}} groups elements into a map keyed by {{.Type}}. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) map[{{.Type}}]{{.Parent.Plural}} {
 	result := make(map[{{.Type}}]{{.Parent.Plural}})
@@ -507,8 +546,12 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	}
 	return result
 }
-`, false, true, false},
-	"Max": &ProjectionMethod{`
+`,
+		RequiresComparable: true,
+	},
+
+	"Max": &Template{
+		Text: `
 // {{.MethodName}} selects the largest value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len(rcv)
@@ -527,8 +570,12 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	}
 	return
 }
-`, false, false, true},
-	"Min": &ProjectionMethod{`
+`,
+		RequiresOrdered: true,
+	},
+
+	"Min": &Template{
+		Text: `
 // {{.MethodName}} selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
 	l := len(rcv)
@@ -547,8 +594,12 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	}
 	return
 }
-`, false, false, true},
-	"Select": &ProjectionMethod{`
+`,
+		RequiresOrdered: true,
+	},
+
+	"Select": &Template{
+		Text: `
 // {{.MethodName}} returns a slice of {{.Type}} in {{.Parent.Plural}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result []{{.Type}}) {
 	for _, v := range rcv {
@@ -556,8 +607,11 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	}
 	return
 }
-`, false, false, false},
-	"Sum": &ProjectionMethod{`
+`,
+	},
+
+	"Sum": &Template{
+		Text: `
 // {{.MethodName}} sums {{.Type}} over elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}) {
 	for _, v := range rcv {
@@ -565,5 +619,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 	}
 	return
 }
-`, true, false, false},
+`,
+		RequiresNumeric: true,
+	},
 }
