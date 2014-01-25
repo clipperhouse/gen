@@ -141,14 +141,14 @@ func (rcv {{.Plural}}) First(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Poi
 	return
 }
 `,
-	"Max": `
-// Max returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+	"MaxBy": `
+// MaxBy returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv {{.Plural}}) Max(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
+func (rcv {{.Plural}}) MaxBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine the Max of an empty slice")
+		err = errors.New("cannot determine the MaxBy of an empty slice")
 		return
 	}
 	m := 0
@@ -161,9 +161,9 @@ func (rcv {{.Plural}}) Max(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}
 	return
 }
 `,
-	"Min": `
-// Min returns an element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
-func (rcv {{.Plural}}) Min(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
+	"MinBy": `
+// MinBy returns an element of {{.Plural}} containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MinBy
+func (rcv {{.Plural}}) MinBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	l := len(rcv)
 	if l == 0 {
 		err = errors.New("cannot determine the Min of an empty slice")
@@ -213,9 +213,9 @@ func (rcv {{.Plural}}) Where(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Plu
 	return result
 }
 `,
-	"Sort": `
-// Sort returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv {{.Plural}}) Sort(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
+	"SortBy": `
+// SortBy returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv {{.Plural}}) SortBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
 	result := make({{.Plural}}, len(rcv))
 	copy(result, rcv)
 	// Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.
@@ -229,9 +229,9 @@ func (rcv {{.Plural}}) Sort(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name
 	return result
 }
 `,
-	"IsSorted": `
-// IsSorted reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
+	"IsSortedBy": `
+// IsSortedBy reports whether an instance of {{.Plural}} is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
 		if less(rcv[i], rcv[i-1]) {
@@ -241,24 +241,24 @@ func (rcv {{.Plural}}) IsSorted(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.
 	return true
 }
 `,
-	"SortDesc": `
-// SortDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+	"SortByDesc": `
+// SortByDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv {{.Plural}}) SortDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
+func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
 	greaterOrEqual := func(a, b {{.Pointer}}{{.Name}}) bool {
 		return !less(a, b)
 	}
-	return rcv.Sort(greaterOrEqual)
+	return rcv.SortBy(greaterOrEqual)
 }
 `,
 	"IsSortedDesc": `
-// IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv {{.Plural}}) IsSortedDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
+// IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
 	greaterOrEqual := func(a, b {{.Pointer}}{{.Name}}) bool {
 		return !less(a, b)
 	}
-	return rcv.IsSorted(greaterOrEqual)
+	return rcv.IsSortedBy(greaterOrEqual)
 }
 `,
 }

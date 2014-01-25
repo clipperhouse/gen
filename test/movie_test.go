@@ -329,48 +329,48 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["Min"] = []test{
+	tests["MinBy"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Min(byTheaters)
+				return many.MinBy(byTheaters)
 			},
 			third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Min(byTitle)
+				return many.MinBy(byTitle)
 			},
 			fifth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Min(byTheaters)
+				return none.MinBy(byTheaters)
 			},
 			_nil,
 			true,
 		},
 	}
 
-	tests["Max"] = []test{
+	tests["MaxBy"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Max(byTheaters)
+				return many.MaxBy(byTheaters)
 			},
 			fourth,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Max(byTitle)
+				return many.MaxBy(byTitle)
 			},
 			third,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return none.Max(byTheaters)
+				return none.MaxBy(byTheaters)
 			},
 			_nil,
 			true,
@@ -415,61 +415,61 @@ func getTests() map[string][]test {
 		},
 	}
 
-	tests["Sort"] = []test{
+	tests["SortBy"] = []test{
 		test{
 			func() (interface{}, error) {
-				return many.Sort(byTitle), nil
+				return many.SortBy(byTitle), nil
 			},
 			Movies{fifth, first, fourth, second, third},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.Sort(byTheaters), nil
+				return many.SortBy(byTheaters), nil
 			},
 			Movies{third, first, second, fifth, fourth},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.IsSorted(byTitle), nil
+				return many.IsSortedBy(byTitle), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				sorted := many.Sort(byTitle)
-				return sorted.IsSorted(byTitle), nil
+				sorted := many.SortBy(byTitle)
+				return sorted.IsSortedBy(byTitle), nil
 			},
 			true,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.SortDesc(byTitle), nil
+				return many.SortByDesc(byTitle), nil
 			},
 			Movies{third, second, fourth, first, fifth},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.SortDesc(byTheaters), nil
+				return many.SortByDesc(byTheaters), nil
 			},
 			Movies{fourth, fifth, second, first, third},
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				return many.IsSortedDesc(byTitle), nil
+				return many.IsSortedByDesc(byTitle), nil
 			},
 			false,
 			false,
 		},
 		test{
 			func() (interface{}, error) {
-				sorted := many.SortDesc(byTitle)
-				return sorted.IsSortedDesc(byTitle), nil
+				sorted := many.SortByDesc(byTitle)
+				return sorted.IsSortedByDesc(byTitle), nil
 			},
 			true,
 			false,

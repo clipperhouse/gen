@@ -209,8 +209,8 @@ func determineImports(t *Type) {
 	methodRequiresErrors := map[string]bool{
 		"First":   true,
 		"Single":  true,
-		"Max":     true,
-		"Min":     true,
+		"MaxBy":   true,
+		"MinBy":   true,
 		"Average": true,
 	}
 
@@ -233,7 +233,7 @@ func determineImports(t *Type) {
 
 func (t *Type) requiresSortSupport() bool {
 	for _, m := range t.StandardMethods {
-		if strings.HasPrefix(m, "Sort") {
+		if strings.HasPrefix(m, "SortBy") {
 			return true
 		}
 	}

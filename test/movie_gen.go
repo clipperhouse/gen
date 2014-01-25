@@ -89,8 +89,8 @@ func (rcv Movies) First(fn func(*Movie) bool) (result *Movie, err error) {
 	return
 }
 
-// IsSorted reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
+// IsSortedBy reports whether an instance of Movies is sorted, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv Movies) IsSortedBy(less func(*Movie, *Movie) bool) bool {
 	n := len(rcv)
 	for i := n - 1; i > 0; i-- {
 		if less(rcv[i], rcv[i-1]) {
@@ -100,21 +100,21 @@ func (rcv Movies) IsSorted(less func(*Movie, *Movie) bool) bool {
 	return true
 }
 
-// IsSortedDesc reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv Movies) IsSortedDesc(less func(*Movie, *Movie) bool) bool {
+// IsSortedDesc reports whether an instance of Movies is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv Movies) IsSortedByDesc(less func(*Movie, *Movie) bool) bool {
 	greaterOrEqual := func(a, b *Movie) bool {
 		return !less(a, b)
 	}
-	return rcv.IsSorted(greaterOrEqual)
+	return rcv.IsSortedBy(greaterOrEqual)
 }
 
-// Max returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+// MaxBy returns an element of Movies containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error) {
+func (rcv Movies) MaxBy(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine the Max of an empty slice")
+		err = errors.New("cannot determine the MaxBy of an empty slice")
 		return
 	}
 	m := 0
@@ -127,8 +127,8 @@ func (rcv Movies) Max(less func(*Movie, *Movie) bool) (result *Movie, err error)
 	return
 }
 
-// Min returns an element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
-func (rcv Movies) Min(less func(*Movie, *Movie) bool) (result *Movie, err error) {
+// MinBy returns an element of Movies containing the minimum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MinBy
+func (rcv Movies) MinBy(less func(*Movie, *Movie) bool) (result *Movie, err error) {
 	l := len(rcv)
 	if l == 0 {
 		err = errors.New("cannot determine the Min of an empty slice")
@@ -166,8 +166,8 @@ func (rcv Movies) Single(fn func(*Movie) bool) (result *Movie, err error) {
 	return
 }
 
-// Sort returns a new ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
-func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
+// SortBy returns a new ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
+func (rcv Movies) SortBy(less func(*Movie, *Movie) bool) Movies {
 	result := make(Movies, len(rcv))
 	copy(result, rcv)
 	// Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.
@@ -181,14 +181,14 @@ func (rcv Movies) Sort(less func(*Movie, *Movie) bool) Movies {
 	return result
 }
 
-// SortDesc returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#Sort
+// SortByDesc returns a new, descending-ordered Movies slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 //
 // (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
-func (rcv Movies) SortDesc(less func(*Movie, *Movie) bool) Movies {
+func (rcv Movies) SortByDesc(less func(*Movie, *Movie) bool) Movies {
 	greaterOrEqual := func(a, b *Movie) bool {
 		return !less(a, b)
 	}
-	return rcv.Sort(greaterOrEqual)
+	return rcv.SortBy(greaterOrEqual)
 }
 
 // Where returns a new Movies slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
