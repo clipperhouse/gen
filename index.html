@@ -27,11 +27,11 @@
                     <a href="#First">- First</a>
                     <a href="#Single">- Single</a>
                     <a href="#Each">- Each</a>
-                    <a href="#Sort">- Sort</a>
+                    <a href="#SortBy">- SortBy</a>
                     <a href="#Distinct">- Distinct</a>
                     <a href="#DistinctBy">- DistinctBy</a>
-                    <a href="#Min">- Min</a>
-                    <a href="#Max">- Max</a>
+                    <a href="#MinBy">- MinBy</a>
+                    <a href="#MaxBy">- MaxBy</a>
                 </p>
                 <h4><a href="#Projections">Projection Methods</a></h4>
                 <p class="methods">
@@ -252,25 +252,25 @@ update := func(s *Score) {
 scores.Each(update)
 </pre>
 
-            <h3 id="Sort">Sort</h3>
+            <h3 id="SortBy">SortBy</h3>
             <p>
                 Returns a new slice (plural type) whose elements are sorted based on a func defining ‘less’. The less func takes two elements, and returns true if the first element is less than the second element. 
             </p>
 <pre>
-func (rcv Things) Sort(less func(*Thing, *Thing) bool) Things
+func (rcv Things) SortBy(less func(*Thing, *Thing) bool) Things
 </pre>
             <p>Example:</p>
 
 <pre>
-byRank := func(a, b *Player) bool {
+rank := func(a, b *Player) bool {
     return a.Rank &lt; b.Rank
 }
-leaderboard := player.Sort(byRank)
+leaderboard := player.SortBy(rank)
 </pre>
 
-            <p><strong>SortDesc</strong> works similarly, returning the elements in reverse order. Its implementation negates ‘less’, so is effectively Sort(equalOrGreater).</p>
+            <p><strong>SortByDesc</strong> works similarly, returning the elements in reverse order. Its implementation negates ‘less’, so is effectively Sort(equalOrGreater).</p>
 
-            <p><strong>IsSorted(Desc)</strong> uses a similar idiom, returning true if the elements are sorted according to the ‘less’ comparer.</p>
+            <p><strong>IsSortedBy(Desc)</strong> uses a similar idiom, returning true if the elements are sorted according to the ‘less’ comparer.</p>
 
             <h3 id="Distinct">Distinct</h3>
             <p>
@@ -302,36 +302,36 @@ hairstyle := func(a *Fashionista, b *Fashionista) bool {
 }
 trendsetters := fashionistas.DistinctBy(hairstyle)</pre>
 
-            <h3 id="Min">Min</h3>
+            <h3 id="MinBy">MinBy</h3>
 <pre>
-func (rcv Things) Min(less func(*Thing, *Thing) bool) (*Thing, error)
+func (rcv Things) MinBy(less func(*Thing, *Thing) bool) (*Thing, error)
 </pre>
             <p>Returns the element containing the minimum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
 
 <p>Example:</p>
 
 <pre>
-byPrice := func(a, b *Product) bool {
+price := func(a, b *Product) bool {
     return a.Price &lt; b.Price
 }
-cheapest, err := products.Min(byPrice)
+cheapest, err := products.MinBy(price)
 </pre>
 
             <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
 
-            <h3 id="Max">Max</h3>
+            <h3 id="MaxBy">MaxBy</h3>
 <pre>
-func (rcv Things) Max(less func(*Thing, *Thing) bool) (*Thing, error)
+func (rcv Things) MaxBy(less func(*Thing, *Thing) bool) (*Thing, error)
 </pre>
             <p>Returns the element containing the maximum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
 
 <p>Example:</p>
 
 <pre>
-byArea := func(a, b *House) bool {
+area := func(a, b *House) bool {
     return a.Area() &lt; b.Area()
 }
-roomiest, err := houses.Max(byArea)
+roomiest, err := houses.MaxBy(area)
 </pre>
 
             <h2 id="Projections">Projections</h2>
