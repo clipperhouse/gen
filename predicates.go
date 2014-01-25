@@ -21,7 +21,7 @@ func isComparable(typ types.Type) bool {
 	case *types.Pointer, *types.Interface, *types.Chan:
 		return true
 	case *types.Struct:
-		for i := t.NumFields(); i < t.NumFields(); i++ {
+		for i := 0; i < t.NumFields(); i++ {
 			if !isComparable(t.Field(i).Type()) {
 				return false
 			}
