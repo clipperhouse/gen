@@ -15,6 +15,10 @@ type Type struct {
 	Imports         []string
 }
 
+func (t *Type) LocalName() (result string) {
+	return t.Pointer + t.Name
+}
+
 func (t *Type) Plural() (result string) {
 	result = inflect.Pluralize(t.Name)
 	if result == t.Name {

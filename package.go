@@ -63,12 +63,44 @@ func getPackages() (result []*Package) {
 				continue
 			}
 
+			typ := &Type{
+				Package: pkg,
+				Pointer: spec.Pointer,
+				Name:    docType.Name,
+			}
+
 			standardMethods, projectionMethods, err := determineMethods(spec)
 			if err != nil {
 				errs = append(errs, err)
 			}
 
-			typ := &Type{Package: pkg, Pointer: spec.Pointer, Name: docType.Name, StandardMethods: standardMethods}
+			// assemble standard methods with type verification
+			t, _, err := types.Eval(typ.LocalName(), typesPkg, scope)
+			known := err == nil
+
+			if !known {
+				addError(fmt.Sprintf("failed to evaluate type %s (%s)", typ.Name, err))
+			}
+
+			if known {
+				numeric := isNumeric(t)
+				comparable := isComparable(t)
+				ordered := isOrdered(t)
+
+				for _, s := range standardMethods {
+					st, ok := StandardTemplates[s]
+
+					if !ok {
+						addError(fmt.Sprintf("unknown standard method %s", s))
+					}
+
+					valid := (!st.RequiresNumeric || numeric) && (!st.RequiresComparable || comparable) && (!st.RequiresOrdered || ordered)
+
+					if valid {
+						typ.StandardMethods = append(typ.StandardMethods, s)
+					}
+				}
+			}
 
 			// assemble projections with type verification
 			if spec.Projections != nil {
@@ -89,14 +121,14 @@ func getPackages() (result []*Package) {
 					}
 
 					for _, m := range projectionMethods {
-						pm, ok := ProjectionMethods[m]
+						pt, ok := ProjectionTemplates[m]
 
 						if !ok {
 							addError(fmt.Sprintf("unknown projection method %v", m))
 							continue
 						}
 
-						valid := (!pm.RequiresNumeric || numeric) && (!pm.RequiresComparable || comparable) && (!pm.RequiresOrdered || ordered)
+						valid := (!pt.RequiresNumeric || numeric) && (!pt.RequiresComparable || comparable) && (!pt.RequiresOrdered || ordered)
 
 						if valid {
 							typ.AddProjection(m, s)

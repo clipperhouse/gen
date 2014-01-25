@@ -26,7 +26,7 @@ func getHeaderTemplate() *template.Template {
 }
 
 func getStandardTemplate(name string) (result *template.Template, err error) {
-	t, found := standardTemplates[name]
+	t, found := StandardTemplates[name]
 	if found {
 		result = template.Must(template.New(name).Parse(t.Text))
 	} else {
@@ -36,12 +36,12 @@ func getStandardTemplate(name string) (result *template.Template, err error) {
 }
 
 func isStandardMethod(s string) bool {
-	_, ok := standardTemplates[s]
+	_, ok := StandardTemplates[s]
 	return ok
 }
 
 func getStandardMethodKeys() (result []string) {
-	for k := range standardTemplates {
+	for k := range StandardTemplates {
 		result = append(result, k)
 	}
 	sort.Strings(result)
@@ -49,7 +49,7 @@ func getStandardMethodKeys() (result []string) {
 }
 
 func getProjectionTemplate(name string) (result *template.Template, err error) {
-	t, found := ProjectionMethods[name]
+	t, found := ProjectionTemplates[name]
 	if found {
 		result = template.Must(template.New(name).Parse(t.Text))
 	} else {
@@ -59,12 +59,12 @@ func getProjectionTemplate(name string) (result *template.Template, err error) {
 }
 
 func isProjectionMethod(s string) bool {
-	_, ok := ProjectionMethods[s]
+	_, ok := ProjectionTemplates[s]
 	return ok
 }
 
 func getProjectionMethodKeys() (result []string) {
-	for k := range ProjectionMethods {
+	for k := range ProjectionTemplates {
 		result = append(result, k)
 	}
 	sort.Strings(result)
@@ -93,7 +93,7 @@ import ({{range .Imports}}
 type {{.Plural}} []{{.Pointer}}{{.Name}}
 `
 
-var standardTemplates = map[string]*Template{
+var StandardTemplates = map[string]*Template{
 
 	"All": &Template{
 		Text: `
@@ -504,7 +504,7 @@ func quickSort{{.Plural}}(rcv {{.Plural}}, less func({{.Pointer}}{{.Name}}, {{.P
 }
 `
 
-var ProjectionMethods = map[string]*Template{
+var ProjectionTemplates = map[string]*Template{
 	"Aggregate": &Template{
 		Text: `
 // {{.MethodName}} iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate

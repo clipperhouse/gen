@@ -273,7 +273,7 @@ func TestStandardMethods(t *testing.T) {
 		t.Errorf("Thing1 should not generate pointers")
 	}
 
-	if len(thing1.StandardMethods) != len(standardTemplates) {
+	if len(thing1.StandardMethods) != len(StandardTemplates) {
 		t.Errorf("Thing1 should have all standard methods")
 	}
 
@@ -303,7 +303,7 @@ func TestStandardMethods(t *testing.T) {
 
 	thing4 := types["Thing4"]
 
-	if len(thing4.Projections) != 2*len(ProjectionMethods) {
+	if len(thing4.Projections) != 2*len(ProjectionTemplates) {
 		t.Errorf("Thing4 should have all projection methods for 2 types, but has: %v", thing4.Projections)
 	}
 
