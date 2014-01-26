@@ -1,8 +1,30 @@
 package main
 
 import (
+	"errors"
 	"testing"
 )
+
+var (
+	pkg  *Package
+	typs map[string]*Type
+)
+
+func init() {
+	packages := getPackages()
+
+	if len(packages) != 1 {
+		err := errors.New("should have only found 1 package")
+		panic(err)
+	}
+
+	pkg = packages[0]
+
+	typs = make(map[string]*Type)
+	for _, typ := range packages[0].Types {
+		typs[typ.Name] = typ
+	}
+}
 
 func TestGenSpecParsing(t *testing.T) {
 	dummy := "dummy"
@@ -168,7 +190,7 @@ func TestMethodDetermination(t *testing.T) {
 	}
 
 	if len(projectionMethods2) != 0 {
-		t.Errorf("projection methods without projected types should be none")
+		t.Errorf("projection methods without projected typs should be none")
 	}
 
 	spec3 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Unknown"}}, &GenTag{[]string{}}}
@@ -184,7 +206,7 @@ func TestMethodDetermination(t *testing.T) {
 	}
 
 	if len(projectionMethods3) != 0 {
-		t.Errorf("projection methods without projected types should be none")
+		t.Errorf("projection methods without projected typs should be none")
 	}
 
 	spec4 := &GenSpec{"", dummy, nil, &GenTag{[]string{"SomeType"}}}
@@ -192,7 +214,7 @@ func TestMethodDetermination(t *testing.T) {
 	standardMethods4, projectionMethods4, err4 := determineMethods(spec4)
 
 	if err4 != nil {
-		t.Errorf("projected types without subsetted methods should be ok, instead got: '%v'", err4)
+		t.Errorf("projected typs without subsetted methods should be ok, instead got: '%v'", err4)
 	}
 
 	if len(standardMethods4) != len(getStandardMethodKeys()) {
@@ -200,7 +222,7 @@ func TestMethodDetermination(t *testing.T) {
 	}
 
 	if len(projectionMethods4) != len(getProjectionMethodKeys()) {
-		t.Errorf("projection methods should default to all in presence of projected types")
+		t.Errorf("projection methods should default to all in presence of projected typs")
 	}
 
 	spec5 := &GenSpec{"", dummy, &GenTag{[]string{"GroupBy"}}, &GenTag{[]string{"SomeType"}}}
@@ -208,7 +230,7 @@ func TestMethodDetermination(t *testing.T) {
 	standardMethods5, projectionMethods5, err5 := determineMethods(spec5)
 
 	if err5 != nil {
-		t.Errorf("projected types with subsetted methods should be ok, instead got: '%v'", err5)
+		t.Errorf("projected typs with subsetted methods should be ok, instead got: '%v'", err5)
 	}
 
 	if len(standardMethods5) != 0 {
@@ -250,20 +272,18 @@ type Thing4 struct{}
 // +gen methods:"Count,GroupBy,Select,Aggregate" projections:"string,Thing4"
 type Thing5 Thing4
 
+// +gen projections:"float64,Thing1,Thing4,Thing7"
+type Thing6 struct {
+	Field int
+}
+
+// +gen
+type Thing7 struct {
+	Field func(int) // not comparable
+}
+
 func TestStandardMethods(t *testing.T) {
-	packages := getPackages()
-
-	if len(packages) != 1 {
-		t.Errorf("should find one package")
-	}
-
-	// put into a map for convenience
-	types := make(map[string]*Type)
-	for _, typ := range packages[0].Types {
-		types[typ.Name] = typ
-	}
-
-	thing1, ok1 := types["Thing1"]
+	thing1, ok1 := typs["Thing1"]
 
 	if !ok1 || thing1 == nil {
 		t.Errorf("Thing1 should have been identified as a gen Type")
@@ -281,13 +301,13 @@ func TestStandardMethods(t *testing.T) {
 		t.Errorf("Thing1 should have no projections")
 	}
 
-	thing2, ok2 := types["Thing2"]
+	thing2, ok2 := typs["Thing2"]
 
 	if ok2 || thing2 != nil {
 		t.Errorf("Thing2 should not have been identified as a gen Type")
 	}
 
-	thing3 := types["Thing3"]
+	thing3 := typs["Thing3"]
 
 	if thing3.Pointer != "*" {
 		t.Errorf("Thing3 should generate pointers")
@@ -297,23 +317,72 @@ func TestStandardMethods(t *testing.T) {
 		t.Errorf("Thing3 should have subsetted Any and Where, but has: %v", thing3.StandardMethods)
 	}
 
-	if len(thing1.Projections) != 0 {
+	if len(thing3.Projections) != 0 {
 		t.Errorf("Thing3 should have no projections, but has: %v", thing3.Projections)
 	}
 
-	thing4 := types["Thing4"]
+	thing4 := typs["Thing4"]
 
 	if len(thing4.Projections) != 2*len(ProjectionTemplates) {
-		t.Errorf("Thing4 should have all projection methods for 2 types, but has: %v", thing4.Projections)
+		t.Errorf("Thing4 should have all projection methods for 2 typs, but has: %v", thing4.Projections)
 	}
 
-	thing5 := types["Thing5"]
+	thing5 := typs["Thing5"]
 
 	if len(thing5.StandardMethods) != 1 {
 		t.Errorf("Thing5 should have 1 subsetted standard method, but has: %v", thing5.StandardMethods)
 	}
 
 	if len(thing5.Projections) != 2*3 {
-		t.Errorf("Thing4 should have 3 subsetted projection methods for 2 types, but has: %v", thing5.Projections)
+		t.Errorf("Thing4 should have 3 subsetted projection methods for 2 typs, but has: %v", thing5.Projections)
 	}
+}
+
+func TestTypeEvaluation(t *testing.T) {
+	thing6 := typs["Thing6"]
+	methods6 := stringSliceToSet(thing6.StandardMethods)
+	projections6 := projectionsToSet(thing6.Projections)
+
+	if !methods6["Distinct"] {
+		t.Errorf("Thing6 should have Distinct because it is comparable, but has: %v", thing6.StandardMethods)
+	}
+
+	if !projections6["AverageThing1"] {
+		t.Errorf("Thing6 should have AverageThing1 because it is numeric, but has: %v", thing6.Projections)
+	}
+
+	if projections6["AverageThing4"] {
+		t.Errorf("Thing6 should not have AverageThing4 because it is not numeric, but has: %v", thing6.Projections)
+	}
+
+	if !projections6["GroupByThing4"] {
+		t.Errorf("Thing6 should have GroupByThing4 because it is comparable, but has: %v", thing6.Projections)
+	}
+
+	if projections6["GroupByThing7"] {
+		t.Errorf("Thing6 should not have GroupByThing7 because it is not comparable, but has: %v", thing6.Projections)
+	}
+
+	thing7 := typs["Thing7"]
+	methods7 := stringSliceToSet(thing7.StandardMethods)
+
+	if methods7["Distinct"] {
+		t.Errorf("Thing7 should not have Distinct because it is not comparable, but has: %v", thing7.StandardMethods)
+	}
+}
+
+func stringSliceToSet(s []string) map[string]bool {
+	result := make(map[string]bool)
+	for _, v := range s {
+		result[v] = true
+	}
+	return result
+}
+
+func projectionsToSet(p []*Projection) map[string]bool {
+	result := make(map[string]bool)
+	for _, v := range p {
+		result[v.MethodName()] = true
+	}
+	return result
 }

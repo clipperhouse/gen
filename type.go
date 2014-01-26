@@ -60,3 +60,7 @@ func (p *Projection) MethodName() string {
 
 	return p.Method + strings.Title(name)
 }
+
+func (p *Projection) String() string {
+	return p.MethodName()
+}
