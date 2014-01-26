@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -44,6 +45,38 @@ func addError(text string) {
 	errs = append(errs, errors.New(text))
 }
 
+func writeType(w io.Writer, t *Type, opts options) {
+	h := getHeaderTemplate()
+	h.Execute(w, t)
+
+	for _, m := range t.StandardMethods {
+		tmpl, err := getStandardTemplate(m)
+		if err == nil {
+			tmpl.Execute(w, t)
+		} else if opts.Force {
+			fmt.Printf("  skipping %v method\n", m)
+		} else {
+			panic(err)
+		}
+	}
+
+	for _, f := range t.Projections {
+		tmpl, err := getProjectionTemplate(f.Method)
+		if err == nil {
+			tmpl.Execute(w, f)
+		} else if opts.Force {
+			fmt.Printf("  skipping %v projection method\n", f.Method)
+		} else {
+			panic(err)
+		}
+	}
+
+	if t.requiresSortSupport() {
+		s := getSortSupportTemplate()
+		s.Execute(w, t)
+	}
+}
+
 func writeFile(packages []*Package, opts options) {
 	for _, p := range packages {
 		for _, t := range p.Types {
@@ -53,35 +86,7 @@ func writeFile(packages []*Package, opts options) {
 			}
 			defer file.Close()
 
-			h := getHeaderTemplate()
-			h.Execute(file, t)
-
-			for _, m := range t.StandardMethods {
-				tmpl, err := getStandardTemplate(m)
-				if err == nil {
-					tmpl.Execute(file, t)
-				} else if opts.Force {
-					fmt.Printf("  skipping %v method\n", m)
-				} else {
-					panic(err) // shouldn't get here, should have been caught in getSubsettedMethods
-				}
-			}
-
-			for _, f := range t.Projections {
-				tmpl, err := getProjectionTemplate(f.Method)
-				if err == nil {
-					tmpl.Execute(file, f)
-				} else if opts.Force {
-					fmt.Printf("  skipping %v projection method\n", f.Method)
-				} else {
-					panic(err) // shouldn't get here, should have been caught in getProjectionSpecs
-				}
-			}
-
-			if t.requiresSortSupport() {
-				s := getSortSupportTemplate()
-				s.Execute(file, t)
-			}
+			writeType(file, t, opts)
 
 			fmt.Printf("  generated %s, yay!\n", t.Plural())
 		}
