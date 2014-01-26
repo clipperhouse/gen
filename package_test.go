@@ -371,6 +371,20 @@ func TestTypeEvaluation(t *testing.T) {
 	}
 }
 
+func TestSort(t *testing.T) {
+	thing4 := typs["Thing4"]
+
+	if !thing4.requiresSortSupport() {
+		t.Errorf("Thing4 should require sort support. Methods: %v", thing4.StandardMethods)
+	}
+
+	thing5 := typs["Thing5"]
+
+	if thing5.requiresSortSupport() {
+		t.Errorf("Thing4 should not require sort support. Methods: %v", thing5.StandardMethods)
+	}
+}
+
 func stringSliceToSet(s []string) map[string]bool {
 	result := make(map[string]bool)
 	for _, v := range s {
