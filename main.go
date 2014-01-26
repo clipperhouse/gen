@@ -52,7 +52,10 @@ func writeType(w io.Writer, t *Type, opts options) {
 	for _, m := range t.StandardMethods {
 		tmpl, err := getStandardTemplate(m)
 		if err == nil {
-			tmpl.Execute(w, t)
+			err := tmpl.Execute(w, t)
+			if err != nil {
+				panic(err)
+			}
 		} else if opts.Force {
 			fmt.Printf("  skipping %v method\n", m)
 		} else {
@@ -63,7 +66,10 @@ func writeType(w io.Writer, t *Type, opts options) {
 	for _, f := range t.Projections {
 		tmpl, err := getProjectionTemplate(f.Method)
 		if err == nil {
-			tmpl.Execute(w, f)
+			err := tmpl.Execute(w, f)
+			if err != nil {
+				panic(err)
+			}
 		} else if opts.Force {
 			fmt.Printf("  skipping %v projection method\n", f.Method)
 		} else {
@@ -73,7 +79,10 @@ func writeType(w io.Writer, t *Type, opts options) {
 
 	if t.requiresSortSupport() {
 		s := getSortSupportTemplate()
-		s.Execute(w, t)
+		err := s.Execute(w, t)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
