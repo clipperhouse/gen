@@ -1,3 +1,11 @@
+body {
+	line-height: 1.5;
+}
+
+#content > * {
+	width: 730px;
+}
+
 #sidebar {
 	background: #fff;
 	position: fixed;
@@ -54,13 +62,19 @@ h1 > span.alpha {
 	font-size: 50%;
 }
 
-img#completion {
+#right {
 	float: right;
+	text-align: right;
 	width: 330px;
 	margin: 25px 0 30px 45px;
+	line-height: 2
 }
 
-div.pre, span.cmd {
+img#completion {
+	width: 330px;
+}
+
+div.pre, code {
 	background-color: #f5f5f5;
 	border: 1px solid #cccccc;
 	border-radius: 4px;
@@ -76,18 +90,17 @@ table#usage td:first-child {
 	padding-right: 40px;
 }
 
-pre, div.pre, span.cmd {
+pre, div.pre, code {
 	font-family: Menlo, Consolas, "Courier New", monospace;	
 	font-size: 14px;
 }
 
-span.cmd {
+code {
 	padding: 1px 3px;
 	border-radius: 2px;
-}
-
-p, pre, div.pre {
-	width: 730px
+	font-size: 100%;
+	color: inherit;
+	white-space: nowrap;
 }
 
 .nowrap {

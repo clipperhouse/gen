@@ -47,17 +47,20 @@
                 <h4><a href="#Subsetting">Subsetting</a></h4>
                 <h4><a href="#Tips">Tips</a></h4>
                 <h4><a href="#FAQ">FAQ</a></h4>
+                <h4><a href="#Changelog">Changelog</a></h4>
 
                 <br />
-                <a href="https://github.com/clipperhouse/gen" id="github">Source</a><br /><br />
-                <a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a><br /><br />
 
                 <h4><a href="#Custom" class="strike">Custom Methods</a></h4><br />
 
             </nav>
         </div>
         <div id="content">
-            <a href="https://github.com/DisposaBoy/GoSublime"><img src="completion.png" id="completion"></a>
+            <div id="right">
+                <p><a href="https://github.com/DisposaBoy/GoSublime"><img src="completion.png" id="completion"></a></p>
+                <p><a href="https://github.com/clipperhouse/gen" id="github">Source</a>&nbsp;</p>
+                <p><a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a>&nbsp;</p>
+            </div>
             <h1>gen <span class="alpha">alpha</span></h1>
             <h3>
                 A library for bringing generics-like functionality to Go
@@ -91,9 +94,9 @@ otherThings := myThings.Where(func).Sort(func)
 <pre>
 go get github.com/clipperhouse/gen
 </pre>
-            <p>Create a new Go project, and <span class="cmd">cd</span> into it. Create a main.go file and define a type in it.</p>
+            <p>Create a new Go project, and <code>cd</code> into it. Create a main.go file and define a type in it.</p>
 
-            <p>Now, mark it up with a simple <span class="cmd">+gen</span> tag in an adjacent comment like so:</p>
+            <p>Now, mark it up with a simple <code>+gen</code> tag in an adjacent comment like so:</p>
 <pre>
 // +gen
 type MyType struct {
@@ -105,11 +108,11 @@ type MyType struct {
 gen
 </pre>
 
-            <p>You should see a new file, named <span class="cmd">mytype_gen.go</span>. Have a look around. Try out that plural type.</p>
+            <p>You should see a new file, named <code>mytype_gen.go</code>. Have a look around. Try out that plural type.</p>
 
             <h2 id="Usage">Usage</h2>
 
-            <p>If you’d like to generate methods that take pointers instead of value types, add the <span class="cmd">*</span> directive.</p>
+            <p>If you’d like to generate methods that take pointers instead of value types, add the <code>*</code> directive.</p>
 <pre>
 // +gen *
 type MyType struct {
@@ -341,7 +344,7 @@ roomiest, err := houses.MaxBy(area)
 
             <h4>Projections allow ad-hoc mapping of one type to another.</h4>
 
-            <p>Projections are specified by listing types in a <span class="cmd">projection</span> tag. Here’s a marked-up type and some handy func’s, used in the examples below:</p>
+            <p>Projections are specified by listing types in a <code>projection</code> tag. Here’s a marked-up type and some handy func’s, used in the examples below:</p>
 <pre>
 +gen projections:"int,string"
 type Thing struct { 
@@ -453,9 +456,9 @@ list := myThings.AggregateString(join)
 
             <h2 id="Subsetting">Subsetting</h2>
 
-            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <span class="cmd">gen</span> a type. Similarly, all of the above <a href="#Projections">projection methods</a> are generated when you include a <span class="cmd">projections</span> tag.</p>
+            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <code>gen</code> a type. Similarly, all of the above <a href="#Projections">projection methods</a> are generated when you include a <code>projections</code> tag.</p>
 
-            <p>If you would prefer only to generate specific methods, you can do so with a <span class="cmd">methods</span> tag.</p>
+            <p>If you would prefer only to generate specific methods, you can do so with a <code>methods</code> tag.</p>
 
 <pre>
 // +gen methods:"Count,Where,Select,GroupBy" projections:"string,float64"
@@ -472,7 +475,7 @@ type Thing struct {
             <p>gen parses your source and evaluates types. If your code doesn’t parse or build, gen’s ability to reason about it is nearly zero. It will return errors at the command line.</p>
 
             <h4>-force</h4>
-            <p>If you find yourself getting errors that you can’t resolve, you can use <span class="cmd">gen -force</span> at the command line. gen will do its best with limited information, but your warranty is voided. The official party line is that this is undefined behavior.</p>
+            <p>If you find yourself getting errors that you can’t resolve, you can use <code>gen -force</code> at the command line. gen will do its best with limited information, but your warranty is voided. The official party line is that this is undefined behavior.</p>
 
             <h2 id="FAQ">FAQ</h2>
 
@@ -489,7 +492,7 @@ type Thing struct {
             <h4>gen returns a new slice for many operations</h4>
             <p>This is by design, so that there is no question about whether you are mutating a slice in place or not. (An example would be Go’s builtin sort package, which works in-place.)</p>
 
-            <p>Slices are <a href="http://blog.golang.org/go-slices-usage-and-internals">cheap</a>. You can reduce potential allocations by operating on pointer types, as well, by <a href="#Usage">using</a> the <span class="cmd">*</span> directive in your gen tag.</p>
+            <p>Slices are <a href="http://blog.golang.org/go-slices-usage-and-internals">cheap</a>. You can reduce potential allocations by operating on pointer types, as well, by <a href="#Usage">using</a> the <code>*</code> directive in your gen tag.</p>
 
             <h4>You re-implemented sort?</h4>
             <p>Yes. Go’s <a href="http://godoc.org/sort">sort package</a> requires the fulfillment of three <a href="http://golang.org/pkg/sort/#Interface">interface members</a>, two of which are usually boilerplate. If you want to sort by different criteria, you need to implement multiple ‘alias’ types.</p>
@@ -537,6 +540,37 @@ type MyType struct {
 
             <h4>Who is ‘we’?</h4>
             <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. We have are ramping up with <a href="https://github.com/clipperhouse/gen/graphs/contributors">contributors</a> too.</p>
+
+            <h2 id="Changelog">Changelog</h2>
+
+            <p><strong>26 Jan 2014</strong></p>
+
+            <p>This release includes breaking changes.</p>
+
+            <p>Command-line type specification has been deprecated, and replaced by markup per <a href="https://github.com/clipperhouse/gen/issues/23">#23</a>. It takes the form of:</p>
+
+<pre>// +gen
+type MyType struct {...}
+</pre>
+
+            <p>Where before the command-line would be <code>gen package.Type</code>, now it's simply <code>gen</code>, which will locate and process your marked-up types.</p>
+
+            <p>Here's a larger example:</p>
+
+<pre>// +gen * methods:"Count,Where" projections:"SomeType,int"
+type MyType struct {...}
+</pre>
+
+            <ul>
+                <li>The <code>*</code> is a directive to generate methods which take a pointer type instead of a value type. Optional but recommended.</li>
+                <li>The <code>methods</code> tag is for <a href="http://clipperhouse.github.io/gen/#Subsetting">subsetting</a> methods; replaces <code>gen:"..."</code>. Optional; omit it to generate all standard methods.</li>
+                <li>The <code>projections</code> tag specifies types to be <a href="http://clipperhouse.github.io/gen/#Projections">projected</a> for methods such as <code>Select</code> and <code>GroupBy</code>. Optional. If the <code>methods</code> tag is omitted, all projection methods will be generated, appropriate to each type. (For example, Average will not be generated for non-numeric types.) You can subset projection methods using the <code>methods</code> tag above.</li>
+            </ul><p>The <code>-all</code> flag has been deprecated, it's no longer a valid use case, given the above. The <code>-exported</code> flag, which is a modifier of same, is gone too.</p>
+
+            <p>Custom methods, where specific member fields of a struct are marked up, have been deprecated. The <a href="https://github.com/clipperhouse/gen/issues/23">rationale</a> is that we prefer to project types, not fields.</p>
+
+            <p><code>Sort(func)</code> has been renamed <code>SortBy(func)</code>, and similarly Max → MaxBy, Min → MinBy. This is done in anticipation of methods of those names which will <em>not</em> take a func, see <a href="https://github.com/clipperhouse/gen/issues/28">#28</a>.</p>
+
 
             <h2 id="Custom">Custom methods</h2>
 
