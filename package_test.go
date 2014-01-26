@@ -282,6 +282,9 @@ type Thing7 struct {
 	Field func(int) // not comparable
 }
 
+// +gen
+type Thing8 [7]Thing7
+
 func TestStandardMethods(t *testing.T) {
 	thing1, ok1 := typs["Thing1"]
 
@@ -368,6 +371,13 @@ func TestTypeEvaluation(t *testing.T) {
 
 	if methods7["Distinct"] {
 		t.Errorf("Thing7 should not have Distinct because it is not comparable, but has: %v", thing7.StandardMethods)
+	}
+
+	thing8 := typs["Thing8"]
+	methods8 := stringSliceToSet(thing8.StandardMethods)
+
+	if methods8["Distinct"] {
+		t.Errorf("Thing8 should not have Distinct because it is not comparable, but has: %v", thing8.StandardMethods)
 	}
 }
 
