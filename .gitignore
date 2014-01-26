@@ -1,0 +1,4 @@
+install.sh
+watch.sh
+coverage.out
+*_gen.go
