@@ -5,30 +5,33 @@ import (
 	"testing"
 )
 
-func testTypeArg(t *testing.T, s string, num int) {
-	args := strings.Split(s, " ")
-	opts, err := parseArgs(args)
+func TestFlags(t *testing.T) {
+	args1 := strings.Split("-f", " ")
+	opts1, _ := parseArgs(args1)
 
-	defaultOpts := options{}
+	args2 := strings.Split("-force", " ")
+	opts2, _ := parseArgs(args2)
 
-	if opts != defaultOpts {
-		t.Errorf("expected default options '%v', got '%v'", defaultOpts, opts)
+	if !opts1.Force || !opts2.Force {
+		t.Errorf("should have detected force flag")
 	}
 
-	if err != nil {
-		t.Errorf("expected no errors, got '%v'", errs)
-	}
-}
-
-func TestSynonymousFlags(t *testing.T) {
-	args7 := strings.Split("-f", " ")
-	opts7, _ := parseArgs(args7)
-
-	args8 := strings.Split("-force", " ")
-	opts8, _ := parseArgs(args8)
-
-	if opts7 != opts8 {
+	if opts1 != opts2 {
 		t.Errorf("-f and -force should by synonymous")
+	}
+
+	args3 := strings.Split("-h", " ")
+	opts3, _ := parseArgs(args3)
+
+	args4 := strings.Split("-help", " ")
+	opts4, _ := parseArgs(args4)
+
+	if !opts3.Help || !opts3.Help {
+		t.Errorf("should have detected help flag")
+	}
+
+	if opts3 != opts4 {
+		t.Errorf("-h and -help should by synonymous")
 	}
 }
 
