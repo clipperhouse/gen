@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"go/parser"
-	"go/token"
 	"testing"
 )
 
@@ -395,17 +392,6 @@ func TestSort(t *testing.T) {
 
 	if thing5.requiresSortSupport() {
 		t.Errorf("Thing4 should not require sort support. Methods: %v", thing5.StandardMethods)
-	}
-}
-
-func TestWrite(t *testing.T) {
-	for _, typ := range typs {
-		b := bytes.NewBufferString("")
-		writeType(b, typ, options{})
-
-		if _, err := parser.ParseFile(token.NewFileSet(), "dummy", b.String(), 0); err != nil {
-			t.Error(err)
-		}
 	}
 }
 
