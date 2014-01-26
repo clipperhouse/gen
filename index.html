@@ -285,7 +285,10 @@ func (rcv Things) Distinct() Things
 snowflakes := hipsters.Distinct()
 </pre>
 
-<p>Keep in mind that pointers and values have different notions of <a href="http://golang.org/doc/go1#equality">equality</a>, and therefore distinctness.</p>
+
+            <p><strong>Note:</strong> Distinct will only be generated for types that support <a href="http://golang.org/doc/go1#equality">equality</a>.</p>
+
+            <p>Keep in mind that pointers and values have different notions of equality, and therefore distinctness.</p>
 
             <h3 id="DistinctBy">DistinctBy</h3>
             <p>
@@ -380,6 +383,8 @@ report := myThings.GroupByInt(getYear)
 // => { "1995": [Thing1, Thing2], "2008": [Thing3, Thing4] }
 </pre>
 
+            <p><strong>Note:</strong> Because map keys must be compared for equality, GroupBy() will only be generated for types that support <a href="http://golang.org/doc/go1#equality">equality</a>.</p>
+
             <h3 id="Sum">Sum</h3>
 
             <p>Sums over all elements. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb298381(v=vs.110).aspx">Sum</a>.</p>
@@ -390,6 +395,7 @@ report := myThings.GroupByInt(getYear)
 revenue := myThings.SumFloat64(getSales)
 // => 9457846.74
 </pre>
+            <p><strong>Note:</strong> Sum will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">numeric types</a>.</p>
 
             <h3 id="Average">Average</h3>
 
@@ -401,6 +407,7 @@ revenue := myThings.SumFloat64(getSales)
 avg := myThings.AverageFloat64(getSales)
 // => 30005.74
 </pre>
+            <p><strong>Note:</strong> Average will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">numeric types</a>.</p>
 
             <h3 id="MaxProjection">Max</h3>
 
@@ -413,6 +420,8 @@ bigmoney := myThings.MaxFloat64(getSales)
 // => 68598.99
 </pre>
 
+            <p><strong>Note:</strong> Max will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered types</a>, that is, types which can be evaluated as greater or less.</p>
+
             <h3 id="MinProjection">Min</h3>
 
             <p>Selects the least projected value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548741(v=vs.110).aspx">Min</a>.</p>
@@ -423,6 +432,7 @@ bigmoney := myThings.MaxFloat64(getSales)
 earliest := myThings.MinInt(getYear)
 // => 1995
 </pre>
+            <p><strong>Note:</strong> Min will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered types</a>, that is, types which can be evaluated as greater or less.</p>
 
             <h3 id="Aggregate">Aggregate</h3>
 
@@ -475,6 +485,11 @@ type Thing struct {
 
             <h4>What’s that <a href="#Concepts">plural type</a> business?</h4>
             <p>gen creates a new slice type for your selected struct(s) because method receivers cannot be slices. It’s clearer and less verbose to type myThings.Where(fn) than package.Where(myThings, fn). Not to mention, the latter wouldn’t work for multiple struct types in the same package.</p>
+
+            <h4>gen returns a new slice for many operations</h4>
+            <p>This is by design, so that there is no question about whether you are mutating a slice in place or not. (An example would be Go’s builtin sort package, which works in-place.)</p>
+
+            <p>Slices are <a href="http://blog.golang.org/go-slices-usage-and-internals">cheap</a>. You can reduce potential allocations by operating on pointer types, as well, by <a href="#Usage">using</a> the <span class="cmd">*</span> directive in your gen tag.</p>
 
             <h4>You re-implemented sort?</h4>
             <p>Yes. Go’s <a href="http://godoc.org/sort">sort package</a> requires the fulfillment of three <a href="http://golang.org/pkg/sort/#Interface">interface members</a>, two of which are usually boilerplate. If you want to sort by different criteria, you need to implement multiple ‘alias’ types.</p>
