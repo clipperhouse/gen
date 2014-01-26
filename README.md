@@ -18,7 +18,7 @@ It’s intended to fit well with idiomatic Go. Explicitness and compile-time saf
 
 The goal is to keep the API small. We aim to implement the **least number of orthogonal methods** which allow the desired range of function.
 
-It’s about types. If something would be expressed <T> in another language, perhaps it’s a good candidate for gen. If it would not be expressed that way, perhaps it’s not a good candidate.
+It’s about types. If something would be expressed &lt;T&gt; in another language, perhaps it’s a good candidate for gen. If it would not be expressed that way, perhaps it’s not a good candidate.
 
 We avoid methods that feel like wrappers or aliases to existing methods, even if they are convenient. A good proxy is to imagine a user asking the question ‘which method should I use?’. If that’s a reasonable question, the library should be doing less.
 
