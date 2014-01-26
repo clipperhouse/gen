@@ -37,7 +37,7 @@ func main() {
 		}
 	}
 
-	writeFile(packages, opts)
+	writeFiles(packages, opts)
 }
 
 func addError(text string) {

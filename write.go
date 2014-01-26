@@ -47,7 +47,7 @@ func writeType(w io.Writer, t *Type, opts options) {
 	}
 }
 
-func writeFile(packages []*Package, opts options) {
+func writeFiles(packages []*Package, opts options) {
 	for _, p := range packages {
 		for _, t := range p.Types {
 			file, err := os.Create(t.FileName())
@@ -60,6 +60,5 @@ func writeFile(packages []*Package, opts options) {
 
 			fmt.Printf("  generated %s, yay!\n", t.Plural())
 		}
-
 	}
 }
