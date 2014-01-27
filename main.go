@@ -50,4 +50,4 @@ Usage: gen [-force]
   -force    # forces generation to continue despite errors; voids warranty; shortcut -f
 `
 
-const deprecationUrl = `https://github.com/clipperhouse/gen/blob/projection/CHANGELOG.md`
+const deprecationUrl = `http://clipperhouse.github.io/gen/#Changelog`
