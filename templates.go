@@ -86,8 +86,8 @@ const header = `// This file was auto-generated using github.com/clipperhouse/ge
 package {{.Package.Name}}
 {{if gt (len .Imports) 0}}
 import ({{range .Imports}}
-	"{{.}}"
-{{end}})
+	"{{.}}"{{end}}
+)
 {{end}}
 // {{.Plural}} is a slice of type {{.Pointer}}{{.Name}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Name}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Name}}
