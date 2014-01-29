@@ -258,6 +258,22 @@ func determineImports(t *Type) {
 		}
 	}
 
+	methodRequiresSort := map[string]bool{
+		"Sort": true,
+	}
+
+	for _, m := range t.StandardMethods {
+		if methodRequiresSort[m] {
+			imports["sort"] = true
+		}
+	}
+
+	for _, f := range t.Projections {
+		if methodRequiresSort[f.Method] {
+			imports["sort"] = true
+		}
+	}
+
 	for s := range imports {
 		t.Imports = append(t.Imports, s)
 	}

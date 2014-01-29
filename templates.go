@@ -272,6 +272,47 @@ func (rcv {{.Plural}}) Where(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Plu
 }
 `},
 
+	"Sort": &Template{
+		Text: `
+// Sort returns a new ordered {{.Plural}} slice. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) Sort() {{.Plural}} {
+	result := make({{.Plural}}, len(rcv))
+	copy(result, rcv)
+	sort.Sort(result)
+	return result
+}
+
+// IsSorted reports whether {{.Plural}} is sorted. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) IsSorted() bool {
+	return sort.IsSorted(rcv)
+}
+
+// SortDesc returns a new reverse-ordered {{.Plural}} slice. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) SortDesc() {{.Plural}} {
+	result := make({{.Plural}}, len(rcv))
+	copy(result, rcv)
+	sort.Sort(sort.Reverse(result))
+	return result
+}
+
+// IsSortedDesc reports whether {{.Plural}} is reverse-sorted. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) IsSortedDesc() bool {
+	return sort.IsSorted(sort.Reverse(rcv))
+}
+
+func (rcv {{.Plural}}) Len() int {
+	return len(rcv)
+}
+func (rcv {{.Plural}}) Less(i, j int) bool {
+	return rcv[i] < rcv[j]
+}
+func (rcv {{.Plural}}) Swap(i, j int) {
+	rcv[i], rcv[j] = rcv[j], rcv[i]
+}
+`,
+		RequiresOrdered: true,
+	},
+
 	"SortBy": &Template{
 		Text: `
 // SortBy returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
@@ -307,8 +348,6 @@ func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 	"SortByDesc": &Template{
 		Text: `
 // SortByDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
-//
-// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
 	greater := func(a, b {{.Pointer}}{{.Name}}) bool {
 		return a != b && !less(a, b)
