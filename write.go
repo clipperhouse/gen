@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"go/format"
 	"io"
 	"os"
 )
@@ -47,6 +49,15 @@ func writeType(w io.Writer, t *Type, opts options) {
 	}
 }
 
+func formatToBytes(b *bytes.Buffer) ([]byte, error) {
+	byts := b.Bytes()
+	formatted, err := format.Source(byts)
+	if err != nil {
+		return byts, err
+	}
+	return formatted, nil
+}
+
 func writeFiles(packages []*Package, opts options) {
 	for _, p := range packages {
 		for _, t := range p.Types {
@@ -56,7 +67,16 @@ func writeFiles(packages []*Package, opts options) {
 			}
 			defer file.Close()
 
-			writeType(file, t, opts)
+			b := bytes.NewBufferString("")
+			writeType(b, t, opts)
+
+			byts, err := formatToBytes(b)
+
+			if err == nil || opts.Force {
+				file.Write(byts)
+			} else {
+				panic(err)
+			}
 
 			fmt.Printf("  generated %s, yay!\n", t.Plural())
 		}
