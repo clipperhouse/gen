@@ -347,6 +347,34 @@ func TestSortBy(t *testing.T) {
 	}
 }
 
+func TestWhere(t *testing.T) {
+	where1 := thing1s.Where(func(x Thing1) bool {
+		return x.Name == "Third"
+	})
+
+	w1 := Thing1s{third1, anotherThird1}
+
+	if !sliceEqual(where1, w1) {
+		t.Errorf("Where should result in %v, got %v", w1, where1)
+	}
+
+	where2 := thing1s.Where(func(x Thing1) bool {
+		return x.Name == "Dummy"
+	})
+
+	if len(where2) != 0 {
+		t.Errorf("Where should result in empty slice, got %v", where2)
+	}
+
+	where3 := no1s.Where(func(x Thing1) bool {
+		return true
+	})
+
+	if len(where3) != 0 {
+		t.Errorf("Where should result in empty slice, got %v", where3)
+	}
+}
+
 func TestAggregate(t *testing.T) {
 	join := func(state string, x Thing1) string {
 		if len(state) > 0 {
