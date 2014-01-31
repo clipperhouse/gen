@@ -267,6 +267,8 @@ func (rcv SortableThings) Sort() SortableThings
 
             <p>Sort uses Go’s <a href="http://golang.org/pkg/sort/">sort package</a> by implementing the <a href="http://golang.org/pkg/sort/#Interface">interface</a> required to use it. Similarly, <strong>SortDesc</strong> and <strong>IsSorted(Desc)</strong>.</p>
 
+            <p>In keeping with gen’s design, Sort returns a new sorted slice. If this is too expensive for you, you can just as easily use Go’s <a href="http://golang.org/pkg/sort/#Sort">sort.Sort</a>, which operates in-place.</p>
+
             <p><strong>Note:</strong> Sort will only be generated for types that can be compared greater than or less than one another (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
 
             <h3 id="SortBy">SortBy</h3>
