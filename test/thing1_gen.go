@@ -182,8 +182,6 @@ func (rcv Thing1s) SortBy(less func(Thing1, Thing1) bool) Thing1s {
 }
 
 // SortByDesc returns a new, descending-ordered Thing1s slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
-//
-// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Thing1s) SortByDesc(less func(Thing1, Thing1) bool) Thing1s {
 	greater := func(a, b Thing1) bool {
 		return a != b && !less(a, b)

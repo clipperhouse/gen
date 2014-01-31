@@ -321,6 +321,75 @@ func TestSortBy(t *testing.T) {
 	}
 }
 
+func TestAggregate(t *testing.T) {
+	join := func(state string, x Thing1) string {
+		if len(state) > 0 {
+			state += ", "
+		}
+		return state + x.Name
+	}
+
+	aggregate1 := thing1s.AggregateString(join)
+	agg1 := "First, Second, Third, Third, Fourth"
+
+	if aggregate1 != agg1 {
+		t.Errorf("AggregateString should be %v, got %v", agg1, aggregate1)
+	}
+}
+
+func TestAverage(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	average1, err := thing1s.AverageInt(number)
+
+	if err != nil {
+		t.Errorf("SumInt should succeed")
+	}
+
+	avg1 := 68
+
+	if average1 != avg1 {
+		t.Errorf("SumInt should be %v, got %v", avg1, average1)
+	}
+
+	average2, err := no1s.AverageInt(number)
+
+	if err == nil || average2 != 0 {
+		t.Errorf("SumInt should fail on empty slice")
+	}
+}
+
+func TestGroupBy(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	groupby1 := thing1s.GroupByInt(number)
+	g1 := map[int]Thing1s{
+		40:  Thing1s{second1, fourth1},
+		60:  Thing1s{first1},
+		100: Thing1s{third1, anotherThird1},
+	}
+
+	if len(groupby1) != len(g1) {
+		t.Errorf("GroupByInt result should have %d elements, has %d", len(g1), len(groupby1))
+	}
+
+	for k, v := range g1 {
+		g, ok := groupby1[k]
+
+		if !ok {
+			t.Errorf("GroupByInt result should have %d element, but is %v", k, len(groupby1))
+		}
+
+		if !sliceEqual(v, g) {
+			t.Errorf("GroupByInt result [%d] should have %v but has %v", k, v, g)
+		}
+	}
+}
+
 func appendMany(x Thing1, n int) (result Thing1s) {
 	for i := 0; i < n; i++ {
 		result = append(result, x)
