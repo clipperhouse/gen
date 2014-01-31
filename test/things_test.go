@@ -390,6 +390,75 @@ func TestGroupBy(t *testing.T) {
 	}
 }
 
+func TestMax(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	max1, err := thing1s.MaxInt(number)
+
+	if err != nil {
+		t.Errorf("Max should succeed")
+	}
+
+	if max1 != 100 {
+		t.Errorf("Max should be %v, got %v", 100, max1)
+	}
+
+	max2, err := no1s.MaxInt(number)
+
+	if err == nil || max2 != 0 {
+		t.Errorf("Max should fail on empty slice")
+	}
+}
+
+func TestMin(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	min1, err := thing1s.MinInt(number)
+
+	if err != nil {
+		t.Errorf("Min should succeed")
+	}
+
+	if min1 != 40 {
+		t.Errorf("Min should be %v, got %v", 40, min1)
+	}
+
+	min2, err := no1s.MinInt(number)
+
+	if err == nil || min2 != 0 {
+		t.Errorf("Min should fail on empty slice")
+	}
+}
+
+func TestSelect(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	select1 := thing1s.SelectInt(number)
+	s1 := []int{60, 40, 100, 100, 40}
+
+	if !intSliceEqual(select1, s1) {
+		t.Errorf("Select should result in %v, got %v", s1, select1)
+	}
+}
+
+func TestSum(t *testing.T) {
+	number := func(x Thing1) int {
+		return x.Number
+	}
+
+	sum1 := thing1s.SumInt(number)
+
+	if sum1 != 340 {
+		t.Errorf("Sum should result in %v, got %v", 340, sum1)
+	}
+}
+
 func appendMany(x Thing1, n int) (result Thing1s) {
 	for i := 0; i < n; i++ {
 		result = append(result, x)
@@ -398,6 +467,18 @@ func appendMany(x Thing1, n int) (result Thing1s) {
 }
 
 func sliceEqual(a, b Thing1s) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func intSliceEqual(a, b []int) bool {
 	if len(a) != len(b) {
 		return false
 	}
