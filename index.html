@@ -27,6 +27,7 @@
                     <a href="#First">- First</a>
                     <a href="#Single">- Single</a>
                     <a href="#Each">- Each</a>
+                    <a href="#Sort">- Sort</a>
                     <a href="#SortBy">- SortBy</a>
                     <a href="#Distinct">- Distinct</a>
                     <a href="#DistinctBy">- DistinctBy</a>
@@ -252,6 +253,21 @@ update := func(s *Score) {
 }
 scores.Each(update)
 </pre>
+
+            <h3 id="Sort">Sort</h3>
+            <p>
+                Returns a new slice (plural type) whose elements are sorted.
+            </p>
+
+<pre>
+type SortableThing int
+
+func (rcv SortableThings) Sort() SortableThings
+</pre>
+
+            <p>Sort uses Go’s <a href="http://golang.org/pkg/sort/">sort package</a> by implementing the <a href="http://golang.org/pkg/sort/#Interface">interface</a> required to use it. Similarly, <strong>SortDesc</strong> and <strong>IsSorted(Desc)</strong>.</p>
+
+            <p><strong>Note:</strong> Sort will only be generated for types that can be compared greater than or less than one another (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
 
             <h3 id="SortBy">SortBy</h3>
             <p>
