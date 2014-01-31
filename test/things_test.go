@@ -345,19 +345,19 @@ func TestAverage(t *testing.T) {
 	average1, err := thing1s.AverageInt(number)
 
 	if err != nil {
-		t.Errorf("SumInt should succeed")
+		t.Errorf("Average should succeed")
 	}
 
 	avg1 := 68
 
 	if average1 != avg1 {
-		t.Errorf("SumInt should be %v, got %v", avg1, average1)
+		t.Errorf("Average should be %v, got %v", avg1, average1)
 	}
 
 	average2, err := no1s.AverageInt(number)
 
 	if err == nil || average2 != 0 {
-		t.Errorf("SumInt should fail on empty slice")
+		t.Errorf("Average should fail on empty slice")
 	}
 }
 
