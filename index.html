@@ -557,6 +557,16 @@ type MyType struct {
 
             <h2 id="Changelog">Changelog</h2>
 
+            <p><strong>30 Jan 2014</strong></p>
+
+            <p>Added new <a href="#Sort">Sort</a> (alongside the existing SortBy). The difference is that Sort works on types that are already sortable such as <code>type MySortable int</code>. It requires no passed ‘less’ func because we already what ‘less’ is for such types. :)</p>
+
+            <p><a href="#SortBy">SortBy(func)</a> is still the way to go structs or any ad-hoc sorts.</p>
+
+            <p>The ‘<a href="https://github.com/clipperhouse/gen/tree/master/test">integration tests</a>’ (those which test the gen’d code) have been rewritten for clarity.</p>
+
+            <p>Generated code is now <a href="https://github.com/clipperhouse/gen/commit/38df7421cdfd243f557f1c12f5a15e2de8834ffc">passed through</a> go/format (gofmt) on output, so you don’t have to.</p>
+
             <p><strong>26 Jan 2014</strong></p>
 
             <p>This release includes breaking changes. To update:</p>
