@@ -8,6 +8,7 @@ var (
 	zero1, first1, second1, third1, anotherThird1, fourth1 Thing1
 	fifth1, sixth1, seventh1, eighth1                      Thing1
 	thing1s, no1s, lotsOfThing1s                           Thing1s
+	thing2s                                                Thing2s
 )
 
 func init() {
@@ -40,6 +41,7 @@ func init() {
 		seventh1,
 		eighth1,
 	}
+	thing2s = Thing2s{50.1, 7, 99.8, 100.4, 80}
 }
 
 func TestAll(t *testing.T) {
@@ -247,6 +249,30 @@ func TestSingle(t *testing.T) {
 
 	if err == nil || single3 != zero1 {
 		t.Errorf("Single should fail on empty slice")
+	}
+}
+
+func TestSort(t *testing.T) {
+	sort1 := thing2s.Sort()
+	s1 := Thing2s{7, 50.1, 80, 99.8, 100.4}
+
+	if !thing2SliceEqual(sort1, s1) {
+		t.Errorf("Sort should result in %v, got %v", s1, sort1)
+	}
+
+	if !sort1.IsSorted() {
+		t.Errorf("IsSorted should be true for %v", sort1)
+	}
+
+	sort2 := thing2s.SortDesc()
+	s2 := Thing2s{100.4, 99.8, 80, 50.1, 7}
+
+	if !thing2SliceEqual(sort2, s2) {
+		t.Errorf("SortDesc should result in %v, got %v", s2, sort2)
+	}
+
+	if !sort2.IsSortedDesc() {
+		t.Errorf("IsSortedDesc should be true for %v", sort1)
 	}
 }
 
@@ -479,6 +505,18 @@ func sliceEqual(a, b Thing1s) bool {
 }
 
 func intSliceEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func thing2SliceEqual(a, b Thing2s) bool {
 	if len(a) != len(b) {
 		return false
 	}
