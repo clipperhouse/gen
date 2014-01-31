@@ -86,8 +86,8 @@ const header = `// This file was auto-generated using github.com/clipperhouse/ge
 package {{.Package.Name}}
 {{if gt (len .Imports) 0}}
 import ({{range .Imports}}
-	"{{.}}"
-{{end}})
+	"{{.}}"{{end}}
+)
 {{end}}
 // {{.Plural}} is a slice of type {{.Pointer}}{{.Name}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Name}}. (This is required because slices cannot be method receivers.)
 type {{.Plural}} []{{.Pointer}}{{.Name}}
@@ -272,6 +272,47 @@ func (rcv {{.Plural}}) Where(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Plu
 }
 `},
 
+	"Sort": &Template{
+		Text: `
+// Sort returns a new ordered {{.Plural}} slice. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) Sort() {{.Plural}} {
+	result := make({{.Plural}}, len(rcv))
+	copy(result, rcv)
+	sort.Sort(result)
+	return result
+}
+
+// IsSorted reports whether {{.Plural}} is sorted. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) IsSorted() bool {
+	return sort.IsSorted(rcv)
+}
+
+// SortDesc returns a new reverse-ordered {{.Plural}} slice. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) SortDesc() {{.Plural}} {
+	result := make({{.Plural}}, len(rcv))
+	copy(result, rcv)
+	sort.Sort(sort.Reverse(result))
+	return result
+}
+
+// IsSortedDesc reports whether {{.Plural}} is reverse-sorted. See: http://clipperhouse.github.io/gen/#Sort
+func (rcv {{.Plural}}) IsSortedDesc() bool {
+	return sort.IsSorted(sort.Reverse(rcv))
+}
+
+func (rcv {{.Plural}}) Len() int {
+	return len(rcv)
+}
+func (rcv {{.Plural}}) Less(i, j int) bool {
+	return rcv[i] < rcv[j]
+}
+func (rcv {{.Plural}}) Swap(i, j int) {
+	rcv[i], rcv[j] = rcv[j], rcv[i]
+}
+`,
+		RequiresOrdered: true,
+	},
+
 	"SortBy": &Template{
 		Text: `
 // SortBy returns a new ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
@@ -307,13 +348,11 @@ func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 	"SortByDesc": &Template{
 		Text: `
 // SortByDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
-//
-// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
-	greaterOrEqual := func(a, b {{.Pointer}}{{.Name}}) bool {
-		return !less(a, b)
+	greater := func(a, b {{.Pointer}}{{.Name}}) bool {
+		return a != b && !less(a, b)
 	}
-	return rcv.SortBy(greaterOrEqual)
+	return rcv.SortBy(greater)
 }
 `},
 
@@ -321,10 +360,10 @@ func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 		Text: `
 // IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
-	greaterOrEqual := func(a, b {{.Pointer}}{{.Name}}) bool {
-		return !less(a, b)
+	greater := func(a, b {{.Pointer}}{{.Name}}) bool {
+		return a != b && !less(a, b)
 	}
-	return rcv.IsSortedBy(greaterOrEqual)
+	return rcv.IsSortedBy(greater)
 }
 `},
 }
