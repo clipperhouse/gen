@@ -80,7 +80,7 @@ func TestDeletions(t *testing.T) {
 
 	input.WriteString(y)
 	if _, ok := promptDeletions(packages, existing, input, output); !ok {
-		t.Errorf("promptDeletions should be ok with '%v' as input", n)
+		t.Errorf("promptDeletions should be ok with '%v' as input", y)
 	}
 
 	input.WriteString(y)
@@ -89,7 +89,7 @@ func TestDeletions(t *testing.T) {
 	}
 
 	if _, ok := promptDeletions(packages, none, input, output); !ok {
-		t.Errorf("promptDeletions should true when no files to delete")
+		t.Errorf("promptDeletions should return true when no files to delete")
 	}
 }
 
