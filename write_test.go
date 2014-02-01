@@ -9,14 +9,14 @@ import (
 
 func TestWrite(t *testing.T) {
 	for _, typ := range typs { // from package_test.go
-		b := bytes.NewBufferString("")
-		writeType(b, typ, options{})
+		var b bytes.Buffer
+		writeType(&b, typ, options{})
 
 		if _, err := parser.ParseFile(token.NewFileSet(), "dummy", b.String(), 0); err != nil {
 			t.Error(err)
 		}
 
-		if _, err := formatToBytes(b); err != nil {
+		if _, err := formatToBytes(&b); err != nil {
 			t.Error(err)
 		}
 	}
@@ -65,30 +65,29 @@ func TestDeletions(t *testing.T) {
 	y := "y"
 	dummy := "dummy"
 
-	input := bytes.NewBufferString("")
-	output := bytes.NewBufferString("")
+	var input, output bytes.Buffer
 
 	input.WriteString(n)
-	if _, ok := promptDeletions(packages, existing, input, output); ok {
+	if _, ok := promptDeletions(packages, existing, &input, &output); ok {
 		t.Errorf("promptDeletions should not be ok with '%v' as input", n)
 	}
 
 	input.WriteString(dummy)
-	if _, ok := promptDeletions(packages, existing, input, output); ok {
+	if _, ok := promptDeletions(packages, existing, &input, &output); ok {
 		t.Errorf("promptDeletions should not be ok with '%v' as input", dummy)
 	}
 
 	input.WriteString(y)
-	if _, ok := promptDeletions(packages, existing, input, output); !ok {
+	if _, ok := promptDeletions(packages, existing, &input, &output); !ok {
 		t.Errorf("promptDeletions should be ok with '%v' as input", y)
 	}
 
 	input.WriteString(y)
-	if d, _ := promptDeletions(packages, existing, input, output); !sliceEqual(d, deletions) {
+	if d, _ := promptDeletions(packages, existing, &input, &output); !sliceEqual(d, deletions) {
 		t.Errorf("promptDeletions should return %v, got %v", deletions, d)
 	}
 
-	if _, ok := promptDeletions(packages, none, input, output); !ok {
+	if _, ok := promptDeletions(packages, none, &input, &output); !ok {
 		t.Errorf("promptDeletions should return true when no files to delete")
 	}
 }

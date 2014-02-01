@@ -119,10 +119,9 @@ func writeFiles(packages []*Package, opts options) {
 			}
 			defer file.Close()
 
-			b := bytes.NewBufferString("")
-			writeType(b, t, opts)
-
-			byts, err := formatToBytes(b)
+			var b bytes.Buffer
+			writeType(&b, t, opts)
+			byts, err := formatToBytes(&b)
 
 			if err == nil || opts.Force {
 				file.Write(byts)
