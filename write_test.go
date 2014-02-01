@@ -47,3 +47,60 @@ type MyType int
 		t.Errorf("format failed, expected %v, got %v:", []byte(out), []byte(s))
 	}
 }
+
+func TestDeletions(t *testing.T) {
+	packages := getPackages()
+	existing := map[string]bool{
+		"thing1_gen.go":  true, // gen'd type, see package_test.go
+		"thing2_gen.go":  true,
+		"another_gen.go": true,
+	}
+	deletions := []string{
+		"thing2_gen.go",
+		"another_gen.go",
+	}
+	none := map[string]bool{}
+
+	n := "n"
+	y := "y"
+	dummy := "dummy"
+
+	input := bytes.NewBufferString("")
+	output := bytes.NewBufferString("")
+
+	input.WriteString(n)
+	if _, ok := promptDeletions(packages, existing, input, output); ok {
+		t.Errorf("promptDeletions should not be ok with '%v' as input", n)
+	}
+
+	input.WriteString(dummy)
+	if _, ok := promptDeletions(packages, existing, input, output); ok {
+		t.Errorf("promptDeletions should not be ok with '%v' as input", dummy)
+	}
+
+	input.WriteString(y)
+	if _, ok := promptDeletions(packages, existing, input, output); !ok {
+		t.Errorf("promptDeletions should be ok with '%v' as input", n)
+	}
+
+	input.WriteString(y)
+	if d, _ := promptDeletions(packages, existing, input, output); !sliceEqual(d, deletions) {
+		t.Errorf("promptDeletions should return %v, got %v", deletions, d)
+	}
+
+	if _, ok := promptDeletions(packages, none, input, output); !ok {
+		t.Errorf("promptDeletions should true when no files to delete")
+	}
+}
+
+func sliceEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
