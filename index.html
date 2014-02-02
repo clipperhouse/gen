@@ -31,7 +31,9 @@
                     <a href="#SortBy">- SortBy</a>
                     <a href="#Distinct">- Distinct</a>
                     <a href="#DistinctBy">- DistinctBy</a>
+                    <a href="#Min">- Min</a>
                     <a href="#MinBy">- MinBy</a>
+                    <a href="#Max">- Max</a>
                     <a href="#MaxBy">- MaxBy</a>
                 </p>
                 <h4><a href="#Projections">Projection Methods</a></h4>
@@ -304,7 +306,6 @@ func (rcv Things) Distinct() Things
 snowflakes := hipsters.Distinct()
 </pre>
 
-
             <p><strong>Note:</strong> Distinct will only be generated for types that support <a href="http://golang.org/doc/go1#equality">equality</a>.</p>
 
             <p>Keep in mind that pointers and values have different notions of equality, and therefore distinctness.</p>
@@ -324,6 +325,23 @@ hairstyle := func(a *Fashionista, b *Fashionista) bool {
 }
 trendsetters := fashionistas.DistinctBy(hairstyle)</pre>
 
+            <h3 id="Min">Min</h3>
+<pre>
+func (rcv Things) Min() (*Thing, error)
+</pre>
+            <p>Returns the minimum value of Things. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
+
+<p>Example:</p>
+
+<pre>
+type Price float64
+cheapest, err := prices.Min()
+</pre>
+
+            <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
+
+            <p><strong>Note:</strong> Min will only be generated for types that support less than/greater than (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
+
             <h3 id="MinBy">MinBy</h3>
 <pre>
 func (rcv Things) MinBy(less func(*Thing, *Thing) bool) (*Thing, error)
@@ -340,6 +358,22 @@ cheapest, err := products.MinBy(price)
 </pre>
 
             <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
+
+            <h3 id="Max">Max</h3>
+<pre>
+func (rcv Things) Max() (*Thing, error)
+</pre>
+            <p>Returns the maximum value of slice (plural type). Returns an error when invoked on an empty slice, considered an invalid operation.</p>
+
+<p>Example:</p>
+
+<pre>
+type Price float64
+dearest, err := prices.Max()
+</pre>
+            <p>In the case of multiple items being equally maximal, the first such element is returned.</p>
+
+            <p><strong>Note:</strong> Max will only be generated for types that support less than/greater than (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
 
             <h3 id="MaxBy">MaxBy</h3>
 <pre>
