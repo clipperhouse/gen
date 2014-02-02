@@ -109,8 +109,6 @@ func (rcv Thing1s) IsSortedByDesc(less func(Thing1, Thing1) bool) bool {
 }
 
 // MaxBy returns an element of Thing1s containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy
-//
-// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv Thing1s) MaxBy(less func(Thing1, Thing1) bool) (result Thing1, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -119,7 +117,7 @@ func (rcv Thing1s) MaxBy(less func(Thing1, Thing1) bool) (result Thing1, err err
 	}
 	m := 0
 	for i := 1; i < l; i++ {
-		if !less(rcv[i], rcv[m]) {
+		if rcv[i] != rcv[m] && !less(rcv[i], rcv[m]) {
 			m = i
 		}
 	}

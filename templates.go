@@ -237,8 +237,6 @@ func (rcv {{.Plural}}) Min() (result {{.Pointer}}{{.Name}}, err error) {
 	"MaxBy": &Template{
 		Text: `
 // MaxBy returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy
-//
-// (Note: this is implemented by negating the passed ‘less’ func, effectively testing ‘greater than or equal to’.)
 func (rcv {{.Plural}}) MaxBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) (result {{.Pointer}}{{.Name}}, err error) {
 	l := len(rcv)
 	if l == 0 {
@@ -247,7 +245,7 @@ func (rcv {{.Plural}}) MaxBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Nam
 	}
 	m := 0
 	for i := 1; i < l; i++ {
-		if !less(rcv[i], rcv[m]) {
+		if rcv[i] != rcv[m] && !less(rcv[i], rcv[m]) {
 			m = i
 		}
 	}

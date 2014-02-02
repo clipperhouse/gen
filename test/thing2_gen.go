@@ -32,7 +32,7 @@ func (rcv Thing2s) Max() (result Thing2, err error) {
 	return
 }
 
-// Min returns the minimum value of Thing2s. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+// Min returns the minimum value of Thing2s. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
 func (rcv Thing2s) Min() (result Thing2, err error) {
 	l := len(rcv)
 	if l == 0 {
