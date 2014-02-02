@@ -598,7 +598,7 @@ type MyType struct {
 
             <p><strong>1 Feb 2014</strong></p>
 
-            <p>gen will now delete <code>*_gen.go</code> files in the case that a previously-gen’d type has been removed, per <a href="https://github.com/clipperhouse/gen/issues/34">#34</a>. Confimrs with the user for safety. And of course you are using version control, right?</p>
+            <p>gen will now delete <code>*_gen.go</code> files in the case that a previously-gen’d type has been removed, per <a href="https://github.com/clipperhouse/gen/issues/34">#34</a>. Confirms with the user for safety. And of course you are using version control, right?</p>
 
             <p>Added new <a href="#Max">Max</a> and <a href="#Min">Min</a> (alongside the existing respective *By). The difference is that these work on types that are known <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a> such as <code>type MyOrderable int</code>. It requires no passed ‘less’ func because we already know what ‘less’ is for such types. <a href="https://github.com/clipperhouse/gen/issues/28">#28</a>.</p>
 
