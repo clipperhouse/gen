@@ -215,7 +215,7 @@ func (rcv {{.Plural}}) Max() (result {{.Pointer}}{{.Name}}, err error) {
 
 	"Min": &Template{
 		Text: `
-// Min returns the minimum value of {{.Plural}}. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+// Min returns the minimum value of {{.Plural}}. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
 func (rcv {{.Plural}}) Min() (result {{.Pointer}}{{.Name}}, err error) {
 	l := len(rcv)
 	if l == 0 {
