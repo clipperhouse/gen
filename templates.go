@@ -192,6 +192,48 @@ func (rcv {{.Plural}}) First(fn func({{.Pointer}}{{.Name}}) bool) (result {{.Poi
 }
 `},
 
+	"Max": &Template{
+		Text: `
+// Max returns the maximum value of {{.Plural}}. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+func (rcv {{.Plural}}) Max() (result {{.Pointer}}{{.Name}}, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine the Max of an empty slice")
+		return
+	}
+	result = rcv[0]
+	for _, v := range rcv {
+		if v > result {
+			result = v
+		}
+	}
+	return
+}
+`,
+		RequiresOrdered: true,
+	},
+
+	"Min": &Template{
+		Text: `
+// Min returns the minimum value of {{.Plural}}. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+func (rcv {{.Plural}}) Min() (result {{.Pointer}}{{.Name}}, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine the Min of an empty slice")
+		return
+	}
+	result = rcv[0]
+	for _, v := range rcv {
+		if v < result {
+			result = v
+		}
+	}
+	return
+}
+`,
+		RequiresOrdered: true,
+	},
+
 	"MaxBy": &Template{
 		Text: `
 // MaxBy returns an element of {{.Plural}} containing the maximum value, when compared to other elements using a passed func defining ‘less’. In the case of multiple items being equally maximal, the last such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#MaxBy

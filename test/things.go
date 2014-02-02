@@ -6,7 +6,7 @@ type Thing1 struct {
 	Number int
 }
 
-// +gen methods:"Sort"
+// +gen methods:"Max,Min,Sort"
 type Thing2 Thing3
 
 type Thing3 float64

@@ -190,10 +190,11 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 			if isStandardMethod(m) {
 				standardMethods = append(standardMethods, m)
 			}
-			if isProjectionMethod(m) {
+			isP := spec.Projections != nil && isProjectionMethod(m) // only consider projection methods in presence of projected types
+			if isP {
 				projectionMethods = append(projectionMethods, m)
 			}
-			if !isStandardMethod(m) && !isProjectionMethod(m) {
+			if !isStandardMethod(m) && !isP {
 				err = errors.New(fmt.Sprintf("method %s is unknown", m, spec.Name))
 			}
 		}
@@ -241,6 +242,8 @@ func determineImports(t *Type) {
 	methodRequiresErrors := map[string]bool{
 		"First":   true,
 		"Single":  true,
+		"Max":     true,
+		"Min":     true,
 		"MaxBy":   true,
 		"MinBy":   true,
 		"Average": true,

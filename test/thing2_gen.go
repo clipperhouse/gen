@@ -9,11 +9,44 @@
 package models
 
 import (
+	"errors"
 	"sort"
 )
 
 // Thing2s is a slice of type Thing2, for use with gen methods below. Use this type where you would use []Thing2. (This is required because slices cannot be method receivers.)
 type Thing2s []Thing2
+
+// Max returns the maximum value of Thing2s. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+func (rcv Thing2s) Max() (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine the Max of an empty slice")
+		return
+	}
+	result = rcv[0]
+	for _, v := range rcv {
+		if v > result {
+			result = v
+		}
+	}
+	return
+}
+
+// Min returns the minimum value of Thing2s. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+func (rcv Thing2s) Min() (result Thing2, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine the Min of an empty slice")
+		return
+	}
+	result = rcv[0]
+	for _, v := range rcv {
+		if v < result {
+			result = v
+		}
+	}
+	return
+}
 
 // Sort returns a new ordered Thing2s slice. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv Thing2s) Sort() Thing2s {

@@ -178,6 +178,26 @@ func TestFirst(t *testing.T) {
 	}
 }
 
+func TestMin(t *testing.T) {
+	min1, err := thing2s.Min()
+	m1 := Thing2(7)
+
+	if err != nil {
+		t.Errorf("Min should succeed")
+	}
+
+	if min1 != m1 {
+		t.Errorf("Min should return %v, got %v", m1, min1)
+	}
+
+	min2, err := Thing2s{}.Min()
+	var m2 Thing2
+
+	if err == nil || min2 != m2 {
+		t.Errorf("Min should fail on empty slice")
+	}
+}
+
 func TestMinBy(t *testing.T) {
 	min1, err := thing1s.MinBy(func(a, b Thing1) bool {
 		return a.Number < b.Number
@@ -197,6 +217,26 @@ func TestMinBy(t *testing.T) {
 
 	if err == nil || min2 != zero1 {
 		t.Errorf("MinBy Number should fail on empty slice")
+	}
+}
+
+func TestMax(t *testing.T) {
+	max1, err := thing2s.Max()
+	m1 := Thing2(100.4)
+
+	if err != nil {
+		t.Errorf("Max should succeed")
+	}
+
+	if max1 != m1 {
+		t.Errorf("Max should return %v, got %v", m1, max1)
+	}
+
+	max2, err := Thing2s{}.Max()
+	var m2 Thing2
+
+	if err == nil || max2 != m2 {
+		t.Errorf("Max should fail on empty slice")
 	}
 }
 
@@ -444,7 +484,7 @@ func TestGroupBy(t *testing.T) {
 	}
 }
 
-func TestMax(t *testing.T) {
+func TestMaxInt(t *testing.T) {
 	number := func(x Thing1) int {
 		return x.Number
 	}
@@ -466,7 +506,7 @@ func TestMax(t *testing.T) {
 	}
 }
 
-func TestMin(t *testing.T) {
+func TestMinInt(t *testing.T) {
 	number := func(x Thing1) int {
 		return x.Number
 	}
