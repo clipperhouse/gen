@@ -13,24 +13,7 @@ import (
 )
 
 func isComparable(typ types.Type) bool {
-	switch t := typ.Underlying().(type) {
-	case *types.Basic:
-		// assume invalid types to be comparable
-		// to avoid follow-up errors
-		return t.Kind() != types.UntypedNil
-	case *types.Pointer, *types.Interface, *types.Chan:
-		return true
-	case *types.Struct:
-		for i := 0; i < t.NumFields(); i++ {
-			if !isComparable(t.Field(i).Type()) {
-				return false
-			}
-		}
-		return true
-	case *types.Array:
-		return isComparable(t.Elem())
-	}
-	return false
+	return types.Comparable(typ)
 }
 
 func isNumeric(typ types.Type) bool {
