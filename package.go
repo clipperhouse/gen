@@ -24,7 +24,8 @@ type GenSpec struct {
 }
 
 type GenTag struct {
-	Items []string
+	Items   []string
+	Negated bool
 }
 
 // Returns one gen Package per Go package found in current directory
@@ -167,11 +168,11 @@ func getGenSpec(doc, name string) (result *GenSpec, found bool) {
 				if s == "*" {
 					pointer = s
 				}
-				if x, found := parseTag("methods", s); found {
-					subsettedMethods = &GenTag{x}
+				if x, found, negated := parseTag("methods", s); found {
+					subsettedMethods = &GenTag{x, negated}
 				}
-				if x, found := parseTag("projections", s); found {
-					projectedTypes = &GenTag{x}
+				if x, found, negated := parseTag("projections", s); found {
+					projectedTypes = &GenTag{x, negated}
 				}
 			}
 
@@ -184,19 +185,42 @@ func getGenSpec(doc, name string) (result *GenSpec, found bool) {
 }
 
 func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []string, err error) {
+
+	if spec.Methods == nil || spec.Methods.Negated { // default to all
+		standardMethods = getStandardMethodKeys()
+		if spec.Projections != nil {
+			projectionMethods = getProjectionMethodKeys()
+		}
+	}
+
 	if spec.Methods != nil {
 		// categorize subsetted methods as standard or projection
+		std := make([]string, 0)
+		prj := make([]string, 0)
+
 		for _, m := range spec.Methods.Items {
+			isStd := isStandardMethod(m)
 			if isStandardMethod(m) {
-				standardMethods = append(standardMethods, m)
+				std = append(std, m)
 			}
-			isP := spec.Projections != nil && isProjectionMethod(m) // only consider projection methods in presence of projected types
-			if isP {
-				projectionMethods = append(projectionMethods, m)
+
+			// only consider projection methods in presence of projected types
+			isPrj := spec.Projections != nil && isProjectionMethod(m)
+			if isPrj {
+				prj = append(prj, m)
 			}
-			if !isStandardMethod(m) && !isP {
+
+			if !isStd && !isPrj {
 				err = errors.New(fmt.Sprintf("method %s is unknown", m, spec.Name))
 			}
+		}
+
+		if spec.Methods.Negated {
+			standardMethods = remove(standardMethods, std)
+			projectionMethods = remove(projectionMethods, prj)
+		} else {
+			standardMethods = std
+			projectionMethods = prj
 		}
 
 		if spec.Projections != nil && len(projectionMethods) == 0 {
@@ -205,12 +229,6 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 
 		if len(projectionMethods) > 0 && spec.Projections == nil {
 			err = errors.New(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", spec.Name))
-		}
-	} else {
-		// default to all if not subsetted
-		standardMethods = getStandardMethodKeys()
-		if spec.Projections != nil {
-			projectionMethods = getProjectionMethodKeys()
 		}
 	}
 	return
@@ -224,14 +242,19 @@ func getAstFiles(p *ast.Package) (result []*ast.File) {
 	return
 }
 
-func parseTag(name, s string) (result []string, found bool) {
+func parseTag(name, s string) (result []string, found bool, negated bool) {
 	pattern := fmt.Sprintf(`%s:"(.*)"`, name)
 	r := regexp.MustCompile(pattern)
 	if matches := r.FindStringSubmatch(s); matches != nil && len(matches) > 1 {
 		found = true
 		match := matches[1]
 		if len(match) > 0 {
-			result = strings.Split(match, ",")
+			index := 0
+			if strings.HasPrefix(match, "-") {
+				negated = true
+				index = 1
+			}
+			result = strings.Split(match[index:], ",")
 		}
 	}
 	return
@@ -291,12 +314,22 @@ func (t *Type) requiresSortSupport() bool {
 	return false
 }
 
+func (t *Type) requiresSortInterface() bool {
+	reg := regexp.MustCompile(`^Sort(Desc)?$`)
+	for _, m := range t.StandardMethods {
+		if reg.MatchString(m) {
+			return true
+		}
+	}
+	return false
+}
+
 func checkDeprecatedTags(t types.Type) {
 	// give informative errors for use of deprecated custom methods
 	switch x := t.Underlying().(type) {
 	case *types.Struct:
 		for i := 0; i < x.NumFields(); i++ {
-			_, found := parseTag("gen", x.Tag(i))
+			_, found, _ := parseTag("gen", x.Tag(i))
 			if found {
 				addError(fmt.Sprintf(`custom methods (%s on %s) have been deprecated, see %s`, x.Tag(i), x.Field(i).Name(), deprecationUrl))
 			}

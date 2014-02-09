@@ -97,6 +97,10 @@ func TestGenSpecParsing(t *testing.T) {
 		t.Errorf("gen spec should have 2 methods")
 	}
 
+	if spec4.Methods.Negated {
+		t.Errorf("gen spec should not be negated")
+	}
+
 	if spec4.Projections != nil {
 		t.Errorf("gen spec projections should be nil if unspecified")
 	}
@@ -119,6 +123,10 @@ func TestGenSpecParsing(t *testing.T) {
 
 	if len(spec5.Methods.Items) != 2 {
 		t.Errorf("gen spec should have 2 subsetted methods")
+	}
+
+	if spec5.Methods.Negated {
+		t.Errorf("gen spec should not be negated")
 	}
 
 	if len(spec5.Projections.Items) != 1 {
@@ -149,12 +157,33 @@ func TestGenSpecParsing(t *testing.T) {
 		t.Errorf("gen spec methods should be empty, instead got %v", len(spec6.Methods.Items))
 	}
 
+	if spec6.Methods.Negated {
+		t.Errorf("gen spec should not be negated")
+	}
+
 	if spec6.Projections == nil {
 		t.Errorf("gen spec projections should exist even if empty")
 	}
 
 	if len(spec6.Projections.Items) > 0 {
 		t.Errorf("gen spec projections should be empty, instead got %v", spec6.Projections.Items)
+	}
+
+	s7 := `// Here is a description of some type
+// +gen methods:"-GroupBy,Sort"`
+	spec7, _ := getGenSpec(s7, dummy)
+
+	if spec7.Methods == nil {
+		t.Errorf("negated methods should parse")
+	}
+
+	if !spec7.Methods.Negated {
+		t.Errorf("gen spec should be negated")
+	}
+
+	expected7 := []string{"GroupBy", "Sort"}
+	if !sliceEqual(spec7.Methods.Items, expected7) {
+		t.Errorf("methods should be %v, got %v", expected7, spec7.Methods.Items)
 	}
 }
 
@@ -177,7 +206,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected type should be none, instead got %v", projectionMethods1)
 	}
 
-	spec2 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Where"}}, nil}
+	spec2 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Where"}, false}, nil}
 
 	standardMethods2, projectionMethods2, err2 := determineMethods(spec2)
 
@@ -193,7 +222,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected typs should be none")
 	}
 
-	spec3 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Unknown"}}, &GenTag{[]string{}}}
+	spec3 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Unknown"}, false}, &GenTag{[]string{}, false}}
 
 	standardMethods3, projectionMethods3, err3 := determineMethods(spec3)
 
@@ -209,7 +238,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected typs should be none")
 	}
 
-	spec4 := &GenSpec{"", dummy, nil, &GenTag{[]string{"SomeType"}}}
+	spec4 := &GenSpec{"", dummy, nil, &GenTag{[]string{"SomeType"}, false}}
 
 	standardMethods4, projectionMethods4, err4 := determineMethods(spec4)
 
@@ -225,7 +254,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should default to all in presence of projected typs")
 	}
 
-	spec5 := &GenSpec{"", dummy, &GenTag{[]string{"GroupBy"}}, &GenTag{[]string{"SomeType"}}}
+	spec5 := &GenSpec{"", dummy, &GenTag{[]string{"GroupBy"}, false}, &GenTag{[]string{"SomeType"}, false}}
 
 	standardMethods5, projectionMethods5, err5 := determineMethods(spec5)
 
@@ -241,7 +270,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should be subsetted")
 	}
 
-	spec6 := &GenSpec{"", dummy, &GenTag{[]string{}}, nil}
+	spec6 := &GenSpec{"", dummy, &GenTag{[]string{}, false}, nil}
 
 	standardMethods6, projectionMethods6, err6 := determineMethods(spec6)
 
@@ -255,6 +284,41 @@ func TestMethodDetermination(t *testing.T) {
 
 	if len(projectionMethods6) != 0 {
 		t.Errorf("projection methods should be none")
+	}
+
+	spec7 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Any"}, true}, nil}
+
+	standardMethods7, projectionMethods7, err7 := determineMethods(spec7)
+
+	if err7 != nil {
+		t.Errorf("empty subsetted methods should be ok, instead got: '%v'", err7)
+	}
+
+	expected7 := []string{"All", "Count", "Distinct", "DistinctBy", "Each", "First", "IsSorted", "IsSortedBy", "IsSortedByDesc", "IsSortedDesc", "Max", "MaxBy", "Min", "MinBy", "Single", "SortBy", "SortByDesc", "SortDesc", "Where"}
+	if !sliceEqual(standardMethods7, expected7) {
+		t.Errorf("standard methods should be negatively subsetted, expected %v, got %v", expected7, standardMethods7)
+	}
+
+	if len(projectionMethods7) != 0 {
+		t.Errorf("projection methods should be none")
+	}
+
+	spec8 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Where", "GroupBy"}, true}, &GenTag{[]string{"int"}, false}}
+
+	standardMethods8, projectionMethods8, err8 := determineMethods(spec8)
+
+	if err8 != nil {
+		t.Errorf("empty subsetted methods should be ok, instead got: '%v'", err8)
+	}
+
+	expectedStd8 := []string{"All", "Any", "Count", "Distinct", "DistinctBy", "Each", "First", "IsSorted", "IsSortedBy", "IsSortedByDesc", "IsSortedDesc", "Max", "MaxBy", "Min", "MinBy", "Single", "SortBy", "SortByDesc", "SortDesc"}
+	if !sliceEqual(standardMethods8, expectedStd8) {
+		t.Errorf("standard methods should be negatively subsetted, expected %v, got %v", expectedStd8, standardMethods8)
+	}
+
+	expectedPrj8 := []string{"Aggregate", "Average", "Max", "Min", "Select", "Sum"}
+	if !sliceEqual(projectionMethods8, expectedPrj8) {
+		t.Errorf("projection methods should be negatively subsetted, expected %v, got %v", expectedPrj8, projectionMethods8)
 	}
 }
 
