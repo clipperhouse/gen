@@ -518,6 +518,15 @@ type Thing struct {
     Sales float64
 }
 </pre>
+            <h4>Negative subsetting</h4>
+
+            <p>You can also gen every method <em>except</em> the ones specified by prepending the tag contents with <code>-</code></p>
+
+<pre>
+// +gen methods:"-Count,Where,Select,GroupBy" projections:"string,float64"
+</pre>
+
+            <p>Negative subsetting is unsupported on the <code>projections</code> tag.</p>
 
             <h2 id="Tips">Tips</h2>
 
@@ -537,10 +546,10 @@ type Thing struct {
             <p>Codegen is not without its risks, we understand. But keep in mind that languages which do support generics are in fact doing <a href="http://msdn.microsoft.com/en-us/library/vstudio/f4a6ta2h(v=vs.110).aspx">something like code generation</a>, so perhaps gen’s approach is not that far out.</p>
 
             <h4>What’s that <a href="#Concepts">plural type</a> business?</h4>
-            <p>gen creates a new slice type for your selected struct(s) because method receivers cannot be slices. It’s clearer and less verbose to type myThings.Where(fn) than package.Where(myThings, fn). Not to mention, the latter wouldn’t work for multiple struct types in the same package.</p>
+            <p>gen creates a new slice type to serve as method receivers. It’s clearer and less verbose to type myThings.Where(fn) than package.Where(myThings, fn). Not to mention, the latter wouldn’t work for multiple types without the use of reflection.</p>
 
             <h4>gen returns a new slice for many operations</h4>
-            <p>This is by design, so that there is no question about whether you are mutating a slice in place or not. (An example would be Go’s builtin sort package, which works in-place.)</p>
+            <p>This is by design, so that there is no question about whether you are mutating a slice in place or not.</p>
 
             <p>Slices are <a href="http://blog.golang.org/go-slices-usage-and-internals">cheap</a>. You can reduce potential allocations by operating on pointer types, as well, by <a href="#Usage">using</a> the <code>*</code> directive in your gen tag.</p>
 
