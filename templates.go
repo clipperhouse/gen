@@ -75,6 +75,10 @@ func getSortSupportTemplate() *template.Template {
 	return template.Must(template.New("sortSupport").Parse(sortSupport))
 }
 
+func getSortInterfaceTemplate() *template.Template {
+	return template.Must(template.New("sortInterface").Parse(sortInterface))
+}
+
 const header = `// This file was auto-generated using github.com/clipperhouse/gen
 // Modifying this file is not recommended as it will likely be overwritten in the future
 
@@ -321,12 +325,20 @@ func (rcv {{.Plural}}) Sort() {{.Plural}} {
 	sort.Sort(result)
 	return result
 }
-
+`,
+		RequiresOrdered: true,
+	},
+	"IsSorted": &Template{
+		Text: `
 // IsSorted reports whether {{.Plural}} is sorted. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv {{.Plural}}) IsSorted() bool {
 	return sort.IsSorted(rcv)
 }
-
+`,
+		RequiresOrdered: true,
+	},
+	"SortDesc": &Template{
+		Text: `
 // SortDesc returns a new reverse-ordered {{.Plural}} slice. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv {{.Plural}}) SortDesc() {{.Plural}} {
 	result := make({{.Plural}}, len(rcv))
@@ -334,20 +346,14 @@ func (rcv {{.Plural}}) SortDesc() {{.Plural}} {
 	sort.Sort(sort.Reverse(result))
 	return result
 }
-
+`,
+		RequiresOrdered: true,
+	},
+	"IsSortedDesc": &Template{
+		Text: `
 // IsSortedDesc reports whether {{.Plural}} is reverse-sorted. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv {{.Plural}}) IsSortedDesc() bool {
 	return sort.IsSorted(sort.Reverse(rcv))
-}
-
-func (rcv {{.Plural}}) Len() int {
-	return len(rcv)
-}
-func (rcv {{.Plural}}) Less(i, j int) bool {
-	return rcv[i] < rcv[j]
-}
-func (rcv {{.Plural}}) Swap(i, j int) {
-	rcv[i], rcv[j] = rcv[j], rcv[i]
 }
 `,
 		RequiresOrdered: true,
@@ -396,7 +402,7 @@ func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 }
 `},
 
-	"IsSortedDesc": &Template{
+	"IsSortedByDesc": &Template{
 		Text: `
 // IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
@@ -407,6 +413,18 @@ func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointe
 }
 `},
 }
+
+const sortInterface = `
+func (rcv {{.Plural}}) Len() int {
+	return len(rcv)
+}
+func (rcv {{.Plural}}) Less(i, j int) bool {
+	return rcv[i] < rcv[j]
+}
+func (rcv {{.Plural}}) Swap(i, j int) {
+	rcv[i], rcv[j] = rcv[j], rcv[i]
+}
+`
 
 const sortSupport = `
 // Sort support methods

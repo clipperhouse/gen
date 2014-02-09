@@ -42,6 +42,14 @@ func writeType(w io.Writer, t *Type, opts options) {
 		}
 	}
 
+	if t.requiresSortInterface() {
+		s := getSortInterfaceTemplate()
+		err := s.Execute(w, t)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	if t.requiresSortSupport() {
 		s := getSortSupportTemplate()
 		err := s.Execute(w, t)
