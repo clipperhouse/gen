@@ -105,6 +105,11 @@ func getPackages() (result []*Package) {
 
 			// assemble projections with type verification
 			if spec.Projections != nil {
+
+				if spec.Projections.Negated {
+					addError(fmt.Sprintf("negation of projected types (see projection tag on %s) is unsupported", docType.Name))
+				}
+
 				for _, s := range spec.Projections.Items {
 					numeric := false
 					comparable := true // sensible default?
