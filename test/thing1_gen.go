@@ -1,7 +1,8 @@
 // This file was auto-generated using github.com/clipperhouse/gen
 // Modifying this file is not recommended as it will likely be overwritten in the future
 
-// Sort functions are a modification of http://golang.org/pkg/sort/#Sort
+// Sort (if included below) is a modification of http://golang.org/pkg/sort/#Sort
+// List (if included below) is a modification of http://golang.org/pkg/container/list/
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.

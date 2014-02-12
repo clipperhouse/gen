@@ -57,6 +57,20 @@ func writeType(w io.Writer, t *Type, opts options) {
 			panic(err)
 		}
 	}
+
+	for _, c := range t.Containers {
+		tmpl, err := getContainerTemplate(c)
+		if err == nil {
+			err := tmpl.Execute(w, t)
+			if err != nil {
+				panic(err)
+			}
+		} else if opts.Force {
+			fmt.Printf("  skipping %v container\n", c)
+		} else {
+			panic(err)
+		}
+	}
 }
 
 func formatToBytes(b *bytes.Buffer) ([]byte, error) {

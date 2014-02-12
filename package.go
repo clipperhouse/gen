@@ -19,8 +19,8 @@ type Package struct {
 }
 
 type GenSpec struct {
-	Pointer, Name        string // Name is included mainly for informative error messages
-	Methods, Projections *GenTag
+	Pointer, Name                    string // Name is included mainly for informative error messages
+	Methods, Projections, Containers *GenTag
 }
 
 type GenTag struct {
@@ -105,7 +105,6 @@ func getPackages() (result []*Package) {
 
 			// assemble projections with type verification
 			if spec.Projections != nil {
-
 				if spec.Projections.Negated {
 					addError(fmt.Sprintf("negation of projected types (see projection tag on %s) is unsupported", docType.Name))
 				}
@@ -143,6 +142,14 @@ func getPackages() (result []*Package) {
 				}
 			}
 
+			if spec.Containers != nil {
+				if spec.Containers.Negated {
+					addError(fmt.Sprintf("negation of containers (see containers tag on %s) is unsupported", docType.Name))
+				}
+
+				typ.Containers = spec.Containers.Items
+			}
+
 			determineImports(typ)
 
 			pkg.Types = append(pkg.Types, typ)
@@ -167,7 +174,7 @@ func getGenSpec(doc, name string) (result *GenSpec, found bool) {
 			parts := spaces.Split(line, -1)
 
 			var pointer string
-			var subsettedMethods, projectedTypes *GenTag
+			var subsettedMethods, projectedTypes, containers *GenTag
 
 			for _, s := range parts {
 				if s == "*" {
@@ -179,10 +186,13 @@ func getGenSpec(doc, name string) (result *GenSpec, found bool) {
 				if x, found, negated := parseTag("projections", s); found {
 					projectedTypes = &GenTag{x, negated}
 				}
+				if x, found, negated := parseTag("containers", s); found {
+					containers = &GenTag{x, negated}
+				}
 			}
 
 			found = true
-			result = &GenSpec{pointer, name, subsettedMethods, projectedTypes}
+			result = &GenSpec{pointer, name, subsettedMethods, projectedTypes, containers}
 			return
 		}
 	}

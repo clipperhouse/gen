@@ -190,7 +190,7 @@ func TestGenSpecParsing(t *testing.T) {
 func TestMethodDetermination(t *testing.T) {
 	dummy := "dummy"
 
-	spec1 := &GenSpec{"", dummy, nil, nil}
+	spec1 := &GenSpec{"", dummy, nil, nil, nil}
 
 	standardMethods1, projectionMethods1, err1 := determineMethods(spec1)
 
@@ -206,7 +206,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected type should be none, instead got %v", projectionMethods1)
 	}
 
-	spec2 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Where"}, false}, nil}
+	spec2 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Where"}, false}, nil, nil}
 
 	standardMethods2, projectionMethods2, err2 := determineMethods(spec2)
 
@@ -222,7 +222,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected typs should be none")
 	}
 
-	spec3 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Unknown"}, false}, &GenTag{[]string{}, false}}
+	spec3 := &GenSpec{"", dummy, &GenTag{[]string{"Count", "Unknown"}, false}, &GenTag{[]string{}, false}, nil}
 
 	standardMethods3, projectionMethods3, err3 := determineMethods(spec3)
 
@@ -238,7 +238,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods without projected typs should be none")
 	}
 
-	spec4 := &GenSpec{"", dummy, nil, &GenTag{[]string{"SomeType"}, false}}
+	spec4 := &GenSpec{"", dummy, nil, &GenTag{[]string{"SomeType"}, false}, nil}
 
 	standardMethods4, projectionMethods4, err4 := determineMethods(spec4)
 
@@ -254,7 +254,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should default to all in presence of projected typs")
 	}
 
-	spec5 := &GenSpec{"", dummy, &GenTag{[]string{"GroupBy"}, false}, &GenTag{[]string{"SomeType"}, false}}
+	spec5 := &GenSpec{"", dummy, &GenTag{[]string{"GroupBy"}, false}, &GenTag{[]string{"SomeType"}, false}, nil}
 
 	standardMethods5, projectionMethods5, err5 := determineMethods(spec5)
 
@@ -270,7 +270,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should be subsetted")
 	}
 
-	spec6 := &GenSpec{"", dummy, &GenTag{[]string{}, false}, nil}
+	spec6 := &GenSpec{"", dummy, &GenTag{[]string{}, false}, nil, nil}
 
 	standardMethods6, projectionMethods6, err6 := determineMethods(spec6)
 
@@ -286,7 +286,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should be none")
 	}
 
-	spec7 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Any"}, true}, nil}
+	spec7 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Any"}, true}, nil, nil}
 
 	standardMethods7, projectionMethods7, err7 := determineMethods(spec7)
 
@@ -303,7 +303,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projection methods should be none")
 	}
 
-	spec8 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Where", "GroupBy"}, true}, &GenTag{[]string{"int"}, false}}
+	spec8 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Where", "GroupBy"}, true}, &GenTag{[]string{"int"}, false}, nil}
 
 	standardMethods8, projectionMethods8, err8 := determineMethods(spec8)
 
