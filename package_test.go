@@ -185,6 +185,19 @@ func TestGenSpecParsing(t *testing.T) {
 	if !sliceEqual(spec7.Methods.Items, expected7) {
 		t.Errorf("methods should be %v, got %v", expected7, spec7.Methods.Items)
 	}
+
+	s8 := `// Here is a description of some type
+// +gen containers:"List"`
+	spec8, _ := getGenSpec(s8, dummy)
+
+	if spec8.Containers == nil {
+		t.Errorf("containers should parse")
+	}
+
+	expected8 := []string{"List"}
+	if !sliceEqual(spec8.Containers.Items, expected8) {
+		t.Errorf("containers should be %v, got %v", expected8, spec8.Methods.Items)
+	}
 }
 
 func TestMethodDetermination(t *testing.T) {
@@ -348,6 +361,9 @@ type Thing7 struct {
 
 // +gen
 type Thing8 [7]Thing7
+
+// +gen containers:"List"
+type Thing9 struct{}
 
 func TestStandardMethods(t *testing.T) {
 	thing1, ok1 := typs["Thing1"]
