@@ -13,7 +13,25 @@ import (
 )
 
 func isComparable(typ types.Type) bool {
-	return types.Comparable(typ)
+	// From : https://code.google.com/p/go/source/browse/go/types/predicates.go?repo=tools&name=release-branch.go1.2
+	switch t := typ.Underlying().(type) {
+	case *types.Basic:
+		// assume invalid types to be comparable
+		// to avoid follow-up errors
+		return t.Kind() != types.UntypedNil
+	case *types.Pointer, *types.Interface, *types.Chan:
+		return true
+	case *types.Struct:
+		for i := 0; i < t.NumFields(); i++ {
+			if !isComparable(t.Field(i).Type()) {
+				return false
+			}
+		}
+		return true
+	case *types.Array:
+		return isComparable(t.Elem())
+	}
+	return false
 }
 
 func isNumeric(typ types.Type) bool {
