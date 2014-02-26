@@ -3,6 +3,7 @@ package main
 import (
 	_ "code.google.com/p/go.tools/go/gcimporter"
 	"code.google.com/p/go.tools/go/types"
+	"code.google.com/p/go.tools/importer"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -29,6 +30,28 @@ type GenTag struct {
 	Negated bool
 }
 
+func checkTypes(path string, fset *token.FileSet, files []*ast.File) (*types.Package, error) {
+	/*
+	 * Use customized types.Config instead of  types.Check
+	 * By default, types.Check will use gcimporter, which will only import gc-generated files (*.a)
+	 * The customized types.Config will use importer, instead of gcimporter. importer will import gc-generated files (*.a) and source files (*.go).
+	 */
+	typesConfig := types.Config{}
+	typesConfig.Import = func(imports map[string]*types.Package, path string) (*types.Package, error) {
+		impConfig := importer.Config{}
+		impConfig.TypeChecker = typesConfig
+		impConfig.Build = &build.Default
+		imp := importer.New(&impConfig)
+		pkgInfo, err := imp.LoadPackage(path)
+		if nil != err {
+			return nil, err
+		}
+		return pkgInfo.Pkg, nil
+	}
+
+	return typesConfig.Check(path, fset, files, nil)
+}
+
 // Returns one gen Package per Go package found in current directory
 func getPackages() (result []*Package) {
 	fset := token.NewFileSet()
@@ -41,7 +64,7 @@ func getPackages() (result []*Package) {
 	for name, astPackage := range astPackages {
 		pkg := &Package{Name: name}
 
-		typesPkg, err := types.Check(name, fset, getAstFiles(astPackage, rootDir))
+		typesPkg, err := checkTypes(name, fset, getAstFiles(astPackage, rootDir))
 		if err != nil {
 			errs = append(errs, err)
 		}
