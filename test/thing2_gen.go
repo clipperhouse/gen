@@ -133,7 +133,7 @@ func (l *Thing2List) Init() *Thing2List {
 }
 
 // New returns an initialized list.
-func New() *Thing2List { return new(Thing2List).Init() }
+func NewThing2List() *Thing2List { return new(Thing2List).Init() }
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).

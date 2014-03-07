@@ -784,7 +784,7 @@ func (l *{{.Name}}List) Init() *{{.Name}}List {
 }
 
 // New returns an initialized list.
-func New() *{{.Name}}List { return new({{.Name}}List).Init() }
+func New{{.Name}}List() *{{.Name}}List { return new({{.Name}}List).Init() }
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).
