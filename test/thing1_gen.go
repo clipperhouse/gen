@@ -3,6 +3,7 @@
 
 // Sort (if included below) is a modification of http://golang.org/pkg/sort/#Sort
 // List (if included below) is a modification of http://golang.org/pkg/container/list/
+// Ring (if included below) is a modification of http://golang.org/pkg/container/ring/
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
