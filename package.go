@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/doc"
 	"go/parser"
 	"go/token"
@@ -31,7 +32,8 @@ type GenTag struct {
 // Returns one gen Package per Go package found in current directory
 func getPackages() (result []*Package) {
 	fset := token.NewFileSet()
-	astPackages, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
+	rootDir := "./"
+	astPackages, err := parser.ParseDir(fset, rootDir, nil, parser.ParseComments)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -39,7 +41,7 @@ func getPackages() (result []*Package) {
 	for name, astPackage := range astPackages {
 		pkg := &Package{Name: name}
 
-		typesPkg, err := types.Check(name, fset, getAstFiles(astPackage))
+		typesPkg, err := types.Check(name, fset, getAstFiles(astPackage, rootDir))
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -249,10 +251,15 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 	return
 }
 
-func getAstFiles(p *ast.Package) (result []*ast.File) {
+func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File) {
 	// pull map of *ast.File into a slice
-	for _, f := range p.Files {
-		result = append(result, f)
+	// and skip files who's out of compile scope (Conditional compile, for example)
+	for name, f := range p.Files {
+		if ok, err := build.Default.MatchFile(rootDir, name); err != nil {
+			addError(fmt.Sprintf("fail to match file to compile scope (%s)", err))
+		} else if ok {
+			result = append(result, f)
+		}
 	}
 	return
 }
