@@ -640,6 +640,10 @@ type MyType struct {
 
             <h2 id="Changelog">Changelog</h2>
 
+            <p><strong>9 Mar 2014</strong></p>
+
+            <p>Preliminary support for <a href="#Containers">containers</a>, starting with List and Ring, and based on <a href="http://golang.org/pkg/container">golang.org/pkg/container</a>. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions).</p>
+
             <p><strong>1 Feb 2014</strong></p>
 
             <p>gen will now delete <code>*_gen.go</code> files in the case that a previously-gen’d type has been removed, per <a href="https://github.com/clipperhouse/gen/issues/34">#34</a>. Confirms with the user for safety. And of course you are using version control, right?</p>
