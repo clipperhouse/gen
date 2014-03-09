@@ -46,6 +46,11 @@
                     <a href="#MinProjection">- Min</a>
                     <a href="#Aggregate">- Aggregate</a>
                 </p>
+                <h4><a href="#Containers">Containers</a></h4>
+                <p class="methods">
+                    <a href="#List">- List</a>
+                    <a href="#Ring">- Ring</a>
+                </p>
 
                 <h4><a href="#Subsetting">Subsetting</a></h4>
                 <h4><a href="#Tips">Tips</a></h4>
@@ -518,6 +523,7 @@ type Thing struct {
     Sales float64
 }
 </pre>
+
             <h4>Negative subsetting</h4>
 
             <p>You can also gen every method <em>except</em> the ones specified by prepending the tag contents with <code>-</code></p>
@@ -527,6 +533,35 @@ type Thing struct {
 </pre>
 
             <p>Negative subsetting is unsupported on the <code>projections</code> tag.</p>
+
+            <h2 id="Containers">Containers</h2>
+
+            <p>Containers are type-specific data structures, such as lists, trees, etc. The goal is to remove the need for casting (type assertions) that are required in other implementations.</p>
+
+            <p>Containers are specified using the <code>containers</code> tag.</p>
+<pre>
+// +gen containers:"List,Ring"
+type Thing struct {
+    ...
+}
+</pre>
+
+            <h3 id="List">List</h3>
+
+<pre>
+type Thing2List struct
+</pre>
+            <p>
+                Implements a strongly-typed, doubly-linked list, based on <a href="http://golang.org/pkg/container/list/">golang.org/pkg/container/list</a>. API documentation is available at that link. Parameters and return values that would be <code>interface{}</code> in the golang implementation will instead use <em>your</em> type in the gen implementation.
+            </p>
+
+            <h3 id="Ring">Ring</h3>
+<pre>
+type Thing2Ring struct
+</pre>
+            <p>
+                Implements strongly-typed operations on circular lists, based on <a href="http://golang.org/pkg/container/ring/">golang.org/pkg/container/ring</a>. API documentation is available at that link. Parameters and return values that would be <code>interface{}</code> in the golang implementation will instead use <em>your</em> type in the gen implementation.
+            </p>
 
             <h2 id="Tips">Tips</h2>
 
