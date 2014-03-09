@@ -12,6 +12,7 @@ type Type struct {
 	Name            string
 	StandardMethods []string
 	Projections     []*Projection
+	Containers      []string
 	Imports         []string
 }
 

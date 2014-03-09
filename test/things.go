@@ -6,7 +6,7 @@ type Thing1 struct {
 	Number int
 }
 
-// +gen methods:"Max,Min,Sort,IsSorted,SortDesc,IsSortedDesc"
+// +gen methods:"Max,Min,Sort,IsSorted,SortDesc,IsSortedDesc" containers:"List,Ring"
 type Thing2 Thing3
 
 type Thing3 float64
