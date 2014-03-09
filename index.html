@@ -48,6 +48,7 @@
                 </p>
                 <h4><a href="#Containers">Containers</a></h4>
                 <p class="methods">
+                    <a href="#Set">- Set</a>
                     <a href="#List">- List</a>
                     <a href="#Ring">- Ring</a>
                 </p>
@@ -540,11 +541,22 @@ type Thing struct {
 
             <p>Containers are specified using the <code>containers</code> tag.</p>
 <pre>
-// +gen containers:"List,Ring"
+// +gen containers:"Set,List,Ring"
 type Thing struct {
     ...
 }
 </pre>
+            <h3 id="Set">Set</h3>
+
+<pre>
+type ThingSet map[Thing]struct{}
+</pre>
+            <p>
+                Implements a strongly-typed set with common <a href="http://godoc.org/github.com/deckarep/golang-set">operations</a> (Union, Difference, etc). Items stored within it are unordered and unique.
+            </p>
+            <p>
+                The implementation is based on <a href="https://github.com/deckarep/golang-set">github.com/deckarep/golang-set</a>, with permission. API documentation is available <a href="http://godoc.org/github.com/deckarep/golang-set">here</a>. Parameters and return values that would be <code>interface{}</code> in the @deckarep implementation will instead use <em>your</em> type in the gen implementation.
+            </p>
 
             <h3 id="List">List</h3>
 
@@ -642,7 +654,7 @@ type MyType struct {
 
             <p><strong>9 Mar 2014</strong></p>
 
-            <p>Preliminary support for <a href="#Containers">containers</a>, starting with List and Ring, and based on <a href="http://golang.org/pkg/container">golang.org/pkg/container</a>. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions).</p>
+            <p>Preliminary support for <a href="#Containers">containers</a>, starting with Set, List and Ring. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions), and to add compile-time safety.</p>
 
             <p><strong>1 Feb 2014</strong></p>
 
