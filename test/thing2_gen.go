@@ -8,6 +8,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Set (if included below) is a modification of https://github.com/deckarep/golang-set
+// The MIT License (MIT)
+// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)
+
 package models
 
 import (
@@ -423,4 +427,162 @@ func (r *Thing2Ring) Do(f func(Thing2)) {
 			f(p.Value)
 		}
 	}
+}
+
+// The primary type that represents a set
+type Thing2Set map[Thing2]struct{}
+
+// Creates and returns a reference to an empty set.
+func NewThing2Set() Thing2Set {
+	return make(Thing2Set)
+}
+
+// Creates and returns a reference to a set from an existing slice
+func NewThing2SetFromSlice(s []Thing2) Thing2Set {
+	a := NewThing2Set()
+	for _, item := range s {
+		a.Add(item)
+	}
+	return a
+}
+
+// Adds an item to the current set if it doesn't already exist in the set.
+func (set Thing2Set) Add(i Thing2) bool {
+	_, found := set[i]
+	set[i] = struct{}{}
+	return !found //False if it existed already
+}
+
+// Determines if a given item is already in the set.
+func (set Thing2Set) Contains(i Thing2) bool {
+	_, found := set[i]
+	return found
+}
+
+// Determines if the given items are all in the set
+func (set Thing2Set) ContainsAll(i ...Thing2) bool {
+	allSet := NewThing2SetFromSlice(i)
+	if allSet.IsSubset(set) {
+		return true
+	}
+	return false
+}
+
+// Determines if every item in the other set is in this set.
+func (set Thing2Set) IsSubset(other Thing2Set) bool {
+	for elem := range set {
+		if !other.Contains(elem) {
+			return false
+		}
+	}
+	return true
+}
+
+// Determines if every item of this set is in the other set.
+func (set Thing2Set) IsSuperset(other Thing2Set) bool {
+	return other.IsSubset(set)
+}
+
+// Returns a new set with all items in both sets.
+func (set Thing2Set) Union(other Thing2Set) Thing2Set {
+	unionedSet := NewThing2Set()
+
+	for elem := range set {
+		unionedSet.Add(elem)
+	}
+	for elem := range other {
+		unionedSet.Add(elem)
+	}
+	return unionedSet
+}
+
+// Returns a new set with items that exist only in both sets.
+func (set Thing2Set) Intersect(other Thing2Set) Thing2Set {
+	intersection := NewThing2Set()
+	// loop over smaller set
+	if set.Cardinality() < other.Cardinality() {
+		for elem := range set {
+			if other.Contains(elem) {
+				intersection.Add(elem)
+			}
+		}
+	} else {
+		for elem := range other {
+			if set.Contains(elem) {
+				intersection.Add(elem)
+			}
+		}
+	}
+	return intersection
+}
+
+// Returns a new set with items in the current set but not in the other set
+func (set Thing2Set) Difference(other Thing2Set) Thing2Set {
+	differencedSet := NewThing2Set()
+	for elem := range set {
+		if !other.Contains(elem) {
+			differencedSet.Add(elem)
+		}
+	}
+	return differencedSet
+}
+
+// Returns a new set with items in the current set or the other set but not in both.
+func (set Thing2Set) SymmetricDifference(other Thing2Set) Thing2Set {
+	aDiff := set.Difference(other)
+	bDiff := other.Difference(set)
+	return aDiff.Union(bDiff)
+}
+
+// Clears the entire set to be the empty set.
+func (set *Thing2Set) Clear() {
+	*set = make(Thing2Set)
+}
+
+// Allows the removal of a single item in the set.
+func (set Thing2Set) Remove(i Thing2) {
+	delete(set, i)
+}
+
+// Cardinality returns how many items are currently in the set.
+func (set Thing2Set) Cardinality() int {
+	return len(set)
+}
+
+// Iter() returns a channel of type Thing2 that you can range over.
+func (set Thing2Set) Iter() <-chan Thing2 {
+	ch := make(chan Thing2)
+	go func() {
+		for elem := range set {
+			ch <- elem
+		}
+		close(ch)
+	}()
+
+	return ch
+}
+
+// Equal determines if two sets are equal to each other.
+// If they both are the same size and have the same items they are considered equal.
+// Order of items is not relevent for sets to be equal.
+func (set Thing2Set) Equal(other Thing2Set) bool {
+	if set.Cardinality() != other.Cardinality() {
+		return false
+	}
+	for elem := range set {
+		if !other.Contains(elem) {
+			return false
+		}
+	}
+	return true
+}
+
+// Returns a clone of the set.
+// Does NOT clone the underlying elements.
+func (set Thing2Set) Clone() Thing2Set {
+	clonedSet := NewThing2Set()
+	for elem := range set {
+		clonedSet.Add(elem)
+	}
+	return clonedSet
 }

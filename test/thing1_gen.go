@@ -8,6 +8,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Set (if included below) is a modification of https://github.com/deckarep/golang-set
+// The MIT License (MIT)
+// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)
+
 package models
 
 import (

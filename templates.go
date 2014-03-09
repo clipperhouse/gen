@@ -32,6 +32,10 @@ const header = `// This file was auto-generated using github.com/clipperhouse/ge
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Set (if included below) is a modification of https://github.com/deckarep/golang-set
+// The MIT License (MIT)
+// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)
+
 package {{.Package.Name}}
 {{if gt (len .Imports) 0}}
 import ({{range .Imports}}
