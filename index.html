@@ -601,7 +601,7 @@ type Thing2Ring struct
             <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
 
             <h4>Not all projection methods are generated for every type.</h4>
-            <p>gen only generates methods that are meningful for a type. It won’t generate an average of strings, for example, and it won’t key a map with any type that doesn’t support equality.</p>
+            <p>gen only generates methods that are meaningful for a type. It won’t generate an average of strings, for example, and it won’t key a map with any type that doesn’t support equality.</p>
 
             <h4>What about imported types?</h4>
             <p>gen doesn’t support imported types, not least because one can’t define methods on them. You might instead create a local ‘alias’ type, something like:</p>
