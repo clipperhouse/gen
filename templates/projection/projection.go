@@ -1,3 +1,6 @@
+// Package templates/projection includes the projection methods used by gen,
+// such as GroupBy and Average
+
 package projection
 
 import (

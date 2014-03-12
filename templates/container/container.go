@@ -1,3 +1,6 @@
+// Package templates/container includes the type containers used by gen,
+// such as Set and List
+
 package container
 
 import (
