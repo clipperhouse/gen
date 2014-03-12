@@ -1,24 +1,16 @@
-package main
+package container
 
 import (
-	"errors"
-	"fmt"
-	"text/template"
+	"github.com/clipperhouse/gen/templates"
 )
 
-func getContainerTemplate(name string) (result *template.Template, err error) {
-	t, found := ContainerTemplates[name]
-	if found {
-		result = template.Must(template.New(name).Parse(t.Text))
-	} else {
-		err = errors.New(fmt.Sprintf("%s is not a known container", name))
-	}
-	return
+func init() {
+	templates.Register("container", containerTemplates)
 }
 
-var ContainerTemplates = map[string]*Template{
+var containerTemplates = map[string]*templates.Template{
 
-	"List": &Template{
+	"List": &templates.Template{
 		Text: `
 // {{.Name}}Element is an element of a linked list.
 type {{.Name}}Element struct {
@@ -224,7 +216,7 @@ func (l *{{.Name}}List) PushFrontList(other *{{.Name}}List) {
 	}
 }
 `},
-	"Ring": &Template{
+	"Ring": &templates.Template{
 		Text: `
 // A Ring is an element of a circular list, or ring.
 // Rings do not have a beginning or end; a pointer to any ring element
@@ -361,7 +353,7 @@ func (r *{{.Name}}Ring) Do(f func({{.Pointer}}{{.Name}})) {
 	}
 }
 `},
-	"Set": &Template{
+	"Set": &templates.Template{
 		Text: `
 
 // The primary type that represents a set

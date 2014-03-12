@@ -3,10 +3,35 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/clipperhouse/gen/templates"
+	_ "github.com/clipperhouse/gen/templates/container"
+	_ "github.com/clipperhouse/gen/templates/projection"
+	_ "github.com/clipperhouse/gen/templates/standard"
 	"os"
 )
 
 var errs = make([]error, 0)
+var standardTemplates, projectionTemplates, containerTemplates templates.TemplateSet
+
+func init() {
+	if ts, err := templates.GetTemplateSet("standard"); err == nil {
+		standardTemplates = ts
+	} else {
+		errs = append(errs, err)
+	}
+
+	if ts, err := templates.GetTemplateSet("projection"); err == nil {
+		projectionTemplates = ts
+	} else {
+		errs = append(errs, err)
+	}
+
+	if ts, err := templates.GetTemplateSet("container"); err == nil {
+		containerTemplates = ts
+	} else {
+		errs = append(errs, err)
+	}
+}
 
 func main() {
 	args := os.Args[1:]

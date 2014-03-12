@@ -11,11 +11,17 @@ import (
 )
 
 func writeType(w io.Writer, t *Type, opts options) {
-	h := getHeaderTemplate()
-	h.Execute(w, t)
+	if h, err := standardTemplates.Get("header"); err != nil {
+		panic(err)
+	} else {
+		err := h.Execute(w, t)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	for _, m := range t.StandardMethods {
-		tmpl, err := getStandardTemplate(m)
+		tmpl, err := standardTemplates.Get(m)
 		if err == nil {
 			err := tmpl.Execute(w, t)
 			if err != nil {
@@ -29,7 +35,7 @@ func writeType(w io.Writer, t *Type, opts options) {
 	}
 
 	for _, f := range t.Projections {
-		tmpl, err := getProjectionTemplate(f.Method)
+		tmpl, err := projectionTemplates.Get(f.Method)
 		if err == nil {
 			err := tmpl.Execute(w, f)
 			if err != nil {
@@ -43,23 +49,35 @@ func writeType(w io.Writer, t *Type, opts options) {
 	}
 
 	if t.requiresSortInterface() {
-		s := getSortInterfaceTemplate()
-		err := s.Execute(w, t)
-		if err != nil {
+		tmpl, err := standardTemplates.Get("sortInterface")
+		if err == nil {
+			err := tmpl.Execute(w, t)
+			if err != nil {
+				panic(err)
+			}
+		} else if opts.Force {
+			fmt.Printf("  skipping sortInterface\n")
+		} else {
 			panic(err)
 		}
 	}
 
 	if t.requiresSortSupport() {
-		s := getSortSupportTemplate()
-		err := s.Execute(w, t)
-		if err != nil {
+		tmpl, err := standardTemplates.Get("sortSupport")
+		if err == nil {
+			err := tmpl.Execute(w, t)
+			if err != nil {
+				panic(err)
+			}
+		} else if opts.Force {
+			fmt.Printf("  skipping sortSupport\n")
+		} else {
 			panic(err)
 		}
 	}
 
 	for _, c := range t.Containers {
-		tmpl, err := getContainerTemplate(c)
+		tmpl, err := containerTemplates.Get(c)
 		if err == nil {
 			err := tmpl.Execute(w, t)
 			if err != nil {

@@ -211,7 +211,7 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("empty methods should be ok, instead got '%v'", err1)
 	}
 
-	if len(standardMethods1) != len(getStandardMethodKeys()) {
+	if len(standardMethods1) != len(standardTemplates.GetAllKeys()) {
 		t.Errorf("standard methods should default to all")
 	}
 
@@ -259,11 +259,11 @@ func TestMethodDetermination(t *testing.T) {
 		t.Errorf("projected typs without subsetted methods should be ok, instead got: '%v'", err4)
 	}
 
-	if len(standardMethods4) != len(getStandardMethodKeys()) {
+	if len(standardMethods4) != len(standardTemplates.GetAllKeys()) {
 		t.Errorf("standard methods should default to all")
 	}
 
-	if len(projectionMethods4) != len(getProjectionMethodKeys()) {
+	if len(projectionMethods4) != len(projectionTemplates.GetAllKeys()) {
 		t.Errorf("projection methods should default to all in presence of projected typs")
 	}
 
@@ -376,7 +376,7 @@ func TestStandardMethods(t *testing.T) {
 		t.Errorf("Thing1 should not generate pointers")
 	}
 
-	if len(thing1.StandardMethods) != len(StandardTemplates) {
+	if len(thing1.StandardMethods) != len(standardTemplates.GetAllKeys()) {
 		t.Errorf("Thing1 should have all standard methods")
 	}
 
@@ -406,7 +406,7 @@ func TestStandardMethods(t *testing.T) {
 
 	thing4 := typs["Thing4"]
 
-	if len(thing4.Projections) != 2*len(ProjectionTemplates) {
+	if len(thing4.Projections) != 2*len(projectionTemplates.GetAllKeys()) {
 		t.Errorf("Thing4 should have all projection methods for 2 typs, but has: %v", thing4.Projections)
 	}
 

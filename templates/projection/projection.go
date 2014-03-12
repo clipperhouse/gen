@@ -1,37 +1,16 @@
-package main
+package projection
 
 import (
-	"errors"
-	"fmt"
-	"sort"
-	"text/template"
+	"github.com/clipperhouse/gen/templates"
 )
 
-func getProjectionTemplate(name string) (result *template.Template, err error) {
-	t, found := ProjectionTemplates[name]
-	if found {
-		result = template.Must(template.New(name).Parse(t.Text))
-	} else {
-		err = errors.New(fmt.Sprintf("%s is not a known projection method", name))
-	}
-	return
+func init() {
+	templates.Register("projection", projectionTemplates)
 }
 
-func isProjectionMethod(s string) bool {
-	_, ok := ProjectionTemplates[s]
-	return ok
-}
+var projectionTemplates = templates.TemplateSet{
 
-func getProjectionMethodKeys() (result []string) {
-	for k := range ProjectionTemplates {
-		result = append(result, k)
-	}
-	sort.Strings(result)
-	return
-}
-
-var ProjectionTemplates = map[string]*Template{
-	"Aggregate": &Template{
+	"Aggregate": &templates.Template{
 		Text: `
 // {{.MethodName}} iterates over {{.Parent.Plural}}, operating on each element while maintaining ‘state’. See: http://clipperhouse.github.io/gen/#Aggregate
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}, {{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}) {
@@ -42,7 +21,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Type}}, {{.Parent.Point
 }
 `},
 
-	"Average": &Template{
+	"Average": &templates.Template{
 		Text: `
 // {{.MethodName}} sums {{.Type}} over all elements and divides by len({{.Parent.Plural}}). See: http://clipperhouse.github.io/gen/#Average
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
@@ -61,7 +40,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 		RequiresNumeric: true,
 	},
 
-	"GroupBy": &Template{
+	"GroupBy": &templates.Template{
 		Text: `
 // {{.MethodName}} groups elements into a map keyed by {{.Type}}. See: http://clipperhouse.github.io/gen/#GroupBy
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) map[{{.Type}}]{{.Parent.Plural}} {
@@ -76,7 +55,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 		RequiresComparable: true,
 	},
 
-	"Max": &Template{
+	"Max": &templates.Template{
 		Text: `
 // {{.MethodName}} selects the largest value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MaxCustom
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
@@ -100,7 +79,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 		RequiresOrdered: true,
 	},
 
-	"Min": &Template{
+	"Min": &templates.Template{
 		Text: `
 // {{.MethodName}} selects the least value of {{.Type}} in {{.Parent.Plural}}. Returns error on {{.Parent.Plural}} with no elements. See: http://clipperhouse.github.io/gen/#MinCustom
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}, err error) {
@@ -124,7 +103,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 		RequiresOrdered: true,
 	},
 
-	"Select": &Template{
+	"Select": &templates.Template{
 		Text: `
 // {{.MethodName}} returns a slice of {{.Type}} in {{.Parent.Plural}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result []{{.Type}}) {
@@ -136,7 +115,7 @@ func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Pare
 `,
 	},
 
-	"Sum": &Template{
+	"Sum": &templates.Template{
 		Text: `
 // {{.MethodName}} sums {{.Type}} over elements in {{.Parent.Plural}}. See: http://clipperhouse.github.io/gen/#Sum
 func (rcv {{.Parent.Plural}}) {{.MethodName}}(fn func({{.Parent.Pointer}}{{.Parent.Name}}) {{.Type}}) (result {{.Type}}) {

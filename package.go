@@ -91,7 +91,7 @@ func getPackages() (result []*Package) {
 				ordered := isOrdered(t)
 
 				for _, s := range standardMethods {
-					st, ok := StandardTemplates[s]
+					st, ok := standardTemplates[s]
 
 					if !ok {
 						addError(fmt.Sprintf("unknown standard method %s", s))
@@ -128,7 +128,7 @@ func getPackages() (result []*Package) {
 					}
 
 					for _, m := range projectionMethods {
-						pt, ok := ProjectionTemplates[m]
+						pt, ok := projectionTemplates[m]
 
 						if !ok {
 							addError(fmt.Sprintf("unknown projection method %v", m))
@@ -204,9 +204,9 @@ func getGenSpec(doc, name string) (result *GenSpec, found bool) {
 func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []string, err error) {
 
 	if spec.Methods == nil || spec.Methods.Negated { // default to all
-		standardMethods = getStandardMethodKeys()
+		standardMethods = standardTemplates.GetAllKeys()
 		if spec.Projections != nil {
-			projectionMethods = getProjectionMethodKeys()
+			projectionMethods = projectionTemplates.GetAllKeys()
 		}
 	}
 
@@ -216,13 +216,13 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 		prj := make([]string, 0)
 
 		for _, m := range spec.Methods.Items {
-			isStd := isStandardMethod(m)
-			if isStandardMethod(m) {
+			isStd := standardTemplates.Contains(m)
+			if isStd {
 				std = append(std, m)
 			}
 
 			// only consider projection methods in presence of projected types
-			isPrj := spec.Projections != nil && isProjectionMethod(m)
+			isPrj := spec.Projections != nil && projectionTemplates.Contains(m)
 			if isPrj {
 				prj = append(prj, m)
 			}
