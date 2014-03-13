@@ -26,7 +26,7 @@ func Register(name string, ts TemplateSet) {
 
 // GetTemplateSet attempts to a template set from the registered templates sets, by name
 // Returns error if not found
-func GetTemplateSet(name string) (TemplateSet, error) {
+func Get(name string) (TemplateSet, error) {
 	var err error
 	ts, ok := templateSets[name]
 	if !ok {

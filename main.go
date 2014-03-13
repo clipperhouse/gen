@@ -14,19 +14,19 @@ var errs = make([]error, 0)
 var standardTemplates, projectionTemplates, containerTemplates templates.TemplateSet
 
 func init() {
-	if ts, err := templates.GetTemplateSet("standard"); err == nil {
+	if ts, err := templates.Get("standard"); err == nil {
 		standardTemplates = ts
 	} else {
 		errs = append(errs, err)
 	}
 
-	if ts, err := templates.GetTemplateSet("projection"); err == nil {
+	if ts, err := templates.Get("projection"); err == nil {
 		projectionTemplates = ts
 	} else {
 		errs = append(errs, err)
 	}
 
-	if ts, err := templates.GetTemplateSet("container"); err == nil {
+	if ts, err := templates.Get("container"); err == nil {
 		containerTemplates = ts
 	} else {
 		errs = append(errs, err)
