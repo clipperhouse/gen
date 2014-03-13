@@ -1,6 +1,5 @@
 // Package templates/standard includes the basic methods used by gen, including the plural type and methods
-// such as Count and Where
-
+// such as Count and Where.
 package standard
 
 import (
