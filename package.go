@@ -228,7 +228,7 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 			}
 
 			if !isStd && !isPrj {
-				err = fmt.Errorf("method %s is unknown", m, spec.Name)
+				err = fmt.Errorf("method %s is unknown on type %s", m, spec.Name)
 			}
 		}
 
