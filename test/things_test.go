@@ -462,9 +462,9 @@ func TestGroupBy(t *testing.T) {
 
 	groupby1 := thing1s.GroupByInt(number)
 	g1 := map[int]Thing1s{
-		40:  Thing1s{second1, fourth1},
-		60:  Thing1s{first1},
-		100: Thing1s{third1, anotherThird1},
+		40:  {second1, fourth1},
+		60:  {first1},
+		100: {third1, anotherThird1},
 	}
 
 	if len(groupby1) != len(g1) {
