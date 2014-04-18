@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/clipperhouse/gen/templates"
 	_ "github.com/clipperhouse/gen/templates/container"
 	_ "github.com/clipperhouse/gen/templates/projection"
 	_ "github.com/clipperhouse/gen/templates/standard"
-	"os"
 )
 
 var errs = make([]error, 0)

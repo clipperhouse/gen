@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "code.google.com/p/go.tools/go/gcimporter"
-	"code.google.com/p/go.tools/go/types"
 	"fmt"
 	"go/ast"
 	"go/build"
@@ -11,6 +9,9 @@ import (
 	"go/token"
 	"regexp"
 	"strings"
+
+	_ "code.google.com/p/go.tools/go/gcimporter"
+	"code.google.com/p/go.tools/go/types"
 )
 
 type Package struct {
