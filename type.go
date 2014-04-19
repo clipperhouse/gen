@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/clipperhouse/gen/inflect"
 	"regexp"
 	"strings"
+
+	"github.com/clipperhouse/gen/inflect"
 )
 
 type Type struct {

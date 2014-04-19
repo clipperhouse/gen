@@ -1,9 +1,6 @@
 package main
 
 import (
-	_ "code.google.com/p/go.tools/go/gcimporter"
-	"code.google.com/p/go.tools/go/types"
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/build"
@@ -12,6 +9,9 @@ import (
 	"go/token"
 	"regexp"
 	"strings"
+
+	_ "code.google.com/p/go.tools/go/gcimporter"
+	"code.google.com/p/go.tools/go/types"
 )
 
 type Package struct {
@@ -228,7 +228,7 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 			}
 
 			if !isStd && !isPrj {
-				err = errors.New(fmt.Sprintf("method %s is unknown", m, spec.Name))
+				err = fmt.Errorf("method %s is unknown on type %s", m, spec.Name)
 			}
 		}
 
@@ -241,11 +241,11 @@ func determineMethods(spec *GenSpec) (standardMethods, projectionMethods []strin
 		}
 
 		if spec.Projections != nil && len(projectionMethods) == 0 {
-			err = errors.New(fmt.Sprintf("you've included projection types without specifying projection methods on type %s", spec.Name))
+			err = fmt.Errorf("you've included projection types without specifying projection methods on type %s", spec.Name)
 		}
 
 		if len(projectionMethods) > 0 && spec.Projections == nil {
-			err = errors.New(fmt.Sprintf("you've included projection methods without specifying projection types on type %s", spec.Name))
+			err = fmt.Errorf("you've included projection methods without specifying projection types on type %s", spec.Name)
 		}
 	}
 	return

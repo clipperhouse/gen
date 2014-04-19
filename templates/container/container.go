@@ -12,7 +12,7 @@ func init() {
 
 var containerTemplates = map[string]*templates.Template{
 
-	"List": &templates.Template{
+	"List": {
 		Text: `
 // {{.Name}}Element is an element of a linked list.
 type {{.Name}}Element struct {
@@ -218,7 +218,7 @@ func (l *{{.Name}}List) PushFrontList(other *{{.Name}}List) {
 	}
 }
 `},
-	"Ring": &templates.Template{
+	"Ring": {
 		Text: `
 // A Ring is an element of a circular list, or ring.
 // Rings do not have a beginning or end; a pointer to any ring element
@@ -355,7 +355,7 @@ func (r *{{.Name}}Ring) Do(f func({{.Pointer}}{{.Name}})) {
 	}
 }
 `},
-	"Set": &templates.Template{
+	"Set": {
 		Text: `
 
 // The primary type that represents a set
