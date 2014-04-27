@@ -14,51 +14,29 @@ import (
 	"strings"
 )
 
-type Package struct {
-	Name     string
-	Types    []Type
-	typesPkg *types.Package // reference held for Eval below
-}
+func getTypes(directive string) ([]Type, error) {
+	typs := make([]Type, 0)
 
-func (p *Package) Eval(name string) (result *Type, err error) {
-	t, _, typesErr := types.Eval(name, p.typesPkg, p.typesPkg.Scope())
-	if typesErr != nil {
-		err = typesErr
-		return
-	}
-	result = &Type{
-		Package: p,
-		Pointer: isPointer(t),
-		Name:    name,
-	}
-	return
-}
-
-// Returns one gen Package per Go package found in current directory
-func GetPackages() (result []*Package, err error) {
 	fset := token.NewFileSet()
 	rootDir := "./"
 
 	astPackages, astErr := parser.ParseDir(fset, rootDir, nil, parser.ParseComments)
 
 	if astErr != nil {
-		err = astErr
-		return
+		return typs, astErr
 	}
 
 	for name, astPackage := range astPackages {
 		astFiles, astErr := getAstFiles(astPackage, rootDir)
 
 		if astErr != nil {
-			err = astErr
-			return
+			return typs, astErr
 		}
 
 		typesPkg, typesErr := types.Check(name, fset, astFiles)
 
 		if typesErr != nil {
-			err = typesErr
-			return
+			return typs, typesErr
 		}
 
 		pkg := &Package{
@@ -71,7 +49,7 @@ func GetPackages() (result []*Package, err error) {
 
 		for _, docType := range docPkg.Types {
 
-			pointer, tags, found := parseTags(docType.Doc)
+			pointer, tags, found := parseTags(directive, docType.Doc)
 
 			if !found {
 				continue
@@ -96,16 +74,11 @@ func GetPackages() (result []*Package, err error) {
 			typ.numeric = isNumeric(t)
 			typ.ordered = isOrdered(t)
 
-			pkg.Types = append(pkg.Types, typ)
-		}
-
-		// only add it to the results if there is something there
-		if len(pkg.Types) > 0 {
-			result = append(result, pkg)
+			typs = append(typs, typ)
 		}
 	}
 
-	return
+	return typs, nil
 }
 
 func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error) {
@@ -138,10 +111,10 @@ func checkDeprecatedTags(t types.Type) bool {
 }
 
 // identifies gen-marked types and parses tags
-func parseTags(doc string) (pointer Pointer, tags []Tag, found bool) {
+func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool) {
 	lines := strings.Split(doc, "\n")
 	for _, line := range lines {
-		if line = strings.TrimLeft(line, "/ "); !strings.HasPrefix(line, "+gen") {
+		if line = strings.TrimLeft(line, "/ "); !strings.HasPrefix(line, directive) {
 			continue
 		}
 
@@ -181,9 +154,9 @@ func parseTag(s string) (tag Tag, found bool) {
 	var items []string
 	var negated bool
 
-	name = matches[0]
+	name = matches[1]
 
-	if match := matches[1]; len(match) > 0 {
+	if match := matches[2]; len(match) > 0 {
 		index := 0
 		if negated = strings.HasPrefix(match, "-"); negated {
 			index = 1
