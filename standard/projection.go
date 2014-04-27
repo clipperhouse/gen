@@ -1,7 +1,6 @@
 package standard
 
 import (
-	"gen/typewriter"
 	"regexp"
 	"strings"
 )
@@ -9,10 +8,10 @@ import (
 type Projection struct {
 	Method string
 	Type   string
-	Parent typewriter.Type
+	Parent *model
 }
 
-func (p *Projection) MethodName() string {
+func (p Projection) MethodName() string {
 	name := p.Type
 
 	pointer := regexp.MustCompile(`^\**`)

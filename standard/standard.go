@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	typewriter.Register("standard", StandardWriter{})
+	typewriter.Register(StandardWriter{})
 }
 
 type StandardWriter struct{}
@@ -30,8 +30,12 @@ func (m model) Plural() (result string) {
 	return
 }
 
-// Type is not comparable, use .String() instead
+// Type is not comparable, use .String() as key instead
 var models = make(map[string]model)
+
+func (s StandardWriter) Name() string {
+	return "gen"
+}
 
 func (s StandardWriter) Validate(t typewriter.Type) error {
 	standardMethods, projectionMethods, err := determineMethods(t)
@@ -39,14 +43,19 @@ func (s StandardWriter) Validate(t typewriter.Type) error {
 		return err
 	}
 
-	projectionTypes, found, err := t.Tags.ByName("projections")
+	projectionTag, found, err := t.Tags.ByName("projections")
+
 	if err != nil {
 		return err
 	}
 
-	projections := make([]Projection, 0)
+	m := model{
+		Type:    t,
+		methods: standardMethods,
+	}
+
 	if found {
-		for _, s := range projectionTypes.Items {
+		for _, s := range projectionTag.Items {
 			projectionType, err := t.Package.Eval(s)
 
 			if err != nil {
@@ -63,20 +72,24 @@ func (s StandardWriter) Validate(t typewriter.Type) error {
 				valid := (!tmpl.RequiresComparable || projectionType.Comparable()) && (!tmpl.RequiresNumeric || projectionType.Numeric()) && (!tmpl.RequiresOrdered || projectionType.Ordered())
 
 				if valid {
-					projections = append(projections, Projection{
+					m.projections = append(m.projections, Projection{
 						Method: pm,
 						Type:   s,
-						Parent: t,
+						Parent: &m,
 					})
 				}
 			}
 		}
 	}
 
-	m := model{t, standardMethods, projections}
 	models[t.String()] = m
 
 	return nil
+}
+
+func (s StandardWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+	//TODO: add licenses
+	return
 }
 
 func (s StandardWriter) Imports(t typewriter.Type) (result []string) {
@@ -142,7 +155,7 @@ func (s StandardWriter) Write(w io.Writer, t typewriter.Type) {
 
 	for _, p := range m.projections {
 		tmpl, _ := projectionTemplates.Get(p.Method) // already validated above
-		err := tmpl.Execute(w, m)
+		err := tmpl.Execute(w, p)
 		if err != nil {
 			panic(err)
 		}
