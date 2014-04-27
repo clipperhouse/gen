@@ -1,34 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"gen/typewriter"
 	_ "gen/typewriters/standard"
-	"os"
 )
 
 func main() {
-	pkgs, err := typewriter.GetPackages()
+	app, err := typewriter.NewApp("+gen")
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
-	for _, p := range pkgs {
-		for _, t := range p.Types {
-			writeFile(t)
-		}
-	}
+
+	app.WriteAll()
 }
 
-func writeFile(t typewriter.Type) {
-	f, err := os.Create(t.LocalName() + "_gen.go")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer f.Close()
-	typewriter.Write(f, t)
-}
-
-// +gen
+// +gen projections:"int"
 type Silly int
