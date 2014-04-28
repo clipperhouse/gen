@@ -1,8 +1,14 @@
+### What’s this branch?
+
+We are factoring out a new “typewriter” package, think of them as “codecs” for codegen that can be plugged to support “whatever of &lt;T&gt;”. Custom JSON marshallers, for example.
+
+The current state is “in progress” and “wrong”. Don’t use it.
+
 ## What’s this?
 
 `gen` is an attempt to bring some generics-like functionality to Go, with some inspiration from C#’s Linq and JavaScript’s underscore libraries. It’s currently an early alpha.
 
-####[Introduction and docs...](http://clipperhouse.github.io/gen/)
+####[Introduction and docs…](http://clipperhouse.github.io/gen/)
 
 [Changelog](http://clipperhouse.github.io/gen/#Changelog)
 
