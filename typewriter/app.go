@@ -3,6 +3,7 @@ package typewriter
 import (
 	"bytes"
 	"fmt"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"io"
@@ -84,10 +85,10 @@ func (a App) WriteAll() {
 		}
 	}
 
-	// TODO: format
-
-	for filename, buffer := range buffers {
-		writeFile(filename, &buffer)
+	// format and commit to files
+	for f, b := range buffers {
+		src, _ := formatToBytes(&b) // error is ignored since ast is validated above
+		writeFile(f, src)
 	}
 }
 
@@ -101,7 +102,17 @@ func write(w io.Writer, t Type, tw TypeWriter) {
 	tw.Write(w, t)
 }
 
-func writeFile(filename string, buffer io.Reader) {
+// gofmt
+func formatToBytes(b *bytes.Buffer) ([]byte, error) {
+	byts := b.Bytes()
+	formatted, err := format.Source(byts)
+	if err != nil {
+		return byts, err
+	}
+	return formatted, nil
+}
+
+func writeFile(filename string, byts []byte) {
 	w, err := os.Create(filename)
 	if err != nil {
 		fmt.Println(err)
@@ -109,7 +120,7 @@ func writeFile(filename string, buffer io.Reader) {
 	}
 	defer w.Close()
 
-	io.Copy(w, buffer)
+	w.Write(byts)
 }
 
 var packageTmpl = template.Must(template.New("package").Parse(`package {{.}}
