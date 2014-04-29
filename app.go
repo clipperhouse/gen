@@ -3,6 +3,8 @@ package typewriter
 import (
 	"bytes"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io"
 	"os"
 	"strings"
@@ -54,7 +56,7 @@ func (a App) WriteAll() {
 		for _, tw := range a.TypeWriters {
 			err := tw.Validate(t)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println(err) // TODO: return error?
 				return
 			}
 		}
@@ -73,7 +75,16 @@ func (a App) WriteAll() {
 		}
 	}
 
-	// TODO: validate generated ast's before committing to files
+	// validate generated ast's before committing to files
+	for filename, buffer := range buffers {
+		if _, err := parser.ParseFile(token.NewFileSet(), filename, buffer.String(), 0); err != nil {
+			fmt.Println(err) // TODO: return error?
+			// TODO: prompt to write _file on error? parsing errors are meaningless without?
+			return
+		}
+	}
+
+	// TODO: format
 
 	for filename, buffer := range buffers {
 		writeFile(filename, &buffer)
