@@ -52,7 +52,7 @@ func NewApp(directive string) (App, error) {
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
 func (a App) WriteAll() {
-	// Validate them all, don't fail halfway
+	// validate them all (don't fail halfway)
 	for _, t := range a.Types {
 		for _, tw := range a.TypeWriters {
 			err := tw.Validate(t)
@@ -66,7 +66,7 @@ func (a App) WriteAll() {
 	// one buffer for each file, keyed by file name
 	buffers := make(map[string]bytes.Buffer)
 
-	// Validated above, go ahead and write
+	// write the generated code for each Type & TypeWriter into memory
 	for _, t := range a.Types {
 		for _, tw := range a.TypeWriters {
 			var b bytes.Buffer
@@ -77,10 +77,10 @@ func (a App) WriteAll() {
 	}
 
 	// validate generated ast's before committing to files
-	for filename, buffer := range buffers {
-		if _, err := parser.ParseFile(token.NewFileSet(), filename, buffer.String(), 0); err != nil {
+	for f, b := range buffers {
+		if _, err := parser.ParseFile(token.NewFileSet(), f, b.String(), 0); err != nil {
 			fmt.Println(err) // TODO: return error?
-			// TODO: prompt to write _file on error? parsing errors are meaningless without?
+			// TODO: prompt to write (ignored) _file on error? parsing errors are meaningless without.
 			return
 		}
 	}
