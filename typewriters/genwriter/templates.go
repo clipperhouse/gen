@@ -1,7 +1,7 @@
 package genwriter
 
 import (
-	"gen/typewriter"
+	"github.com/clipperhouse/typewriter"
 )
 
 var standardTemplates = typewriter.TemplateSet{

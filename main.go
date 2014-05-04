@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gen/typewriter"
 	_ "gen/typewriters/container"
 	_ "gen/typewriters/genwriter"
+	"github.com/clipperhouse/typewriter"
 )
 
 func main() {
