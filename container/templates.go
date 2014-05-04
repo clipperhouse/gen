@@ -1,7 +1,7 @@
 package container
 
 import (
-	"gen/typewriter"
+	"github.com/clipperhouse/typewriter"
 )
 
 var containerTemplates = typewriter.TemplateSet{
