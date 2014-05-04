@@ -10,10 +10,10 @@ import (
 )
 
 func init() {
-	typewriter.Register(StandardWriter{})
+	typewriter.Register(GenWriter{})
 }
 
-type StandardWriter struct{}
+type GenWriter struct{}
 
 // A convenience struct for passing data to templates.
 type model struct {
@@ -33,11 +33,11 @@ func (m model) Plural() (result string) {
 // Type is not comparable, use .String() as key instead
 var models = make(map[string]model)
 
-func (s StandardWriter) Name() string {
+func (s GenWriter) Name() string {
 	return "gen"
 }
 
-func (s StandardWriter) Validate(t typewriter.Type) error {
+func (s GenWriter) Validate(t typewriter.Type) error {
 	standardMethods, projectionMethods, err := determineMethods(t)
 	if err != nil {
 		return err
@@ -87,12 +87,12 @@ func (s StandardWriter) Validate(t typewriter.Type) error {
 	return nil
 }
 
-func (s StandardWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	//TODO: add licenses
 	return
 }
 
-func (s StandardWriter) Imports(t typewriter.Type) (result []string) {
+func (s GenWriter) Imports(t typewriter.Type) (result []string) {
 	imports := make(map[string]bool)
 
 	methodRequiresErrors := map[string]bool{
@@ -136,7 +136,7 @@ func (s StandardWriter) Imports(t typewriter.Type) (result []string) {
 	return
 }
 
-func (s StandardWriter) Write(w io.Writer, t typewriter.Type) {
+func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
 	m := models[t.String()]
 
 	tmpl, _ := standardTemplates.Get("plural")
