@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/clipperhouse/gen/inflect"
+	"github.com/clipperhouse/inflect"
 )
 
 type Type struct {
