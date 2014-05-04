@@ -2,6 +2,7 @@ package main
 
 import (
 	"gen/typewriter"
+	_ "gen/typewriters/container"
 	_ "gen/typewriters/genwriter"
 )
 
