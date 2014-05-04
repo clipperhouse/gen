@@ -17,7 +17,7 @@ type Type struct {
 type Pointer bool
 
 func (t *Type) String() (result string) {
-	return t.Pointer.String() + t.Package.Name + t.Name
+	return t.Pointer.String() + t.Package.Name() + t.Name
 }
 
 func (t *Type) LocalName() (result string) {

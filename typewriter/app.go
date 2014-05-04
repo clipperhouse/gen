@@ -103,7 +103,7 @@ func write(w io.Writer, t Type, tw TypeWriter) {
 
 `)
 	tw.WriteHeader(w, t)
-	packageTmpl.Execute(w, t.Package.Name)
+	packageTmpl.Execute(w, t.Package.Name())
 	importsTmpl.Execute(w, tw.Imports(t))
 	tw.Write(w, t)
 }
