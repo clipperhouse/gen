@@ -4,7 +4,7 @@ import (
 	"gen/typewriter"
 )
 
-var containerTemplates = map[string]*typewriter.Template{
+var containerTemplates = typewriter.TemplateSet{
 
 	"List": &typewriter.Template{
 		Text: `

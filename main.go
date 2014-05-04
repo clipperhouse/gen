@@ -15,5 +15,5 @@ func main() {
 	app.WriteAll()
 }
 
-// +gen projections:"int"
+// +gen projections:"int" containers:"Set"
 type Silly int
