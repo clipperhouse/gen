@@ -2,7 +2,7 @@ package main
 
 import (
 	"gen/typewriter"
-	_ "gen/typewriters/standard"
+	_ "gen/typewriters/genwriter"
 )
 
 func main() {
