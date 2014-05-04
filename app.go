@@ -12,23 +12,6 @@ import (
 	"text/template"
 )
 
-// Individual TypeWriters register on init, keyed by name
-var typeWriters = make(map[string]TypeWriter)
-
-// Register allows template packages to make themselves known to a 'parent' package, usually in the init() func.
-// Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
-// Your program will do something like:
-//	import (
-//		"github.com/clipperhouse/gen/templates"
-//		_ "github.com/clipperhouse/gen/templates/projection"
-//	)
-func Register(tw TypeWriter) {
-	if _, exists := typeWriters[tw.Name()]; exists {
-		panic(fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name()))
-	}
-	typeWriters[tw.Name()] = tw
-}
-
 type App struct {
 	// All typewriter.Type found in the current directory.
 	Types []Type
@@ -48,6 +31,23 @@ func NewApp(directive string) (App, error) {
 	app.Types = typs
 	app.TypeWriters = typeWriters
 	return app, nil
+}
+
+// Individual TypeWriters register on init, keyed by name
+var typeWriters = make(map[string]TypeWriter)
+
+// Register allows template packages to make themselves known to a 'parent' package, usually in the init() func.
+// Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
+// Your program will do something like:
+//	import (
+//		"github.com/clipperhouse/gen/templates"
+//		_ "github.com/clipperhouse/gen/templates/projection"
+//	)
+func Register(tw TypeWriter) {
+	if _, exists := typeWriters[tw.Name()]; exists {
+		panic(fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name()))
+	}
+	typeWriters[tw.Name()] = tw
 }
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
