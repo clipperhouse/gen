@@ -1,4 +1,4 @@
-package standard
+package genwriter
 
 func findDuplicateStrings(a []string) (result []string) {
 	found := make(map[string]bool)
