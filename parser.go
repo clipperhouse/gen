@@ -91,22 +91,6 @@ func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error)
 	return
 }
 
-const deprecationUrl = `http://clipperhouse.github.io/gen/#Changelog`
-
-func checkDeprecatedTags(t types.Type) bool {
-	// give informative errors for use of deprecated custom methods
-	switch x := t.Underlying().(type) {
-	case *types.Struct:
-		for i := 0; i < x.NumFields(); i++ {
-			_, found := parseTag(x.Tag(i))
-			if found {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // identifies gen-marked types and parses tags
 func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool) {
 	lines := strings.Split(doc, "\n")
