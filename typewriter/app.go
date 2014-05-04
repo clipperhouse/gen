@@ -70,7 +70,7 @@ func (a app) WriteAll() {
 	}
 
 	// one buffer for each file, keyed by file name
-	buffers := make(map[string]bytes.Buffer)
+	buffers := make(map[string]*bytes.Buffer)
 
 	// write the generated code for each Type & TypeWriter into memory
 	for _, t := range a.Types {
@@ -78,7 +78,7 @@ func (a app) WriteAll() {
 			var b bytes.Buffer
 			write(&b, t, tw)
 			f := strings.ToLower(fmt.Sprintf("%s_%s.go", t.LocalName(), tw.Name()))
-			buffers[f] = b
+			buffers[f] = &b
 		}
 	}
 
@@ -93,7 +93,7 @@ func (a app) WriteAll() {
 
 	// format and commit to files
 	for f, b := range buffers {
-		src, _ := formatToBytes(&b) // error is ignored since ast is validated above
+		src, _ := formatToBytes(b) // error is ignored since ast is validated above
 		writeFile(f, src)
 	}
 }
