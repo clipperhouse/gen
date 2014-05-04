@@ -39,10 +39,7 @@ func getTypes(directive string) ([]Type, error) {
 			return typs, typesErr
 		}
 
-		pkg := &Package{
-			Name:     name,
-			typesPkg: typesPkg,
-		}
+		pkg := &Package{typesPkg}
 
 		// doc package is handy for pulling types and their comments
 		docPkg := doc.New(astPackage, name, doc.AllDecls)

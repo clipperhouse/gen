@@ -6,13 +6,11 @@ import (
 )
 
 type Package struct {
-	Name     string
-	Types    []Type
-	typesPkg *types.Package // reference held for Eval below
+	*types.Package
 }
 
 func (p *Package) Eval(name string) (result *Type, err error) {
-	t, _, typesErr := types.Eval(name, p.typesPkg, p.typesPkg.Scope())
+	t, _, typesErr := types.Eval(name, p.Package, p.Scope())
 	if typesErr != nil {
 		err = typesErr
 		return
