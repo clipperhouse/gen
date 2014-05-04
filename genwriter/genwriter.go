@@ -37,16 +37,16 @@ func (s GenWriter) Name() string {
 	return "gen"
 }
 
-func (s GenWriter) Validate(t typewriter.Type) error {
+func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 	standardMethods, projectionMethods, err := determineMethods(t)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	projectionTag, found, err := t.Tags.ByName("projections")
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	m := model{
@@ -59,14 +59,14 @@ func (s GenWriter) Validate(t typewriter.Type) error {
 			projectionType, err := t.Package.Eval(s)
 
 			if err != nil {
-				return fmt.Errorf("unable to identify type %s, projected on %s (%s)", s, t.Name, err)
+				return false, fmt.Errorf("unable to identify type %s, projected on %s (%s)", s, t.Name, err)
 			}
 
 			for _, pm := range projectionMethods {
 				tmpl, ok := projectionTemplates[pm]
 
 				if !ok {
-					return fmt.Errorf("unknown projection method %v", pm)
+					return false, fmt.Errorf("unknown projection method %v", pm)
 				}
 
 				valid := (!tmpl.RequiresComparable || projectionType.Comparable()) && (!tmpl.RequiresNumeric || projectionType.Numeric()) && (!tmpl.RequiresOrdered || projectionType.Ordered())
@@ -84,7 +84,7 @@ func (s GenWriter) Validate(t typewriter.Type) error {
 
 	models[t.String()] = m
 
-	return nil
+	return (len(models) > 0), nil
 }
 
 func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
