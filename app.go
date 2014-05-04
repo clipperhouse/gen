@@ -12,7 +12,7 @@ import (
 	"text/template"
 )
 
-type App struct {
+type app struct {
 	// All typewriter.Type found in the current directory.
 	Types []Type
 	// All typewriter.TypeWriters registered on init.
@@ -20,17 +20,17 @@ type App struct {
 }
 
 // NewApp parses the current directory, collecting Types and their related information.
-func NewApp(directive string) (App, error) {
-	var app App
+func NewApp(directive string) (app, error) {
+	var a app
 
 	typs, err := getTypes(directive)
 	if err != nil {
-		return app, err
+		return a, err
 	}
 
-	app.Types = typs
-	app.TypeWriters = typeWriters
-	return app, nil
+	a.Types = typs
+	a.TypeWriters = typeWriters
+	return a, nil
 }
 
 // Individual TypeWriters register on init, keyed by name
@@ -51,7 +51,7 @@ func Register(tw TypeWriter) {
 }
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
-func (a App) WriteAll() {
+func (a app) WriteAll() {
 	// TypeWriters which will write for each type; use string as key because Type is not comparable
 	var writersByType = make(map[string][]TypeWriter)
 
