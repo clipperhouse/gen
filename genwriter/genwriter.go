@@ -84,7 +84,7 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 
 	models[t.String()] = m
 
-	return (len(models) > 0), nil
+	return len(m.methods) > 0 || len(m.projections) > 0, nil
 }
 
 func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
