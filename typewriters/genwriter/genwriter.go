@@ -32,6 +32,14 @@ func (m model) Plural() (result string) {
 
 // Type is not comparable, use .String() as key instead
 var models = make(map[string]model)
+var validated = make(map[string]bool)
+
+// genwriter prepares models for later use in the .Validate() method. It must be called prior.
+func ensureValidation(t typewriter.Type) {
+	if !validated[t.String()] {
+		panic(fmt.Errorf("Type %s has not been previously validated. typewriter.Validate() must be called on all types before using them in subsequent methods.", t.String()))
+	}
+}
 
 func (s GenWriter) Name() string {
 	return "gen"
@@ -83,16 +91,21 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 	}
 
 	models[t.String()] = m
+	validated[t.String()] = true
 
 	return len(m.methods) > 0 || len(m.projections) > 0, nil
 }
 
 func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+	ensureValidation(t)
+
 	//TODO: add licenses
 	return
 }
 
 func (s GenWriter) Imports(t typewriter.Type) (result []string) {
+	ensureValidation(t)
+
 	imports := make(map[string]bool)
 
 	methodRequiresErrors := map[string]bool{
@@ -137,6 +150,8 @@ func (s GenWriter) Imports(t typewriter.Type) (result []string) {
 }
 
 func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
+	ensureValidation(t)
+
 	m := models[t.String()]
 
 	tmpl, _ := standardTemplates.Get("plural")
