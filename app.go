@@ -52,13 +52,19 @@ func NewApp(directive string) (App, error) {
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
 func (a App) WriteAll() {
+	// TypeWriters which will write for each type; use string as key because Type is not comparable
+	var writersByType = make(map[string][]TypeWriter)
+
 	// validate them all (don't fail halfway)
 	for _, t := range a.Types {
 		for _, tw := range a.TypeWriters {
-			err := tw.Validate(t)
+			write, err := tw.Validate(t)
 			if err != nil {
 				fmt.Println(err) // TODO: return error?
 				return
+			}
+			if write {
+				writersByType[t.String()] = append(writersByType[t.String()], tw)
 			}
 		}
 	}
@@ -68,7 +74,7 @@ func (a App) WriteAll() {
 
 	// write the generated code for each Type & TypeWriter into memory
 	for _, t := range a.Types {
-		for _, tw := range a.TypeWriters {
+		for _, tw := range writersByType[t.String()] {
 			var b bytes.Buffer
 			write(&b, t, tw)
 			f := strings.ToLower(fmt.Sprintf("%s_%s.go", t.LocalName(), tw.Name()))

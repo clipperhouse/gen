@@ -6,8 +6,8 @@ import (
 
 type TypeWriter interface {
 	Name() string
-	// Validate is called for every type to ensure that the TypeWriter considers it valid.
-	Validate(t Type) error
+	// Validate is called for every Type to a) indicate that it will write for this Type and b) ensure that the TypeWriter considers it valid
+	Validate(t Type) (bool, error)
 	// Write to the top of the generated code; intended for license, or package-level comments.
 	WriteHeader(w io.Writer, t Type)
 	// Imports is a slice of names of imports required for the type.
