@@ -18,6 +18,10 @@ type Template struct {
 	RequiresOrdered bool
 }
 
+func (tmpl Template) ApplicableTo(t Type) bool {
+	return (!tmpl.RequiresComparable || t.Comparable()) && (!tmpl.RequiresNumeric || t.Numeric()) && (!tmpl.RequiresOrdered || t.Ordered())
+}
+
 // TemplateSet is a map of string names to Template.
 type TemplateSet map[string]*Template
 
