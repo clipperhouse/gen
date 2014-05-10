@@ -1,6 +1,6 @@
 package genwriter
 
-func remove(a []string, s []string) (result []string) {
+func remove(a []string, s ...string) (result []string) {
 	exists := make(map[string]bool)
 	for _, v := range s {
 		exists[v] = true

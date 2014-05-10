@@ -248,11 +248,28 @@ func determineMethods(typ typewriter.Type) (standardMethods, projectionMethods [
 		}
 
 		if methods.Negated {
-			standardMethods = remove(standardMethods, std)
-			projectionMethods = remove(projectionMethods, prj)
+			standardMethods = remove(standardMethods, std...)
+			projectionMethods = remove(projectionMethods, prj...)
 		} else {
 			standardMethods = std
 			projectionMethods = prj
+		}
+	}
+
+	// choose methods applicable to type
+
+	for _, s := range standardMethods {
+		tmpl, ok := standardTemplates[s]
+
+		if !ok {
+			err = fmt.Errorf("unknown method %v", s)
+			return
+		}
+
+		valid := (!tmpl.RequiresComparable || typ.Comparable()) && (!tmpl.RequiresNumeric || typ.Numeric()) && (!tmpl.RequiresOrdered || typ.Ordered())
+
+		if !valid {
+			standardMethods = remove(standardMethods, s)
 		}
 	}
 
