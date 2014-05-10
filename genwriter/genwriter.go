@@ -46,7 +46,7 @@ func (s GenWriter) Name() string {
 }
 
 func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
-	standardMethods, projectionMethods, err := determineMethods(t.Tags)
+	standardMethods, projectionMethods, err := evaluateTags(t.Tags)
 	if err != nil {
 		return false, err
 	}
@@ -207,7 +207,7 @@ func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
 
 // This business exists because I overload the methods tag to specify both standard and projection methods.
 // Kind of a mess, but for the end user, arguably simpler. And arguably not.
-func determineMethods(tags typewriter.Tags) (standardMethods, projectionMethods []string, err error) {
+func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []string, err error) {
 	var nilMethods, nilProjections bool
 
 	methods, found, methodsErr := tags.ByName("methods")
