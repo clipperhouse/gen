@@ -46,9 +46,23 @@ func (s GenWriter) Name() string {
 }
 
 func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
-	standardMethods, projectionMethods, err := determineMethods(t)
+	standardMethods, projectionMethods, err := determineMethods(t.Tags)
 	if err != nil {
 		return false, err
+	}
+
+	// filter methods applicable to type
+	for _, s := range standardMethods {
+		tmpl, ok := standardTemplates[s]
+
+		if !ok {
+			err = fmt.Errorf("unknown method %v", s)
+			return false, err
+		}
+
+		if !tmpl.ApplicableTo(t) {
+			standardMethods = remove(standardMethods, s)
+		}
 	}
 
 	projectionTag, found, err := t.Tags.ByName("projections")
@@ -77,9 +91,7 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 					return false, fmt.Errorf("unknown projection method %v", pm)
 				}
 
-				valid := (!tmpl.RequiresComparable || projectionType.Comparable()) && (!tmpl.RequiresNumeric || projectionType.Numeric()) && (!tmpl.RequiresOrdered || projectionType.Ordered())
-
-				if valid {
+				if tmpl.ApplicableTo(projectionType) {
 					m.projections = append(m.projections, Projection{
 						Method: pm,
 						Type:   s,
@@ -195,10 +207,10 @@ func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
 
 // This business exists because I overload the methods tag to specify both standard and projection methods.
 // Kind of a mess, but for the end user, arguably simpler. And arguably not.
-func determineMethods(typ typewriter.Type) (standardMethods, projectionMethods []string, err error) {
+func determineMethods(tags typewriter.Tags) (standardMethods, projectionMethods []string, err error) {
 	var nilMethods, nilProjections bool
 
-	methods, found, methodsErr := typ.Tags.ByName("methods")
+	methods, found, methodsErr := tags.ByName("methods")
 
 	if methodsErr != nil {
 		err = methodsErr
@@ -207,7 +219,7 @@ func determineMethods(typ typewriter.Type) (standardMethods, projectionMethods [
 
 	nilMethods = !found // non-existent methods tag is different than empty
 
-	_, found, projectionsErr := typ.Tags.ByName("projections")
+	_, found, projectionsErr := tags.ByName("projections")
 
 	if projectionsErr != nil {
 		err = projectionsErr
@@ -253,23 +265,6 @@ func determineMethods(typ typewriter.Type) (standardMethods, projectionMethods [
 		} else {
 			standardMethods = std
 			projectionMethods = prj
-		}
-	}
-
-	// choose methods applicable to type
-
-	for _, s := range standardMethods {
-		tmpl, ok := standardTemplates[s]
-
-		if !ok {
-			err = fmt.Errorf("unknown method %v", s)
-			return
-		}
-
-		valid := (!tmpl.RequiresComparable || typ.Comparable()) && (!tmpl.RequiresNumeric || typ.Numeric()) && (!tmpl.RequiresOrdered || typ.Ordered())
-
-		if !valid {
-			standardMethods = remove(standardMethods, s)
 		}
 	}
 
