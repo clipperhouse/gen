@@ -9,13 +9,13 @@ type Package struct {
 	*types.Package
 }
 
-func (p *Package) Eval(name string) (result *Type, err error) {
+func (p *Package) Eval(name string) (result Type, err error) {
 	t, _, typesErr := types.Eval(name, p.Package, p.Scope())
 	if typesErr != nil {
 		err = typesErr
 		return
 	}
-	result = &Type{
+	result = Type{
 		Package:    p,
 		Pointer:    isPointer(t),
 		Name:       name,
