@@ -21,9 +21,14 @@ type app struct {
 
 // NewApp parses the current directory, collecting Types and their related information.
 func NewApp(directive string) (app, error) {
+	return NewAppFiltered(directive, nil)
+}
+
+// NewApp parses the current directory, collecting Types and their related information.
+func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (app, error) {
 	var a app
 
-	typs, err := getTypes(directive)
+	typs, err := getTypes(directive, filter)
 	if err != nil {
 		return a, err
 	}

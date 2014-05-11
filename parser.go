@@ -10,17 +10,18 @@ import (
 	"go/doc"
 	"go/parser"
 	"go/token"
+	"os"
 	"regexp"
 	"strings"
 )
 
-func getTypes(directive string) ([]Type, error) {
+func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	typs := make([]Type, 0)
 
 	fset := token.NewFileSet()
 	rootDir := "./"
 
-	astPackages, astErr := parser.ParseDir(fset, rootDir, nil, parser.ParseComments)
+	astPackages, astErr := parser.ParseDir(fset, rootDir, filter, parser.ParseComments)
 
 	if astErr != nil {
 		return typs, astErr
