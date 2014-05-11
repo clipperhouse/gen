@@ -165,8 +165,6 @@ func TestEvaluateTags(t *testing.T) {
 		},
 	}
 
-	// spec8 := &GenSpec{"", dummy, &GenTag{[]string{"Sort", "Where", "GroupBy"}, true}, &GenTag{[]string{"int"}, false}, nil}
-
 	standardMethods8, projectionMethods8, err8 := evaluateTags(tags8)
 
 	if err8 != nil {
