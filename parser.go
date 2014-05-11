@@ -70,6 +70,7 @@ func getTypes(directive string) ([]Type, error) {
 			typ.comparable = isComparable(t)
 			typ.numeric = isNumeric(t)
 			typ.ordered = isOrdered(t)
+			typ.Type = t
 
 			typs = append(typs, typ)
 		}

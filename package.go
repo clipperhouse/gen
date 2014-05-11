@@ -22,6 +22,7 @@ func (p *Package) Eval(name string) (result Type, err error) {
 		comparable: isComparable(t),
 		numeric:    isNumeric(t),
 		ordered:    isOrdered(t),
+		Type:       t,
 	}
 	return
 }
