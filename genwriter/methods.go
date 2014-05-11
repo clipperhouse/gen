@@ -43,6 +43,9 @@ func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []st
 		std := make([]string, 0)
 		prj := make([]string, 0)
 
+		// collect unknowns for err later
+		unknown := make([]string, 0)
+
 		for _, m := range methods.Items {
 			isStd := standardTemplates.Contains(m)
 			if isStd {
@@ -56,8 +59,7 @@ func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []st
 			}
 
 			if !isStd && !isPrj {
-				err = fmt.Errorf("method %s is unknown", m)
-				return
+				unknown = append(unknown, m)
 			}
 		}
 
@@ -67,6 +69,11 @@ func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []st
 		} else {
 			standardMethods = std
 			projectionMethods = prj
+		}
+
+		if len(unknown) > 0 {
+			err = fmt.Errorf("method(s) %v are unknown", unknown)
+			return
 		}
 	}
 
