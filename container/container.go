@@ -6,7 +6,10 @@ import (
 )
 
 func init() {
-	typewriter.Register(ContainerWriter{})
+	err := typewriter.Register(ContainerWriter{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 type ContainerWriter struct{}

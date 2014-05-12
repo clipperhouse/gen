@@ -8,7 +8,10 @@ import (
 )
 
 func init() {
-	typewriter.Register(GenWriter{})
+	err := typewriter.Register(GenWriter{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 type GenWriter struct{}
