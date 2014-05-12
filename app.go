@@ -48,11 +48,12 @@ var typeWriters = make(map[string]TypeWriter)
 //		"github.com/clipperhouse/gen/templates"
 //		_ "github.com/clipperhouse/gen/templates/projection"
 //	)
-func Register(tw TypeWriter) {
+func Register(tw TypeWriter) error {
 	if _, exists := typeWriters[tw.Name()]; exists {
-		panic(fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name()))
+		return fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name())
 	}
 	typeWriters[tw.Name()] = tw
+	return nil
 }
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
