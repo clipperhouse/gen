@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/clipperhouse/typewriter"
-	_ "typewriters/container"
-	_ "typewriters/genwriter"
+	_ "github.com/clipperhouse/typewriters/container"
+	_ "github.com/clipperhouse/typewriters/genwriter"
 )
 
 func main() {
