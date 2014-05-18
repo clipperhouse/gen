@@ -1,2 +1,4 @@
 
 *.out
+
+*_container.go
