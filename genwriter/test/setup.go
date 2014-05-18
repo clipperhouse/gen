@@ -12,10 +12,10 @@ import (
 func main() {
 	// don't let bad test or gen files get us stuck
 	filter := func(f os.FileInfo) bool {
-		return !strings.HasSuffix(f.Name(), "_test.go") && !strings.HasSuffix(f.Name(), "_gen.go")
+		return !strings.HasSuffix(f.Name(), "_test.go") && !strings.HasSuffix(f.Name(), "_genwriter.go")
 	}
 
-	a, err := typewriter.NewAppFiltered("+gen", filter)
+	a, err := typewriter.NewAppFiltered("+test", filter)
 	if err != nil {
 		panic(err)
 	}
