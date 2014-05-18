@@ -341,7 +341,7 @@ func (rcv {{.Plural}}) Swap(i, j int) {
 
 	"sortSupport": &typewriter.Template{
 		Text: `
-// Sort support methods
+// Sort implementation based on http://golang.org/pkg/sort/#Sort, see top of this file
 
 func swap{{.Plural}}(rcv {{.Plural}}, a, b int) {
 	rcv[a], rcv[b] = rcv[b], rcv[a]

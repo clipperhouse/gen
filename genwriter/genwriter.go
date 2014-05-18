@@ -112,7 +112,17 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	ensureValidation(t)
 
-	//TODO: add licenses
+	m := models[t.String()]
+
+	if includeSortSupport(m.methods) {
+		s := `// Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+`
+		w.Write([]byte(s))
+	}
+
 	return
 }
 
