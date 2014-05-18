@@ -41,7 +41,7 @@ func (s ContainerWriter) Write(w io.Writer, t typewriter.Type) {
 	tag := tagsByType[t.String()] // validated above
 
 	for _, c := range tag.Items {
-		tmpl, err1 := containerTemplates.Get(c)
+		tmpl, err1 := containerTemplates.Get(c) // validate above to avoid err check here?
 		if err1 != nil {
 			panic(err1)
 		}
