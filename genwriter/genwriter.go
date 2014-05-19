@@ -36,10 +36,12 @@ var models = make(map[string]model)
 var validated = make(map[string]bool)
 
 // genwriter prepares models for later use in the .Validate() method. It must be called prior.
-func ensureValidation(t typewriter.Type) {
+func ensureValidation(t typewriter.Type) error {
 	if !validated[t.String()] {
-		panic(fmt.Errorf("Type %s has not been previously validated. typewriter.Validate() must be called on all types before using them in subsequent methods.", t.String()))
+		return fmt.Errorf("Type '%s' has not been previously validated. TypeWriter.Validate() must be called on all types before using them in subsequent methods.", t.String())
 	}
+
+	return nil
 }
 
 func (s GenWriter) Name() string {
@@ -103,16 +105,28 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 		}
 	}
 
-	models[t.String()] = m
 	validated[t.String()] = true
 
-	return len(m.methods) > 0 || len(m.projections) > 0, nil
+	// only add to models if we are going to do something with it
+	if len(m.methods) > 0 || len(m.projections) > 0 {
+		models[t.String()] = m
+	}
+
+	return true, nil
 }
 
 func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
-	ensureValidation(t)
+	err := ensureValidation(t)
 
-	m := models[t.String()]
+	if err != nil {
+		panic(err)
+	}
+
+	m, exists := models[t.String()]
+
+	if !exists {
+		return
+	}
 
 	if includeSortSupport(m.methods) {
 		s := `// Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
@@ -127,7 +141,17 @@ func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 }
 
 func (s GenWriter) Imports(t typewriter.Type) (result []string) {
-	ensureValidation(t)
+	err := ensureValidation(t)
+
+	if err != nil {
+		panic(err)
+	}
+
+	m, exists := models[t.String()]
+
+	if !exists {
+		return
+	}
 
 	imports := make(map[string]bool)
 
@@ -144,8 +168,6 @@ func (s GenWriter) Imports(t typewriter.Type) (result []string) {
 	methodRequiresSort := map[string]bool{
 		"Sort": true,
 	}
-
-	m := models[t.String()]
 
 	for _, s := range m.methods {
 		if methodRequiresErrors[s] {
@@ -173,13 +195,20 @@ func (s GenWriter) Imports(t typewriter.Type) (result []string) {
 }
 
 func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
-	ensureValidation(t)
+	err := ensureValidation(t)
 
-	m := models[t.String()]
+	if err != nil {
+		panic(err)
+	}
+
+	m, exists := models[t.String()]
+
+	if !exists {
+		return
+	}
 
 	tmpl, _ := standardTemplates.Get("plural")
-	err := tmpl.Execute(w, m)
-	if err != nil {
+	if err := tmpl.Execute(w, m); err != nil {
 		panic(err)
 	}
 
