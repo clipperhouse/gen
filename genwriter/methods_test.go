@@ -53,7 +53,7 @@ func TestEvaluateTags(t *testing.T) {
 	standardMethods3, projectionMethods3, err3 := evaluateTags(tags3)
 
 	if err3 == nil {
-		t.Errorf("unknown type should be error")
+		t.Errorf("unknown method should be error")
 	}
 
 	if len(standardMethods3) != 1 {
@@ -82,7 +82,7 @@ func TestEvaluateTags(t *testing.T) {
 	}
 
 	if len(projectionMethods4) != len(projectionTemplates.GetAllKeys()) {
-		t.Errorf("projection methods should default to all in presence of projected typs")
+		t.Errorf("projection methods should default to all in presence of projected types")
 	}
 
 	tags5 := typewriter.Tags{
