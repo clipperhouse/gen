@@ -3,6 +3,7 @@ package genwriter
 import (
 	"code.google.com/p/go.tools/go/types"
 	// "fmt"
+	"bytes"
 	"github.com/clipperhouse/typewriter"
 	"strings"
 	"testing"
@@ -104,5 +105,46 @@ func TestValidate(t *testing.T) {
 
 	if m := models[typ2.String()]; len(m.projections) == 0 {
 		t.Errorf("model with projections tag should have projections")
+	}
+}
+
+func TestWriteHeader(t *testing.T) {
+	var b bytes.Buffer
+
+	g := GenWriter{}
+	pkg := &typewriter.Package{
+		types.NewPackage("dummy", "SomePackage"),
+	}
+
+	typ := typewriter.Type{
+		Package: pkg,
+		Name:    "SomeType",
+		Tags: typewriter.Tags{
+			{
+				Name:  "methods",
+				Items: []string{"All"}}, // subset to ensure no Sort
+		},
+	}
+
+	g.Validate(typ)
+	g.WriteHeader(&b, typ)
+
+	if strings.Contains(b.String(), "Copyright") {
+		t.Errorf("should not contain license info if no sort; got:\n%s", b.String())
+	}
+
+	var b2 bytes.Buffer
+
+	typ2 := typewriter.Type{
+		Package: pkg,
+		Name:    "SomeType",
+		Tags:    typewriter.Tags{}, // default includes sort
+	}
+
+	g.Validate(typ2)
+	g.WriteHeader(&b2, typ2)
+
+	if !strings.Contains(b2.String(), "Copyright") {
+		t.Errorf("should contain license info if sort; got:\n%s", b2.String())
 	}
 }
