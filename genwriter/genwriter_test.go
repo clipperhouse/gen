@@ -1,9 +1,9 @@
 package genwriter
 
 import (
+	"bytes"
 	"code.google.com/p/go.tools/go/types"
 	// "fmt"
-	"bytes"
 	"github.com/clipperhouse/typewriter"
 	"strings"
 	"testing"
@@ -147,4 +147,39 @@ func TestWriteHeader(t *testing.T) {
 	if !strings.Contains(b2.String(), "Copyright") {
 		t.Errorf("should contain license info if sort; got:\n%s", b2.String())
 	}
+}
+
+func TestImports(t *testing.T) {
+	g := GenWriter{}
+	pkg := &typewriter.Package{
+		types.NewPackage("dummy", "SomePackage"),
+	}
+
+	typ := typewriter.Type{
+		Package: pkg,
+		Name:    "SomeType",
+		Tags:    typewriter.Tags{},
+	}
+
+	g.Validate(typ)
+	imports := g.Imports(typ)
+
+	if !sliceContains(imports, "errors") {
+		t.Errorf("imports should include 'errors'")
+	}
+
+	if len(imports) > 1 {
+		t.Errorf("imports should only include 'errors'")
+	}
+
+	// not easy to devise a test for Sort, since it requires the unexported typewriter.Type.ordered
+}
+
+func sliceContains(a []string, s string) bool {
+	for _, v := range a {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
