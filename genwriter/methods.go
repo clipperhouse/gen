@@ -9,10 +9,10 @@ import (
 
 // This business exists because I overload the methods tag to specify both standard and projection methods.
 // Kind of a mess, but for the end user, arguably simpler. And arguably not.
-func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []string, err error) {
+func evaluateTags(t typewriter.Type) (standardMethods, projectionMethods []string, err error) {
 	var nilMethods, nilProjections bool
 
-	methods, found, methodsErr := tags.ByName("methods")
+	methods, found, methodsErr := t.Tags.ByName("methods")
 
 	if methodsErr != nil {
 		err = methodsErr
@@ -21,7 +21,7 @@ func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []st
 
 	nilMethods = !found // non-existent methods tag is different than empty
 
-	_, found, projectionsErr := tags.ByName("projections")
+	_, found, projectionsErr := t.Tags.ByName("projections")
 
 	if projectionsErr != nil {
 		err = projectionsErr
@@ -72,7 +72,7 @@ func evaluateTags(tags typewriter.Tags) (standardMethods, projectionMethods []st
 		}
 
 		if len(unknown) > 0 {
-			err = fmt.Errorf("method(s) %v are unknown", unknown)
+			err = fmt.Errorf("method(s) %v on type %s are unknown", unknown, t.String())
 			return
 		}
 	}

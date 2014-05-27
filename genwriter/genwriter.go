@@ -56,7 +56,7 @@ func (g GenWriter) Name() string {
 }
 
 func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
-	standardMethods, projectionMethods, err := evaluateTags(t.Tags)
+	standardMethods, projectionMethods, err := evaluateTags(t)
 	if err != nil {
 		return false, err
 	}

@@ -1,14 +1,22 @@
 package genwriter
 
 import (
+	"code.google.com/p/go.tools/go/types"
 	"github.com/clipperhouse/typewriter"
 	"testing"
 )
 
 func TestEvaluateTags(t *testing.T) {
-	tags1 := typewriter.Tags{}
+	typ := typewriter.Type{
+		Name: "TestType",
+		Package: &typewriter.Package{
+			types.NewPackage("dummy", "TestPackage"),
+		},
+	}
 
-	standardMethods1, projectionMethods1, err1 := evaluateTags(tags1)
+	typ.Tags = typewriter.Tags{}
+
+	standardMethods1, projectionMethods1, err1 := evaluateTags(typ)
 
 	if err1 != nil {
 		t.Errorf("empty methods should be ok, instead got '%v'", err1)
@@ -22,14 +30,14 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods without projected type should be none, instead got %v", projectionMethods1)
 	}
 
-	tags2 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:  "methods",
 			Items: []string{"Count", "Where"},
 		},
 	}
 
-	standardMethods2, projectionMethods2, err2 := evaluateTags(tags2)
+	standardMethods2, projectionMethods2, err2 := evaluateTags(typ)
 
 	if err2 != nil {
 		t.Errorf("empty methods should be ok, instead got %v", err2)
@@ -43,14 +51,14 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods without projected typs should be none")
 	}
 
-	tags3 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:  "methods",
 			Items: []string{"Count", "Unknown"},
 		},
 	}
 
-	standardMethods3, projectionMethods3, err3 := evaluateTags(tags3)
+	standardMethods3, projectionMethods3, err3 := evaluateTags(typ)
 
 	if err3 == nil {
 		t.Errorf("unknown method should be error")
@@ -64,14 +72,14 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods without projected types should be none")
 	}
 
-	tags4 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:  "projections",
 			Items: []string{"SomeType"},
 		},
 	}
 
-	standardMethods4, projectionMethods4, err4 := evaluateTags(tags4)
+	standardMethods4, projectionMethods4, err4 := evaluateTags(typ)
 
 	if err4 != nil {
 		t.Errorf("projected types without subsetted methods should be ok, instead got: '%v'", err4)
@@ -85,7 +93,7 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods should default to all in presence of projected types")
 	}
 
-	tags5 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:  "methods",
 			Items: []string{"GroupBy"},
@@ -96,7 +104,7 @@ func TestEvaluateTags(t *testing.T) {
 		},
 	}
 
-	standardMethods5, projectionMethods5, err5 := evaluateTags(tags5)
+	standardMethods5, projectionMethods5, err5 := evaluateTags(typ)
 
 	if err5 != nil {
 		t.Errorf("projected types with subsetted methods should be ok, instead got: '%v'", err5)
@@ -110,13 +118,13 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods should be subsetted")
 	}
 
-	tags6 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name: "methods",
 		},
 	}
 
-	standardMethods6, projectionMethods6, err6 := evaluateTags(tags6)
+	standardMethods6, projectionMethods6, err6 := evaluateTags(typ)
 
 	if err6 != nil {
 		t.Errorf("empty subsetted methods should be ok, instead got: '%v'", err6)
@@ -130,7 +138,7 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods should be none")
 	}
 
-	tags7 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:    "methods",
 			Items:   []string{"Sort", "Any"},
@@ -138,7 +146,7 @@ func TestEvaluateTags(t *testing.T) {
 		},
 	}
 
-	standardMethods7, projectionMethods7, err7 := evaluateTags(tags7)
+	standardMethods7, projectionMethods7, err7 := evaluateTags(typ)
 
 	if err7 != nil {
 		t.Errorf("subsetted methods should be ok, instead got: '%v'", err7)
@@ -153,7 +161,7 @@ func TestEvaluateTags(t *testing.T) {
 		t.Errorf("projection methods should be none")
 	}
 
-	tags8 := typewriter.Tags{
+	typ.Tags = typewriter.Tags{
 		{
 			Name:    "methods",
 			Items:   []string{"Sort", "Where", "GroupBy"},
@@ -165,7 +173,7 @@ func TestEvaluateTags(t *testing.T) {
 		},
 	}
 
-	standardMethods8, projectionMethods8, err8 := evaluateTags(tags8)
+	standardMethods8, projectionMethods8, err8 := evaluateTags(typ)
 
 	if err8 != nil {
 		t.Errorf("subsetted methods should be ok, instead got: '%v'", err8)
