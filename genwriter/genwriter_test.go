@@ -163,7 +163,12 @@ func TestImports(t *testing.T) {
 	typ := typewriter.Type{
 		Package: pkg,
 		Name:    "SomeType",
-		Tags:    typewriter.Tags{},
+		Tags: typewriter.Tags{
+			{
+				Name:  "projections",
+				Items: []string{"int"},
+			},
+		},
 	}
 
 	g.Validate(typ)
