@@ -63,7 +63,8 @@ func TestValidate(t *testing.T) {
 		Tags: typewriter.Tags{
 			typewriter.Tag{
 				Name:  "projections",
-				Items: []string{"int", "string"}},
+				Items: []string{"int", "string"},
+			},
 		},
 	}
 
@@ -83,7 +84,8 @@ func TestValidate(t *testing.T) {
 		Tags: typewriter.Tags{
 			typewriter.Tag{
 				Name:  "projections",
-				Items: []string{"int", "Foo"}},
+				Items: []string{"int", "Foo"},
+			},
 		},
 	}
 
@@ -124,7 +126,8 @@ func TestWriteHeader(t *testing.T) {
 		Tags: typewriter.Tags{
 			{
 				Name:  "methods",
-				Items: []string{"All"}}, // subset to ensure no Sort
+				Items: []string{"All"},
+			}, // subset to ensure no Sort
 		},
 	}
 
