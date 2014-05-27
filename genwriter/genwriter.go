@@ -8,13 +8,24 @@ import (
 )
 
 func init() {
-	err := typewriter.Register(GenWriter{})
+	err := typewriter.Register(newGenWriter())
 	if err != nil {
 		panic(err)
 	}
 }
 
-type GenWriter struct{}
+type GenWriter struct {
+	// Type is not comparable, use .String() as keys instead
+	models    map[string]model
+	validated map[string]bool
+}
+
+func newGenWriter() GenWriter {
+	return GenWriter{
+		models:    make(map[string]model),
+		validated: make(map[string]bool),
+	}
+}
 
 // A convenience struct for passing data to templates.
 type model struct {
@@ -31,24 +42,20 @@ func (m model) Plural() (result string) {
 	return
 }
 
-// Type is not comparable, use .String() as key instead
-var models = make(map[string]model)
-var validated = make(map[string]bool)
-
 // genwriter prepares models for later use in the .Validate() method. It must be called prior.
-func ensureValidation(t typewriter.Type) error {
-	if !validated[t.String()] {
+func (g GenWriter) ensureValidation(t typewriter.Type) error {
+	if !g.validated[t.String()] {
 		return fmt.Errorf("Type '%s' has not been previously validated. TypeWriter.Validate() must be called on all types before using them in subsequent methods.", t.String())
 	}
 
 	return nil
 }
 
-func (s GenWriter) Name() string {
+func (g GenWriter) Name() string {
 	return "genwriter"
 }
 
-func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
+func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
 	standardMethods, projectionMethods, err := evaluateTags(t.Tags)
 	if err != nil {
 		return false, err
@@ -105,24 +112,24 @@ func (s GenWriter) Validate(t typewriter.Type) (bool, error) {
 		}
 	}
 
-	validated[t.String()] = true
+	g.validated[t.String()] = true
 
 	// only add to models if we are going to do something with it
 	if len(m.methods) > 0 || len(m.projections) > 0 {
-		models[t.String()] = m
+		g.models[t.String()] = m
 	}
 
 	return true, nil
 }
 
-func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
-	err := ensureValidation(t)
+func (g GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+	err := g.ensureValidation(t)
 
 	if err != nil {
 		panic(err)
 	}
 
-	m, exists := models[t.String()]
+	m, exists := g.models[t.String()]
 
 	if !exists {
 		return
@@ -140,14 +147,14 @@ func (s GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	return
 }
 
-func (s GenWriter) Imports(t typewriter.Type) (result []string) {
-	err := ensureValidation(t)
+func (g GenWriter) Imports(t typewriter.Type) (result []string) {
+	err := g.ensureValidation(t)
 
 	if err != nil {
 		panic(err)
 	}
 
-	m, exists := models[t.String()]
+	m, exists := g.models[t.String()]
 
 	if !exists {
 		return
@@ -194,14 +201,14 @@ func (s GenWriter) Imports(t typewriter.Type) (result []string) {
 	return
 }
 
-func (s GenWriter) Write(w io.Writer, t typewriter.Type) {
-	err := ensureValidation(t)
+func (g GenWriter) Write(w io.Writer, t typewriter.Type) {
+	err := g.ensureValidation(t)
 
 	if err != nil {
 		panic(err)
 	}
 
-	m, exists := models[t.String()]
+	m, exists := g.models[t.String()]
 
 	if !exists {
 		return

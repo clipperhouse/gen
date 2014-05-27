@@ -12,7 +12,8 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	g := GenWriter{}
+	g := newGenWriter()
+
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
 	}
@@ -23,11 +24,11 @@ func TestValidate(t *testing.T) {
 		Tags:    typewriter.Tags{},
 	}
 
-	if validated[typ.String()] {
+	if g.validated[typ.String()] {
 		t.Errorf("type should not show having been validated yet")
 	}
 
-	if err := ensureValidation(typ); err == nil {
+	if err := g.ensureValidation(typ); err == nil {
 		t.Errorf("ensure validation should return err prior to validation")
 	}
 
@@ -37,23 +38,23 @@ func TestValidate(t *testing.T) {
 		t.Errorf("type should be valid")
 	}
 
-	if !validated[typ.String()] {
+	if !g.validated[typ.String()] {
 		t.Errorf("type should show having been validated")
 	}
 
-	if err := ensureValidation(typ); err != nil {
+	if err := g.ensureValidation(typ); err != nil {
 		t.Errorf("ensure validation should not return err after validation")
 	}
 
-	if _, ok := models[typ.String()]; !ok {
-		t.Errorf("type should appear in models")
+	if _, ok := g.models[typ.String()]; !ok {
+		t.Errorf("type should appear in g.models")
 	}
 
-	if m := models[typ.String()]; len(m.methods) == 0 {
+	if m := g.models[typ.String()]; len(m.methods) == 0 {
 		t.Errorf("model without tags should have methods")
 	}
 
-	if m := models[typ.String()]; len(m.projections) != 0 {
+	if m := g.models[typ.String()]; len(m.projections) != 0 {
 		t.Errorf("model without tags should have no projections")
 	}
 
@@ -74,7 +75,7 @@ func TestValidate(t *testing.T) {
 		t.Errorf("type should be valid")
 	}
 
-	if m := models[typ2.String()]; len(m.projections) == 0 {
+	if m := g.models[typ2.String()]; len(m.projections) == 0 {
 		t.Errorf("model with projections tag should have projections")
 	}
 
@@ -107,7 +108,7 @@ func TestValidate(t *testing.T) {
 		t.Errorf("type with unknown projection type should mention the type on which it was declared; got %v", err3)
 	}
 
-	if m := models[typ2.String()]; len(m.projections) == 0 {
+	if m := g.models[typ2.String()]; len(m.projections) == 0 {
 		t.Errorf("model with projections tag should have projections")
 	}
 }
@@ -115,7 +116,8 @@ func TestValidate(t *testing.T) {
 func TestWriteHeader(t *testing.T) {
 	var b bytes.Buffer
 
-	g := GenWriter{}
+	g := newGenWriter()
+
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
 	}
@@ -155,7 +157,8 @@ func TestWriteHeader(t *testing.T) {
 }
 
 func TestImports(t *testing.T) {
-	g := GenWriter{}
+	g := newGenWriter()
+
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
 	}
@@ -186,8 +189,6 @@ func TestImports(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	g := GenWriter{}
-
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
 	}
@@ -248,16 +249,15 @@ func TestWrite(t *testing.T) {
 	for _, typ := range typs {
 		var b bytes.Buffer
 
+		g := newGenWriter()
+
 		g.Validate(typ)
-
 		b.WriteString(fmt.Sprintf("package %s\n", pkg.Name()))
-
 		g.Write(&b, typ)
 
 		src := b.String()
 
 		fset := token.NewFileSet()
-
 		_, err := parser.ParseFile(fset, "testwrite.go", src, 0)
 
 		if err != nil {
