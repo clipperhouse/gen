@@ -66,7 +66,7 @@ func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
 		tmpl, ok := standardTemplates[s]
 
 		if !ok {
-			err = fmt.Errorf("unknown method %v", s)
+			err = fmt.Errorf("unknown method %v on type %s", s, t.String())
 			return false, err
 		}
 
