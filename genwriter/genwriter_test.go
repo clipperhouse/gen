@@ -3,8 +3,10 @@ package genwriter
 import (
 	"bytes"
 	"code.google.com/p/go.tools/go/types"
-	// "fmt"
+	"fmt"
 	"github.com/clipperhouse/typewriter"
+	"go/parser"
+	"go/token"
 	"strings"
 	"testing"
 )
@@ -173,6 +175,87 @@ func TestImports(t *testing.T) {
 	}
 
 	// not easy to devise a test for Sort, since it requires the unexported typewriter.Type.ordered
+}
+
+func TestWrite(t *testing.T) {
+	g := GenWriter{}
+
+	pkg := &typewriter.Package{
+		types.NewPackage("dummy", "SomePackage"),
+	}
+
+	typs := []typewriter.Type{
+		{
+			Package: pkg,
+			Name:    "FirstType",
+			Tags:    typewriter.Tags{}, // simple default
+		},
+		{
+			Package: pkg,
+			Name:    "SecondType",
+			Tags: typewriter.Tags{
+				{
+					Name:  "projections",
+					Items: []string{"int", "string"}, // with projections
+				},
+			},
+		},
+		{
+			Package: pkg,
+			Name:    "ThirdType",
+			Tags: typewriter.Tags{
+				{
+					Name:  "methods",
+					Items: []string{"All", "Any"}, // subsetted
+				},
+			},
+		},
+		{
+			Package: pkg,
+			Name:    "FourthType",
+			Tags: typewriter.Tags{
+				{
+					Name:  "methods",
+					Items: []string{"All", "Any"}, // subsetted
+				},
+				{
+					Name:  "projections",
+					Items: []string{"int", "string"}, // and projections
+				},
+			},
+		},
+		{
+			Package: pkg,
+			Name:    "FifthType",
+			Tags: typewriter.Tags{
+				{
+					Name:    "methods",
+					Items:   []string{"Count", "Where"},
+					Negated: true,
+				},
+			},
+		},
+	}
+
+	for _, typ := range typs {
+		var b bytes.Buffer
+
+		g.Validate(typ)
+
+		b.WriteString(fmt.Sprintf("package %s\n", pkg.Name()))
+
+		g.Write(&b, typ)
+
+		src := b.String()
+
+		fset := token.NewFileSet()
+
+		_, err := parser.ParseFile(fset, "testwrite.go", src, 0)
+
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+	}
 }
 
 func sliceContains(a []string, s string) bool {
