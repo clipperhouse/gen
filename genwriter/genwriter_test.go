@@ -12,7 +12,7 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	g := newGenWriter()
+	g := NewGenWriter()
 
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
@@ -116,7 +116,7 @@ func TestValidate(t *testing.T) {
 func TestWriteHeader(t *testing.T) {
 	var b bytes.Buffer
 
-	g := newGenWriter()
+	g := NewGenWriter()
 
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
@@ -157,7 +157,7 @@ func TestWriteHeader(t *testing.T) {
 }
 
 func TestImports(t *testing.T) {
-	g := newGenWriter()
+	g := NewGenWriter()
 
 	pkg := &typewriter.Package{
 		types.NewPackage("dummy", "SomePackage"),
@@ -249,7 +249,7 @@ func TestWrite(t *testing.T) {
 	for _, typ := range typs {
 		var b bytes.Buffer
 
-		g := newGenWriter()
+		g := NewGenWriter()
 
 		g.Validate(typ)
 		b.WriteString(fmt.Sprintf("package %s\n", pkg.Name()))

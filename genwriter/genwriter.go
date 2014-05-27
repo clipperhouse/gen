@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	err := typewriter.Register(newGenWriter())
+	err := typewriter.Register(NewGenWriter())
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +20,7 @@ type GenWriter struct {
 	validated map[string]bool
 }
 
-func newGenWriter() GenWriter {
+func NewGenWriter() GenWriter {
 	return GenWriter{
 		models:    make(map[string]model),
 		validated: make(map[string]bool),
