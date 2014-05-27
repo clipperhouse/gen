@@ -111,6 +111,35 @@ func TestValidate(t *testing.T) {
 	if m := g.models[typ2.String()]; len(m.projections) == 0 {
 		t.Errorf("model with projections tag should have projections")
 	}
+
+	typ4 := typewriter.Type{
+		Package: pkg,
+		Name:    "SomeType4",
+		Tags: typewriter.Tags{
+			typewriter.Tag{
+				Name:  "methods",
+				Items: []string{"All", "Foo"},
+			},
+		},
+	}
+
+	valid4, err4 := g.Validate(typ4)
+
+	if valid4 {
+		t.Errorf("type with unknown method should be invalid")
+	}
+
+	if err4 == nil {
+		t.Errorf("type with unknown method should return error")
+	}
+
+	if !strings.Contains(err4.Error(), "Foo") {
+		t.Errorf("type with unknown method should mention the unknown projection type; got %v", err4)
+	}
+
+	if !strings.Contains(err4.Error(), typ4.Name) {
+		t.Errorf("type with unknown method should mention the type on which it was declared; got %v", err4)
+	}
 }
 
 func TestWriteHeader(t *testing.T) {
