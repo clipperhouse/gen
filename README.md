@@ -22,6 +22,6 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
     	app.WriteAll()
     }
 
-Individual typewriters register themselves to the “parent” package via their init() functions.
+Individual [typewriters](https://github.com/clipperhouse/typewriters) register themselves to the “parent” package via their init() functions.
 
 This is new and in-progress. Feedback is welcome.
