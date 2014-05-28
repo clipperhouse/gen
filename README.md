@@ -1,8 +1,8 @@
 ### What’s this branch?
 
-We are factoring out a new “typewriter” package, think of them as “codecs” for codegen that can be plugged to support “whatever of &lt;T&gt;”. Custom JSON marshallers, for example.
+We are factoring out a new [“typewriter” package](https://github.com/clipperhouse/typewriter), allowing you to drop in [“codecs”](https://github.com/clipperhouse/typewriters) to support “whatever of &lt;T&gt;”. Custom JSON marshallers, for example.
 
-The current state is “in progress” and “wrong”. Don’t use it.
+The current state is “in progress” and “probably broken” and “caveat emptor”. Would love your feedback.
 
 ## What’s this?
 
