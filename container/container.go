@@ -36,20 +36,47 @@ func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 
 func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
-	set := false
+
+	var list, ring, set bool
 
 	for _, s := range tag.Items {
+		if s == "List" {
+			list = true
+		}
+		if s == "Ring" {
+			ring = true
+		}
 		if s == "Set" {
 			set = true
-			break
 		}
+	}
+
+	if list {
+		license := `// List is a modification of http://golang.org/pkg/container/list/
+`
+		w.Write([]byte(license))
+	}
+
+	if ring {
+		license := `// Ring is a modification of http://golang.org/pkg/container/ring/
+`
+		w.Write([]byte(license))
+	}
+
+	if list || ring {
+		license := `// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found at http://golang.org/LICENSE
+
+`
+		w.Write([]byte(license))
 	}
 
 	if set {
 		license := `// Set is a modification of https://github.com/deckarep/golang-set
 // The MIT License (MIT)
-// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)`
-
+// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)
+`
 		w.Write([]byte(license))
 	}
 
