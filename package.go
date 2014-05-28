@@ -9,8 +9,8 @@ type Package struct {
 	*types.Package
 }
 
-func NewPackage(path, name string) Package {
-	return Package{
+func NewPackage(path, name string) *Package {
+	return &Package{
 		types.NewPackage(path, name),
 	}
 }
