@@ -6,42 +6,48 @@ import (
 )
 
 func init() {
-	err := typewriter.Register(ContainerWriter{})
+	err := typewriter.Register(NewContainerWriter())
 	if err != nil {
 		panic(err)
 	}
 }
 
-type ContainerWriter struct{}
+type ContainerWriter struct {
+	tagsByType map[string]typewriter.Tag // typewriter.Type is not comparable, key by .String()
+}
 
-func (s ContainerWriter) Name() string {
+func NewContainerWriter() ContainerWriter {
+	return ContainerWriter{
+		tagsByType: make(map[string]typewriter.Tag),
+	}
+}
+
+func (c ContainerWriter) Name() string {
 	return "container"
 }
 
-var tagsByType = make(map[string]typewriter.Tag)
-
-func (s ContainerWriter) Validate(t typewriter.Type) (bool, error) {
+func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 	tag, found, err := t.Tags.ByName("containers")
 	if found && err == nil {
-		tagsByType[t.String()] = tag
+		c.tagsByType[t.String()] = tag
 	}
 	return found, err
 }
 
-func (s ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	// TODO: add license
 	return
 }
 
-func (s ContainerWriter) Imports(t typewriter.Type) (result []string) {
+func (c ContainerWriter) Imports(t typewriter.Type) (result []string) {
 	return result
 }
 
-func (s ContainerWriter) Write(w io.Writer, t typewriter.Type) {
-	tag := tagsByType[t.String()] // validated above
+func (c ContainerWriter) Write(w io.Writer, t typewriter.Type) {
+	tag := c.tagsByType[t.String()] // validated above
 
-	for _, c := range tag.Items {
-		tmpl, err1 := containerTemplates.Get(c) // validate above to avoid err check here?
+	for _, s := range tag.Items {
+		tmpl, err1 := containerTemplates.Get(s) // validate above to avoid err check here?
 		if err1 != nil {
 			panic(err1)
 		}
