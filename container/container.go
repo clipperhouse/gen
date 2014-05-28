@@ -35,7 +35,24 @@ func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 }
 
 func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
-	// TODO: add license
+	tag := c.tagsByType[t.String()] // validated above
+	set := false
+
+	for _, s := range tag.Items {
+		if s == "Set" {
+			set = true
+			break
+		}
+	}
+
+	if set {
+		license := `// Set is a modification of https://github.com/deckarep/golang-set
+// The MIT License (MIT)
+// Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)`
+
+		w.Write([]byte(license))
+	}
+
 	return
 }
 
