@@ -5,6 +5,46 @@ import (
 	"testing"
 )
 
+func TestParseTags(t *testing.T) {
+	doc := `// some stuff that's actually a comment
++test foo:"bar,Baz"
+`
+	pointer, tags, found := parseTags("+test", doc)
+
+	if !found {
+		t.Errorf("tag should have been found in %s", doc)
+	}
+
+	if len(tags) != 1 {
+		t.Errorf("one tag should have been found in %s", doc)
+	}
+
+	if pointer {
+		t.Errorf("pointer should not have been found in %s", doc)
+	}
+
+	doc2 := `// some stuff that's actually a comment
++test foo:"bar,Baz" thing:"Stuff,yay"
+`
+	pointer2, tags2, found2 := parseTags("+test", doc2)
+
+	if !found2 {
+		t.Errorf("tags should have been found in %s", doc2)
+	}
+
+	if len(tags2) != 2 {
+		t.Errorf("two tags should have been found in %s; found %v", tags2)
+	}
+
+	if tags2[0].Name != "foo" || tags2[1].Name != "thing" {
+		t.Errorf("'foo' and 'thing' should have been found in %s; found %v", tags2)
+	}
+
+	if pointer2 {
+		t.Errorf("pointer should not have been found in %s", doc)
+	}
+}
+
 func TestParseTag(t *testing.T) {
 	s := `foo:"bar,Baz"`
 	tag, found := parseTag(s)
