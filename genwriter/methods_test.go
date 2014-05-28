@@ -1,17 +1,14 @@
 package genwriter
 
 import (
-	"code.google.com/p/go.tools/go/types"
 	"github.com/clipperhouse/typewriter"
 	"testing"
 )
 
 func TestEvaluateTags(t *testing.T) {
 	typ := typewriter.Type{
-		Name: "TestType",
-		Package: &typewriter.Package{
-			types.NewPackage("dummy", "TestPackage"),
-		},
+		Name:    "TestType",
+		Package: typewriter.NewPackage("dummy", "TestPackage"),
 	}
 
 	typ.Tags = typewriter.Tags{}

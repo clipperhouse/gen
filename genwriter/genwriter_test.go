@@ -2,7 +2,6 @@ package genwriter
 
 import (
 	"bytes"
-	"code.google.com/p/go.tools/go/types"
 	"fmt"
 	"github.com/clipperhouse/typewriter"
 	"go/parser"
@@ -14,9 +13,7 @@ import (
 func TestValidate(t *testing.T) {
 	g := NewGenWriter()
 
-	pkg := &typewriter.Package{
-		types.NewPackage("dummy", "SomePackage"),
-	}
+	pkg := typewriter.NewPackage("dummy", "SomePackage")
 
 	typ := typewriter.Type{
 		Package: pkg,
@@ -147,9 +144,7 @@ func TestWriteHeader(t *testing.T) {
 
 	g := NewGenWriter()
 
-	pkg := &typewriter.Package{
-		types.NewPackage("dummy", "SomePackage"),
-	}
+	pkg := typewriter.NewPackage("dummy", "SomePackage")
 
 	typ := typewriter.Type{
 		Package: pkg,
@@ -188,9 +183,7 @@ func TestWriteHeader(t *testing.T) {
 func TestImports(t *testing.T) {
 	g := NewGenWriter()
 
-	pkg := &typewriter.Package{
-		types.NewPackage("dummy", "SomePackage"),
-	}
+	pkg := typewriter.NewPackage("dummy", "SomePackage")
 
 	typ := typewriter.Type{
 		Package: pkg,
@@ -218,9 +211,7 @@ func TestImports(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	pkg := &typewriter.Package{
-		types.NewPackage("dummy", "SomePackage"),
-	}
+	pkg := typewriter.NewPackage("dummy", "SomePackage")
 
 	typs := []typewriter.Type{
 		{
