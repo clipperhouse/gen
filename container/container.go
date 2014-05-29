@@ -1,8 +1,10 @@
 package container
 
 import (
-	"github.com/clipperhouse/typewriter"
+	"fmt"
 	"io"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 func init() {
@@ -91,14 +93,14 @@ func (c ContainerWriter) Write(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
 	for _, s := range tag.Items {
-		tmpl, err1 := containerTemplates.Get(s) // validate above to avoid err check here?
-		if err1 != nil {
-			panic(err1)
+		tmpl, err := containerTemplates.Get(s) // validate above to avoid err check here?
+		if err != nil {
+			continue
 		}
-
-		err2 := tmpl.Execute(w, t)
-		if err2 != nil {
-			panic(err2)
+		err = tmpl.Execute(w, t)
+		if err != nil {
+			fmt.Println(err)
+			continue
 		}
 	}
 
