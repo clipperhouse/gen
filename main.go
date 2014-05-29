@@ -22,7 +22,6 @@ func main() {
 	// panic safe dir removal?
 	defer func() {
 		// don't blow away a dir we didn't create
-		// this may cause some grief if gen blows up before removing
 		if createdDir {
 			err = os.RemoveAll("._gen")
 			if err != nil {
