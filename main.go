@@ -9,10 +9,12 @@ import (
 )
 
 func main() {
+	// read gen custom imports file
 	custom, err := ioutil.ReadFile("_gen.go")
 	if err != nil {
 		log.Println(err)
 	}
+	// create ._gen dir
 	createdDir := true
 	err = os.Mkdir("._gen", 0777)
 	if err != nil {
@@ -30,16 +32,23 @@ func main() {
 			}
 		}
 	}()
+	// minimal compiling file if none provided
+	if len(custom) == 0 {
+		custom = "package main"
+	}
+	// write custom_gen file to ._gen folder
 	err = ioutil.WriteFile("._gen/gen_custom.go", custom, 0644)
 	if err != nil {
 		panic(err)
 	}
+	// write gen.go template to ._gen folder
 	err = ioutil.WriteFile("._gen/gen.go", []byte(gentemplate), 0644)
 	if err != nil {
 		panic(err)
 	}
 	var out bytes.Buffer
 	var outerr bytes.Buffer
+	// build new gen
 	cmd := exec.Command("go", "build", "-o", "._gen/gen", "._gen/gen.go", "._gen/gen_custom.go")
 	cmd.Stdout = &out
 	cmd.Stderr = &outerr
@@ -51,6 +60,7 @@ func main() {
 	if out.Len() > 0 {
 		log.Println(out.String())
 	}
+	// run new gen
 	cmd = exec.Command("._gen/gen", os.Args...)
 	cmd.Stdout = &out
 	cmd.Stderr = &outerr
