@@ -34,7 +34,7 @@ func main() {
 	}()
 	// minimal compiling file if none provided
 	if len(custom) == 0 {
-		custom = "package main"
+		custom = []byte("package main")
 	}
 	// write custom_gen file to ._gen folder
 	err = ioutil.WriteFile("._gen/gen_custom.go", custom, 0644)
