@@ -12,7 +12,8 @@ func main() {
 	// read gen custom imports file
 	custom, err := ioutil.ReadFile("_gen.go")
 	if err != nil {
-		log.Println(err)
+		// maybe silently fail here? some people may not use this feature at all
+		// log.Println("no custom _gen.go for imports found")
 	}
 	// create ._gen dir
 	createdDir := true
