@@ -19,13 +19,24 @@ func main() {
 		createdDir = false
 		log.Println(err)
 	}
+	// panic safe dir removal?
+	defer func() {
+		// don't blow away a dir we didn't create
+		// this may cause some grief if gen blows up before removing
+		if createdDir {
+			err = os.RemoveAll("._gen")
+			if err != nil {
+				panic(err)
+			}
+		}
+	}()
 	err = ioutil.WriteFile("._gen/gen_custom.go", custom, 0644)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	err = ioutil.WriteFile("._gen/gen.go", []byte(gentemplate), 0644)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	var out bytes.Buffer
 	var outerr bytes.Buffer
@@ -35,7 +46,7 @@ func main() {
 	err = cmd.Run()
 	if err != nil {
 		log.Println(outerr.String())
-		log.Fatal(err)
+		panic(err)
 	}
 	if out.Len() > 0 {
 		log.Println(out.String())
@@ -46,18 +57,10 @@ func main() {
 	err = cmd.Run()
 	if err != nil {
 		log.Println(outerr.String())
-		log.Fatal(err)
+		panic(err)
 	}
 	if out.Len() > 0 {
 		log.Println(out.String())
-	}
-	// don't blow away a dir we didn't create
-	// this may cause some grief if gen blows up before removing
-	if createdDir {
-		err = os.RemoveAll("._gen")
-		if err != nil {
-			log.Println(err)
-		}
 	}
 }
 
