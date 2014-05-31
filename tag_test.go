@@ -24,7 +24,7 @@ func TestParseTags(t *testing.T) {
 	}
 
 	doc2 := `// some stuff that's actually a comment
-+test foo:"bar,Baz" thing:"Stuff,yay"
++test foo:"bar,Baz" thing:"Stuff, yay"
 `
 	pointer2, tags2, found2 := parseTags("+test", doc2)
 
@@ -38,6 +38,10 @@ func TestParseTags(t *testing.T) {
 
 	if tags2[0].Name != "foo" || tags2[1].Name != "thing" {
 		t.Errorf("'foo' and 'thing' should have been found in %s; found %v", tags2)
+	}
+
+	if len(tags2[0].Items) != 2 || len(tags2[1].Items) != 2 {
+		t.Errorf("each tag should have 2 Items")
 	}
 
 	if pointer2 {

@@ -93,41 +93,77 @@ func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error)
 	return
 }
 
+// something resembling legal identifiers in Go: http://golang.org/ref/spec#Identifiers
+// TODO: should probably allow underscore
+var tagreg = regexp.MustCompile(`(\p{L}[\p{L}\p{N}]*):"([^\"]+?)"`)
+
 // identifies gen-marked types and parses tags
 func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool) {
 	lines := strings.Split(doc, "\n")
 	for _, line := range lines {
+		// strategy is to remove meaningful tokens as they are found
+		// kind of a hack, a real parser someday
+
+		// does the line start with the directive?
 		if line = strings.TrimLeft(line, "/ "); !strings.HasPrefix(line, directive) {
 			continue
 		}
 
+		// remove the directive from the line
+		line = strings.TrimPrefix(line, directive)
+
+		// next character needs to be a space or end of string
+		if !(len(line) == 0 || strings.HasPrefix(line, " ")) {
+			// TODO: error
+		}
+
+		// ok, we got something
 		found = true
 
-		// parse out tags & pointer
-		spaces := regexp.MustCompile(" +")
-		parts := spaces.Split(line, -1)
+		// get rid of leading spaces
+		line = strings.TrimLeft(line, " ")
 
-		for _, s := range parts {
-			if s == "*" {
-				pointer = true
-				continue
-			}
-			if tag, found := parseTag(s); found {
-				tags = append(tags, tag)
-				continue
+		// is the next character a pointer?
+		p := Pointer(true).String()
+		if strings.HasPrefix(line, p) {
+			pointer = true
+			line = strings.TrimPrefix(line, p)
+
+			// if found, next character needs to be a space or end of string
+			if !(len(line) == 0 || strings.HasPrefix(line, " ")) {
+				// TODO: error
 			}
 		}
+
+		// find all matches of tag pattern
+		matches := tagreg.FindAllString(line, -1)
+
+		for _, m := range matches {
+			if tag, found := parseTag(m); found {
+				// should always be found since the matches are selected
+				// and substringed (substrung?) using the same regex
+
+				// add to the results
+				tags = append(tags, tag)
+
+				// remove the tag from the parsed line
+				line = strings.Replace(line, m, "", -1)
+			}
+		}
+
+		// trim spaces
+		line = strings.Trim(line, " ")
+
+		// anything remaining is invalid
+		// TODO: return err
 	}
 	return
 }
 
 func parseTag(s string) (tag Tag, found bool) {
-	// same as legal identifiers in Go: http://golang.org/ref/spec#Identifiers
-	r := regexp.MustCompile(`(\p{L}[\p{L}\p{N}]*):"(.*)"`)
-
 	var matches []string
-
-	if matches = r.FindStringSubmatch(s); matches == nil || len(matches) == 0 {
+	if matches = tagreg.FindStringSubmatch(s); matches == nil || len(matches) == 0 {
+		// not a match? not an error, just not a tag
 		return
 	}
 
@@ -139,12 +175,13 @@ func parseTag(s string) (tag Tag, found bool) {
 
 	name = matches[1]
 
+	splitter := regexp.MustCompile(`[, ]+`)
 	if match := matches[2]; len(match) > 0 {
 		index := 0
 		if negated = strings.HasPrefix(match, "-"); negated {
 			index = 1
 		}
-		items = strings.Split(match[index:], ",")
+		items = splitter.Split(match[index:], -1)
 	}
 
 	tag = Tag{
