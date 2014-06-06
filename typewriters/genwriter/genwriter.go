@@ -52,7 +52,7 @@ func (g GenWriter) ensureValidation(t typewriter.Type) error {
 }
 
 func (g GenWriter) Name() string {
-	return "genwriter"
+	return "gen"
 }
 
 func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
