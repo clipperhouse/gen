@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	custom, err := ioutil.ReadFile("_gen.go")
 	if err != nil {
 		// maybe silently fail here? some people may not use this feature at all
-		// log.Println("no custom _gen.go for imports found")
+		//log.Println(err)
 	}
 
 	// minimal compiling file if none provided
@@ -22,7 +22,7 @@ func main() {
 		custom = []byte("package main")
 	}
 
-	caller := path.Base(os.Args[0])
+	caller := filepath.Base(os.Args[0])
 	tempDir, err := ioutil.TempDir("", caller)
 
 	if err != nil {
@@ -32,13 +32,13 @@ func main() {
 	defer os.RemoveAll(tempDir)
 
 	// write custom_gen file to temp folder
-	err = ioutil.WriteFile(path.Join(tempDir, "gen_custom.go"), custom, 0644)
+	err = ioutil.WriteFile(filepath.Join(tempDir, "gen_custom.go"), custom, 0644)
 	if err != nil {
 		panic(err)
 	}
 
 	// write gen.go template to temp folder
-	err = ioutil.WriteFile(path.Join(tempDir, "gen.go"), []byte(gentemplate), 0644)
+	err = ioutil.WriteFile(filepath.Join(tempDir, "gen.go"), []byte(gentemplate), 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,7 @@ func main() {
 	var outerr bytes.Buffer
 
 	// run new gen
-	cmd := exec.Command("go", "run", path.Join(tempDir, "gen.go"), path.Join(tempDir, "gen_custom.go"))
+	cmd := exec.Command("go", "run", filepath.Join(tempDir, "gen.go"), filepath.Join(tempDir, "gen_custom.go"))
 	cmd.Stdout = &out
 	cmd.Stderr = &outerr
 	err = cmd.Run()
