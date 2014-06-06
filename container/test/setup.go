@@ -4,9 +4,9 @@ package main
 
 import (
 	"github.com/clipperhouse/typewriter"
+	_ "github.com/clipperhouse/typewriters/container"
 	"os"
 	"strings"
-	_ "typewriters/container" // make sure typewriters folder is at top of GOPATH/src
 )
 
 func main() {
