@@ -1,6 +1,6 @@
 ### What’s this branch?
 
-We are factoring out a new [“typewriter” package](https://github.com/clipperhouse/typewriter), allowing you to drop in [“codecs”](https://github.com/clipperhouse/typewriters) to support “whatever of &lt;T&gt;”. Custom JSON marshallers, for example.
+We are factoring out a new [“typewriter” package](https://github.com/clipperhouse/gen/typewriter), allowing you to drop in [“codecs”](https://github.com/clipperhouse/gen/typewriters) to support “whatever of &lt;T&gt;”. Custom JSON marshallers, for example.
 
 The current state is “in progress” and “probably broken” and “caveat emptor”. Would love your feedback.
 

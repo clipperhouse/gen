@@ -6,11 +6,11 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
 
     import (
         // main package
-    	“github.com/clipperhouse/typewriter”
+    	“github.com/clipperhouse/gen/typewriter”
     	
     	// any number of typewriters 
-    	_ “github.com/clipperhouse/typewriters/container”
-    	_ “github.com/clipperhouse/typewriters/genwriter”
+    	_ “github.com/clipperhouse/gen/typewriters/container”
+    	_ “github.com/clipperhouse/gen/typewriters/genwriter”
     )
     
     func main() {
@@ -22,6 +22,6 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
     	app.WriteAll()
     }
 
-Individual [typewriters](https://github.com/clipperhouse/typewriters) register themselves to the “parent” package via their init() functions.
+Individual [typewriters](https://github.com/clipperhouse/gen/typewriters) register themselves to the “parent” package via their init() functions.
 
 This is new and in-progress. Feedback is welcome.

@@ -2,7 +2,7 @@ package genwriter
 
 import (
 	"fmt"
-	"github.com/clipperhouse/typewriter"
+	"github.com/clipperhouse/gen/typewriter"
 	"regexp"
 	"strings"
 )

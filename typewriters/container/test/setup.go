@@ -3,8 +3,8 @@
 package main
 
 import (
-	"github.com/clipperhouse/typewriter"
-	_ "github.com/clipperhouse/typewriters/container"
+	"github.com/clipperhouse/gen/typewriter"
+	_ "github.com/clipperhouse/gen/typewriters/container"
 	"os"
 	"strings"
 )

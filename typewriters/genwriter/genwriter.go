@@ -2,8 +2,8 @@ package genwriter
 
 import (
 	"fmt"
+	"github.com/clipperhouse/gen/typewriter"
 	"github.com/clipperhouse/inflect"
-	"github.com/clipperhouse/typewriter"
 	"io"
 )
 

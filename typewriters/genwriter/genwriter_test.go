@@ -3,7 +3,7 @@ package genwriter
 import (
 	"bytes"
 	"fmt"
-	"github.com/clipperhouse/typewriter"
+	"github.com/clipperhouse/gen/typewriter"
 	"go/parser"
 	"go/token"
 	"strings"

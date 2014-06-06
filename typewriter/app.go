@@ -45,8 +45,8 @@ var typeWriters = make(map[string]TypeWriter)
 // Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
 // Your program will do something like:
 //	import (
-//		"github.com/clipperhouse/typewriter"
-//		_ "github.com/clipperhouse/typewriters/container"
+//		"github.com/clipperhouse/gen/typewriter"
+//		_ "github.com/clipperhouse/gen/typewriters/container"
 //	)
 func Register(tw TypeWriter) error {
 	if _, exists := typeWriters[tw.Name()]; exists {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/clipperhouse/typewriter"
+	"github.com/clipperhouse/gen/typewriter"
 )
 
 func init() {

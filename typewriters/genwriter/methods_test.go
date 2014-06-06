@@ -1,7 +1,7 @@
 package genwriter
 
 import (
-	"github.com/clipperhouse/typewriter"
+	"github.com/clipperhouse/gen/typewriter"
 	"testing"
 )
 
