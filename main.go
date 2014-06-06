@@ -63,7 +63,7 @@ func main() {
 const gentemplate = `package main
 
 import (
-	"github.com/clipperhouse/typewriter"
+	"github.com/clipperhouse/gen/typewriter"
 	_ "github.com/clipperhouse/typewriters/genwriter"
 	_ "github.com/clipperhouse/typewriters/container"
 )
