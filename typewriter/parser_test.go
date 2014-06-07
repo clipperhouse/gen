@@ -2,7 +2,7 @@ package typewriter
 
 import (
 	// "fmt"
-	// "os"
+	"os"
 	"testing"
 )
 
@@ -51,22 +51,39 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("Tag should have 1 Item, found %v", len(m["Package"].Tags[0].Items))
 	}
 
-	typs2, err2 := getTypes("+dummy", nil)
-
-	if len(typs2) != 0 {
-		t.Errorf("should have no marked-up types for +dummy")
+	filter := func(f os.FileInfo) bool {
+		return f.Name() != "app.go"
 	}
+
+	typs2, err2 := getTypes("+test", filter)
 
 	if err2 != nil {
 		t.Error(err2)
 	}
 
-	// filter := func(f os.FileInfo) bool {
-	// 	return f.Name() == "tag.go"
-	// }
+	if len(typs2) != 1 {
+		t.Errorf("should have found the 1 marked-up type when filtered, found %v", len(typs2))
+	}
 
-	// typs3, err3 := getTypes("+gen", filter)
+	m2 := typeSliceToMap(typs2)
 
+	if _, found := m2["app"]; found {
+		t.Errorf("should not have found the app type")
+	}
+
+	if _, found := m2["Package"]; !found {
+		t.Errorf("should have found the Package type")
+	}
+
+	typs3, err3 := getTypes("+dummy", nil)
+
+	if len(typs3) != 0 {
+		t.Errorf("should have no marked-up types for +dummy")
+	}
+
+	if err3 != nil {
+		t.Error(err3)
+	}
 }
 
 func typeSliceToMap(typs []Type) map[string]Type {
