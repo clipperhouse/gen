@@ -32,6 +32,20 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should have found the dummy type")
 	}
 
+	dummy := m["dummy"]
+
+	if !dummy.Comparable() {
+		t.Errorf("dummy type should be comparable")
+	}
+
+	if !dummy.Ordered() {
+		t.Errorf("dummy type should be ordered")
+	}
+
+	if !dummy.Numeric() {
+		t.Errorf("dummy type should be numeric")
+	}
+
 	// check tag existence at a high level here, see also tag parsing tests
 
 	if len(m["app"].Tags) != 2 {
@@ -53,6 +67,8 @@ func TestGetTypes(t *testing.T) {
 	if len(m["dummy"].Tags[0].Items) != 1 {
 		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Items))
 	}
+
+	// filtered types should not show up
 
 	filter := func(f os.FileInfo) bool {
 		return f.Name() != "app.go"
@@ -78,6 +94,7 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should have found the dummy type")
 	}
 
+	// no false positives
 	typs3, err3 := getTypes("+dummy", nil)
 
 	if len(typs3) != 0 {
