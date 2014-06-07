@@ -6,8 +6,11 @@ import (
 	"testing"
 )
 
+// +test foo:"bar"
+type dummy int
+
 func TestGetTypes(t *testing.T) {
-	// app and Package types are marked up with +test
+	// app and dummy types are marked up with +test
 	typs, err := getTypes("+test", nil)
 
 	if err != nil {
@@ -25,8 +28,8 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should have found the app type")
 	}
 
-	if _, found := m["Package"]; !found {
-		t.Errorf("should have found the Package type")
+	if _, found := m["dummy"]; !found {
+		t.Errorf("should have found the dummy type")
 	}
 
 	// check tag existence at a high level here, see also tag parsing tests
@@ -43,12 +46,12 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("Tag should have 2 Items, found %v", len(m["app"].Tags[1].Items))
 	}
 
-	if len(m["Package"].Tags) != 1 {
-		t.Errorf("typ should have 1 tag, found %v", len(m["Package"].Tags))
+	if len(m["dummy"].Tags) != 1 {
+		t.Errorf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
 	}
 
-	if len(m["Package"].Tags[0].Items) != 1 {
-		t.Errorf("Tag should have 1 Item, found %v", len(m["Package"].Tags[0].Items))
+	if len(m["dummy"].Tags[0].Items) != 1 {
+		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Items))
 	}
 
 	filter := func(f os.FileInfo) bool {
@@ -71,8 +74,8 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should not have found the app type")
 	}
 
-	if _, found := m2["Package"]; !found {
-		t.Errorf("should have found the Package type")
+	if _, found := m2["dummy"]; !found {
+		t.Errorf("should have found the dummy type")
 	}
 
 	typs3, err3 := getTypes("+dummy", nil)
