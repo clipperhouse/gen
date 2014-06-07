@@ -12,6 +12,7 @@ import (
 	"text/template"
 )
 
+// +test foo:"Bar" baz:"qux,thing"
 type app struct {
 	// All typewriter.Type found in the current directory.
 	Types []Type

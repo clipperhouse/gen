@@ -5,6 +5,7 @@ import (
 	"code.google.com/p/go.tools/go/types"
 )
 
+// +test thing:"stuff"
 type Package struct {
 	*types.Package
 }
