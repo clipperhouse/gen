@@ -58,7 +58,7 @@ func Register(tw TypeWriter) error {
 }
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
-func (a app) WriteAll() {
+func (a app) WriteAll() error {
 	// TypeWriters which will write for each type; use string as key because Type is not comparable
 	var writersByType = make(map[string][]TypeWriter)
 
@@ -67,8 +67,7 @@ func (a app) WriteAll() {
 		for _, tw := range a.TypeWriters {
 			write, err := tw.Validate(t)
 			if err != nil {
-				fmt.Println(err) // TODO: return error?
-				return
+				return err
 			}
 			if write {
 				writersByType[t.String()] = append(writersByType[t.String()], tw)
@@ -92,17 +91,25 @@ func (a app) WriteAll() {
 	// validate generated ast's before committing to files
 	for f, b := range buffers {
 		if _, err := parser.ParseFile(token.NewFileSet(), f, b.String(), 0); err != nil {
-			fmt.Println(err) // TODO: return error?
 			// TODO: prompt to write (ignored) _file on error? parsing errors are meaningless without.
-			return
+			return err
 		}
 	}
 
 	// format and commit to files
 	for f, b := range buffers {
-		src, _ := formatToBytes(b) // error is ignored since ast is validated above
-		writeFile(f, src)
+		src, err := formatToBytes(b)
+
+		if err != nil {
+			return err
+		}
+
+		if err := writeFile(f, src); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func write(w io.Writer, t Type, tw TypeWriter) {
@@ -125,22 +132,28 @@ func write(w io.Writer, t Type, tw TypeWriter) {
 // gofmt
 func formatToBytes(b *bytes.Buffer) ([]byte, error) {
 	byts := b.Bytes()
+
 	formatted, err := format.Source(byts)
+
 	if err != nil {
 		return byts, err
 	}
+
 	return formatted, nil
 }
 
-func writeFile(filename string, byts []byte) {
+func writeFile(filename string, byts []byte) error {
 	w, err := os.Create(filename)
+
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
+
 	defer w.Close()
 
 	w.Write(byts)
+
+	return nil
 }
 
 var packageTmpl = template.Must(template.New("package").Parse(`package {{.}}

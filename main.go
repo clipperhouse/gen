@@ -70,10 +70,13 @@ import (
 
 func main() {
 	app, err := typewriter.NewApp("+gen")
+	
 	if err != nil {
 		panic(err)
 	}
 
-	app.WriteAll()
+	if err := app.WriteAll(); err != nil {
+		panic(err)
+	}
 }
 `
