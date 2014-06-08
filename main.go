@@ -10,51 +10,60 @@ import (
 )
 
 func main() {
-	// read gen custom imports file
-	custom, err := ioutil.ReadFile("_gen.go")
-	if err != nil {
-		// maybe silently fail here? some people may not use this feature at all
-		//log.Println(err)
+	// set up basic command args
+	run := []string{
+		"run",
 	}
 
-	// minimal compiling file if none provided
-	if len(custom) == 0 {
-		custom = []byte("package main")
-	}
-
+	// set up temp directory
 	caller := filepath.Base(os.Args[0])
+
 	tempDir, err := ioutil.TempDir("", caller)
 
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 
 	defer os.RemoveAll(tempDir)
 
-	// write custom_gen file to temp folder
-	err = ioutil.WriteFile(filepath.Join(tempDir, "gen_custom.go"), custom, 0644)
+	// read gen custom imports file
+	if src, err := ioutil.ReadFile("_gen.go"); err == nil {
+		custom := filepath.Join(tempDir, "custom.go")
+
+		// write custom_gen file to temp folder
+		if err := ioutil.WriteFile(custom, src, 0644); err != nil {
+			panic(err)
+		}
+
+		// add it to the command
+		run = append(run, custom)
+	}
+
+	// write gen.go template to temp folder
+	main := filepath.Join(tempDir, "main.go")
+
+	err = ioutil.WriteFile(main, []byte(gentemplate), 0644)
+
 	if err != nil {
 		panic(err)
 	}
 
-	// write gen.go template to temp folder
-	err = ioutil.WriteFile(filepath.Join(tempDir, "gen.go"), []byte(gentemplate), 0644)
-	if err != nil {
-		panic(err)
-	}
+	run = append(run, main)
+
+	// run new gen
 
 	var out bytes.Buffer
 	var outerr bytes.Buffer
 
-	// run new gen
-	cmd := exec.Command("go", "run", filepath.Join(tempDir, "gen.go"), filepath.Join(tempDir, "gen_custom.go"))
+	cmd := exec.Command("go", run...)
 	cmd.Stdout = &out
 	cmd.Stderr = &outerr
-	err = cmd.Run()
-	if err != nil {
+
+	if err := cmd.Run(); err != nil {
 		log.Println(outerr.String())
 		panic(err)
 	}
+
 	if out.Len() > 0 {
 		log.Println(out.String())
 	}
