@@ -7,16 +7,22 @@ import (
 	"testing"
 )
 
+var fw *fooWriter = &fooWriter{}
+var bw *barWriter = &barWriter{}
+
 func TestRegister(t *testing.T) {
-	if err := Register(fooWriter{}); err != nil {
+	// these registrations are stateful; remain in place for later tests
+	// so keep 'em at the top of this file
+
+	if err := Register(fw); err != nil {
 		t.Error(err)
 	}
 
-	if err := Register(barWriter("baz")); err != nil {
+	if err := Register(bw); err != nil {
 		t.Error(err)
 	}
 
-	if err := Register(fooWriter{}); err == nil {
+	if err := Register(&fooWriter{}); err == nil {
 		t.Error("registering the same typewriter twice should be an error")
 	}
 
@@ -37,6 +43,11 @@ func TestNewApp(t *testing.T) {
 		t.Errorf("should have found 2 types, found", len(a1.Types))
 	}
 
+	// see TestRegister; this really only tests that they've been assigned to the app
+	if len(a1.TypeWriters) != 2 {
+		t.Errorf("should have found 2 typewriters, found %v", len(a1.TypeWriters))
+	}
+
 	a2, err2 := NewApp("+dummy")
 
 	if err2 != nil {
@@ -44,7 +55,12 @@ func TestNewApp(t *testing.T) {
 	}
 
 	if len(a2.Types) != 0 {
-		t.Errorf("should have found no types, found", len(a2.Types))
+		t.Errorf("should have found no types, found %v", len(a2.Types))
+	}
+
+	// see TestRegister; this really only tests that nothing has changed
+	if len(a2.TypeWriters) != 2 {
+		t.Errorf("should have found 2 typewriters, found %v", len(a2.TypeWriters))
 	}
 }
 
@@ -65,46 +81,92 @@ func TestNewAppFiltered(t *testing.T) {
 	}
 }
 
-type fooWriter struct{}
+func TestWriteAll(t *testing.T) {
+	a1, err1 := NewApp("+test")
 
-func (f fooWriter) Name() string {
+	if err1 != nil {
+		t.Error(err1)
+	}
+
+	a1.WriteAll()
+
+	if fw.validateCalls != len(a1.Types) {
+		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.validateCalls)
+	}
+
+	if bw.validateCalls != len(a1.Types) {
+		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.validateCalls)
+	}
+
+	if fw.writeHeaderCalls != len(a1.Types) {
+		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeHeaderCalls)
+	}
+
+	// see Validate implementation below; chooses not to write dummy
+	if bw.writeHeaderCalls != len(a1.Types)-1 {
+		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.writeHeaderCalls)
+	}
+
+	if fw.writeCalls != len(a1.Types) {
+		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeCalls)
+	}
+
+	// see Validate implementation below; chooses not to write dummy
+	if bw.writeCalls != len(a1.Types)-1 {
+		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.writeCalls)
+	}
+}
+
+type fooWriter struct {
+	validateCalls, writeHeaderCalls, writeCalls int
+}
+
+func (f *fooWriter) Name() string {
 	return "foo"
 }
 
-func (f fooWriter) Validate(t Type) (bool, error) {
+func (f *fooWriter) Validate(t Type) (bool, error) {
+	f.validateCalls++
 	return true, nil
 }
 
-func (f fooWriter) WriteHeader(w io.Writer, t Type) {
+func (f *fooWriter) WriteHeader(w io.Writer, t Type) {
+	f.writeHeaderCalls++
 	return
 }
 
-func (f fooWriter) Imports(t Type) (result []string) {
+func (f *fooWriter) Imports(t Type) (result []string) {
 	return result
 }
 
-func (f fooWriter) Write(w io.Writer, t Type) {
+func (f *fooWriter) Write(w io.Writer, t Type) {
+	f.writeCalls++
 	return
 }
 
-type barWriter string // heck, could be anything
+type barWriter struct {
+	validateCalls, writeHeaderCalls, writeCalls int
+}
 
-func (f barWriter) Name() string {
+func (f *barWriter) Name() string {
 	return "bar"
 }
 
-func (f barWriter) Validate(t Type) (bool, error) {
-	return true, nil
+func (f *barWriter) Validate(t Type) (bool, error) {
+	f.validateCalls++
+	return t.Name != "dummy", nil // indicates not going to write for the dummy type
 }
 
-func (f barWriter) WriteHeader(w io.Writer, t Type) {
+func (f *barWriter) WriteHeader(w io.Writer, t Type) {
+	f.writeHeaderCalls++
 	return
 }
 
-func (f barWriter) Imports(t Type) (result []string) {
+func (f *barWriter) Imports(t Type) (result []string) {
 	return result
 }
 
-func (f barWriter) Write(w io.Writer, t Type) {
+func (f *barWriter) Write(w io.Writer, t Type) {
+	f.writeCalls++
 	return
 }
