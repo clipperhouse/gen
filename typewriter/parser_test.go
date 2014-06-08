@@ -1,8 +1,8 @@
 package typewriter
 
 import (
-	// "fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -71,7 +71,7 @@ func TestGetTypes(t *testing.T) {
 	// filtered types should not show up
 
 	filter := func(f os.FileInfo) bool {
-		return f.Name() != "app.go"
+		return !strings.HasPrefix(f.Name(), "app")
 	}
 
 	typs2, err2 := getTypes("+test", filter)
