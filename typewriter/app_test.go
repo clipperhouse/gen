@@ -104,7 +104,7 @@ func TestWriteAll(t *testing.T) {
 
 	// see Validate implementation below; chooses not to write dummy
 	if bw.writeHeaderCalls != len(a1.Types)-1 {
-		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.writeHeaderCalls)
+		t.Errorf(".WriteHeader() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeHeaderCalls)
 	}
 
 	if fw.writeCalls != len(a1.Types) {
@@ -113,7 +113,7 @@ func TestWriteAll(t *testing.T) {
 
 	// see Validate implementation below; chooses not to write dummy
 	if bw.writeCalls != len(a1.Types)-1 {
-		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.writeCalls)
+		t.Errorf(".Write() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeCalls)
 	}
 }
 
