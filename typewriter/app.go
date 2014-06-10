@@ -17,7 +17,7 @@ type app struct {
 	// All typewriter.Type found in the current directory.
 	Types []Type
 	// All typewriter.TypeWriters registered on init.
-	TypeWriters map[string]TypeWriter
+	TypeWriters []TypeWriter
 }
 
 // NewApp parses the current directory, collecting Types and their related information.
@@ -40,7 +40,7 @@ func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (app, error
 }
 
 // Individual TypeWriters register on init, keyed by name
-var typeWriters = make(map[string]TypeWriter)
+var typeWriters []TypeWriter
 
 // Register allows template packages to make themselves known to a 'parent' package, usually in the init() func.
 // Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
@@ -50,10 +50,12 @@ var typeWriters = make(map[string]TypeWriter)
 //		_ "github.com/clipperhouse/gen/typewriters/container"
 //	)
 func Register(tw TypeWriter) error {
-	if _, exists := typeWriters[tw.Name()]; exists {
-		return fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name())
+	for _, v := range typeWriters {
+		if v.Name() == tw.Name() {
+			return fmt.Errorf("A TypeWriter by the name %s has already been registered", tw.Name())
+		}
 	}
-	typeWriters[tw.Name()] = tw
+	typeWriters = append(typeWriters, tw)
 	return nil
 }
 
