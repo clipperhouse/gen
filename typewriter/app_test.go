@@ -182,6 +182,27 @@ func TestWriteAll(t *testing.T) {
 		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", ew.writeHeaderCalls)
 	}
 
+	// clear 'em out
+	typeWriters = make([]TypeWriter, 0)
+
+	// new set of writers for this test
+
+	fw3 := &fooWriter{}
+	jw3 := &junkWriter{}
+	bw3 := &barWriter{}
+
+	Register(fw3)
+	Register(jw3)
+	Register(bw3)
+
+	a3, _ := NewApp("+test") // error checked above, ignore here
+
+	err3 := a3.WriteAll()
+
+	if err3 == nil {
+		t.Errorf("writer producing invalid Go code should return an error")
+	}
+
 	// clear 'em out for later tests
 	typeWriters = make([]TypeWriter, 0)
 }
@@ -264,5 +285,28 @@ func (f *errWriter) Imports(t Type) (result []string) {
 
 func (f *errWriter) Write(w io.Writer, t Type) {
 	f.writeCalls++
+	return
+}
+
+type junkWriter struct{}
+
+func (f *junkWriter) Name() string {
+	return "junk"
+}
+
+func (f *junkWriter) Validate(t Type) (bool, error) {
+	return true, nil
+}
+
+func (f *junkWriter) WriteHeader(w io.Writer, t Type) {
+	return
+}
+
+func (f *junkWriter) Imports(t Type) (result []string) {
+	return result
+}
+
+func (f *junkWriter) Write(w io.Writer, t Type) {
+	w.Write([]byte("this is invalid Go code, innit?"))
 	return
 }
