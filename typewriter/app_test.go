@@ -1,6 +1,7 @@
 package typewriter
 
 import (
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -9,16 +10,14 @@ import (
 
 var fw *fooWriter = &fooWriter{}
 var bw *barWriter = &barWriter{}
+var ew *errWriter = &errWriter{}
 
 func TestRegister(t *testing.T) {
-	// these registrations are stateful; remain in place for later tests
-	// so keep 'em at the top of this file
-
-	if err := Register(fw); err != nil {
+	if err := Register(&fooWriter{}); err != nil {
 		t.Error(err)
 	}
 
-	if err := Register(bw); err != nil {
+	if err := Register(&barWriter{}); err != nil {
 		t.Error(err)
 	}
 
@@ -29,9 +28,17 @@ func TestRegister(t *testing.T) {
 	if len(typeWriters) != 2 {
 		t.Error("should have 2 typewriters registered, found %v", len(typeWriters))
 	}
+
+	// clear 'em out for later tests
+	typeWriters = make([]TypeWriter, 0)
 }
 
 func TestNewApp(t *testing.T) {
+	// set up some registered typewriters for this app
+	// no error checking here, see TestRegister
+	Register(&fooWriter{})
+	Register(&barWriter{})
+
 	a1, err1 := NewApp("+test")
 
 	if err1 != nil {
@@ -43,7 +50,7 @@ func TestNewApp(t *testing.T) {
 		t.Errorf("should have found 2 types, found", len(a1.Types))
 	}
 
-	// see TestRegister; this really only tests that they've been assigned to the app
+	// this merely tests that they've been assigned to the app
 	if len(a1.TypeWriters) != 2 {
 		t.Errorf("should have found 2 typewriters, found %v", len(a1.TypeWriters))
 	}
@@ -58,10 +65,13 @@ func TestNewApp(t *testing.T) {
 		t.Errorf("should have found no types, found %v", len(a2.Types))
 	}
 
-	// see TestRegister; this really only tests that nothing has changed
+	// this merely tests that they get assigned subsequently
 	if len(a2.TypeWriters) != 2 {
 		t.Errorf("should have found 2 typewriters, found %v", len(a2.TypeWriters))
 	}
+
+	// clear 'em out for later tests
+	typeWriters = make([]TypeWriter, 0)
 }
 
 func TestNewAppFiltered(t *testing.T) {
@@ -82,6 +92,14 @@ func TestNewAppFiltered(t *testing.T) {
 }
 
 func TestWriteAll(t *testing.T) {
+	// set up some registered typewriters for this app
+	// no error checking here, see TestRegister
+	fw1 := &fooWriter{}
+	bw1 := &barWriter{}
+
+	Register(fw1)
+	Register(bw1)
+
 	a1, err1 := NewApp("+test")
 
 	if err1 != nil {
@@ -90,31 +108,82 @@ func TestWriteAll(t *testing.T) {
 
 	a1.WriteAll()
 
-	if fw.validateCalls != len(a1.Types) {
+	if fw1.validateCalls != len(a1.Types) {
 		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.validateCalls)
 	}
 
-	if bw.validateCalls != len(a1.Types) {
+	if bw1.validateCalls != len(a1.Types) {
 		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.validateCalls)
 	}
 
-	if fw.writeHeaderCalls != len(a1.Types) {
+	if fw1.writeHeaderCalls != len(a1.Types) {
 		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeHeaderCalls)
 	}
 
 	// see Validate implementation below; chooses not to write dummy
-	if bw.writeHeaderCalls != len(a1.Types)-1 {
+	if bw1.writeHeaderCalls != len(a1.Types)-1 {
 		t.Errorf(".WriteHeader() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeHeaderCalls)
 	}
 
-	if fw.writeCalls != len(a1.Types) {
+	if fw1.writeCalls != len(a1.Types) {
 		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeCalls)
 	}
 
 	// see Validate implementation below; chooses not to write dummy
-	if bw.writeCalls != len(a1.Types)-1 {
+	if bw1.writeCalls != len(a1.Types)-1 {
 		t.Errorf(".Write() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeCalls)
 	}
+
+	// clear 'em out
+	typeWriters = make([]TypeWriter, 0)
+
+	// new set of writers for this test
+
+	fw2 := &fooWriter{}
+	bw2 := &barWriter{}
+	ew2 := &errWriter{}
+
+	Register(fw2)
+	Register(bw2)
+	Register(ew2)
+
+	a2, _ := NewApp("+test") // error checked above, ignore here
+
+	err2 := a2.WriteAll()
+
+	// if any writer returns an error on Validate(), everything should stop
+	// ie, don't write some and then fail on others
+
+	if err2 == nil {
+		t.Errorf("a validation that returns an error should return on WriteAll")
+	}
+
+	if fw.writeHeaderCalls != 0 {
+		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
+	}
+
+	if bw.writeHeaderCalls != 0 {
+		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", bw.writeHeaderCalls)
+	}
+
+	if ew.writeHeaderCalls != 0 {
+		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", ew.writeHeaderCalls)
+	}
+
+	if fw.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
+	}
+
+	if bw.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", bw.writeHeaderCalls)
+	}
+
+	if ew.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", ew.writeHeaderCalls)
+	}
+
+	// clear 'em out for later tests
+	typeWriters = make([]TypeWriter, 0)
 }
 
 type fooWriter struct {
@@ -167,6 +236,33 @@ func (f *barWriter) Imports(t Type) (result []string) {
 }
 
 func (f *barWriter) Write(w io.Writer, t Type) {
+	f.writeCalls++
+	return
+}
+
+type errWriter struct {
+	validateCalls, writeHeaderCalls, writeCalls int
+}
+
+func (f *errWriter) Name() string {
+	return "err"
+}
+
+func (f *errWriter) Validate(t Type) (bool, error) {
+	f.validateCalls++
+	return true, errors.New("sorry")
+}
+
+func (f *errWriter) WriteHeader(w io.Writer, t Type) {
+	f.writeHeaderCalls++
+	return
+}
+
+func (f *errWriter) Imports(t Type) (result []string) {
+	return result
+}
+
+func (f *errWriter) Write(w io.Writer, t Type) {
 	f.writeCalls++
 	return
 }
