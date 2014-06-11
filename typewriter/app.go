@@ -100,8 +100,9 @@ func (a app) WriteAll() error {
 
 	// format and commit to files
 	for f, b := range buffers {
-		src, err := formatToBytes(b)
+		src, err := format.Source(b.Bytes())
 
+		// shouldn't be an error if the ast parsing above succeeded
 		if err != nil {
 			return err
 		}
@@ -129,19 +130,6 @@ func write(w io.Writer, t Type, tw TypeWriter) {
 	packageTmpl.Execute(w, t.Package.Name())
 	importsTmpl.Execute(w, tw.Imports(t))
 	tw.Write(w, t)
-}
-
-// gofmt
-func formatToBytes(b *bytes.Buffer) ([]byte, error) {
-	byts := b.Bytes()
-
-	formatted, err := format.Source(byts)
-
-	if err != nil {
-		return byts, err
-	}
-
-	return formatted, nil
 }
 
 func writeFile(filename string, byts []byte) error {
