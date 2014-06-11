@@ -402,7 +402,7 @@ roomiest, err := houses.MaxBy(area)
 
             <p>Projections are specified by listing types in a <code>projection</code> tag. Here’s a marked-up type and some handy func’s, used in the examples below:</p>
 <pre>
-+gen projections:"int,string"
+// +gen projections:"int,string"
 type Thing struct { 
     Department string
     Year       int
