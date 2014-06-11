@@ -106,7 +106,9 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err1)
 	}
 
-	a1.WriteAll()
+	if err := a1.WriteAll(); err != nil {
+		t.Error(err)
+	}
 
 	if fw1.validateCalls != len(a1.Types) {
 		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.validateCalls)
