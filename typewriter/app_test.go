@@ -1,7 +1,9 @@
 package typewriter
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -88,6 +90,40 @@ func TestNewAppFiltered(t *testing.T) {
 	// app is filtered out, only dummy type
 	if len(a1.Types) != 1 {
 		t.Errorf("should have found 1 types, found %v", len(a1.Types))
+	}
+}
+
+func TestWrite(t *testing.T) {
+	a := &app{
+		Directive: "+test",
+	}
+
+	typ := Type{
+		Name:    "sometype",
+		Package: NewPackage("dummy", "somepkg"),
+	}
+
+	var b bytes.Buffer
+	write(&b, a, typ, &fooWriter{})
+
+	// make sure the critical bits actually get written
+
+	s := b.String()
+
+	if !strings.Contains(s, "licensing") {
+		t.Errorf("WriteHeader did not write 'licensing' as expected")
+	}
+
+	if !strings.Contains(s, "package somepkg") {
+		t.Errorf("package declaration did not get written")
+	}
+
+	if !strings.Contains(s, "import") || !strings.Contains(s, `"fmt"`) {
+		t.Errorf("imports declaration or package did not get written")
+	}
+
+	if !strings.Contains(s, "func pointlesssometype()") {
+		t.Errorf("Write did not write func as expected")
 	}
 }
 
@@ -224,15 +260,20 @@ func (f *fooWriter) Validate(t Type) (bool, error) {
 
 func (f *fooWriter) WriteHeader(w io.Writer, t Type) {
 	f.writeHeaderCalls++
+	w.Write([]byte("// some licensing stuff"))
 	return
 }
 
 func (f *fooWriter) Imports(t Type) (result []string) {
+	result = append(result, "fmt")
 	return result
 }
 
 func (f *fooWriter) Write(w io.Writer, t Type) {
 	f.writeCalls++
+	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
+		fmt.Println("pointless!")
+		}`, t.LocalName())))
 	return
 }
 
