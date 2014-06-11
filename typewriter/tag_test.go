@@ -45,7 +45,24 @@ func TestParseTags(t *testing.T) {
 	}
 
 	if pointer2 {
-		t.Errorf("pointer should not have been found in %s", doc)
+		t.Errorf("pointer should not have been found in %s", doc2)
+	}
+
+	doc3 := `// some stuff that's actually a comment
++test * foo:"bar,Baz" thing:"Stuff, yay" more:"stuff"
+`
+	pointer3, tags3, found3 := parseTags("+test", doc3)
+
+	if !found3 {
+		t.Errorf("tags should have been found in %s", doc3)
+	}
+
+	if !pointer3 {
+		t.Errorf("pointer should have been found in %s", doc3)
+	}
+
+	if len(tags3) != 3 {
+		t.Errorf("3 tags should have been found in %s; found %v", doc3, len(tags3))
 	}
 }
 
