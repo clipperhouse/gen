@@ -2,6 +2,7 @@ package typewriter
 
 import (
 	"code.google.com/p/go.tools/go/types"
+	"fmt"
 )
 
 type Type struct {
@@ -14,11 +15,11 @@ type Type struct {
 }
 
 func (t *Type) String() (result string) {
-	return t.Pointer.String() + t.Package.Name() + t.Name
+	return fmt.Sprintf("%s%s.%s", t.Pointer.String(), t.Package.Name(), t.Name)
 }
 
 func (t *Type) LocalName() (result string) {
-	return t.Pointer.String() + t.Name
+	return fmt.Sprintf("%s%s", t.Pointer.String(), t.Name)
 }
 
 func (t *Type) Comparable() bool {
