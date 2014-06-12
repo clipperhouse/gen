@@ -78,7 +78,7 @@ func TestNewApp(t *testing.T) {
 
 func TestNewAppFiltered(t *testing.T) {
 	filter := func(f os.FileInfo) bool {
-		return !strings.HasPrefix(f.Name(), "app")
+		return !strings.HasPrefix(f.Name(), "dummy")
 	}
 
 	a1, err1 := NewAppFiltered("+test", filter)
@@ -87,7 +87,7 @@ func TestNewAppFiltered(t *testing.T) {
 		t.Error(err1)
 	}
 
-	// app is filtered out, only dummy type
+	// dummy is filtered out
 	if len(a1.Types) != 1 {
 		t.Errorf("should have found 1 types, found %v", len(a1.Types))
 	}

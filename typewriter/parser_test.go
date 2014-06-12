@@ -6,9 +6,6 @@ import (
 	"testing"
 )
 
-// +test foo:"bar"
-type dummy int
-
 func TestGetTypes(t *testing.T) {
 	// app and dummy types are marked up with +test
 	typs, err := getTypes("+test", nil)
@@ -71,7 +68,7 @@ func TestGetTypes(t *testing.T) {
 	// filtered types should not show up
 
 	filter := func(f os.FileInfo) bool {
-		return !strings.HasPrefix(f.Name(), "app")
+		return !strings.HasPrefix(f.Name(), "dummy")
 	}
 
 	typs2, err2 := getTypes("+test", filter)
@@ -86,19 +83,19 @@ func TestGetTypes(t *testing.T) {
 
 	m2 := typeSliceToMap(typs2)
 
-	if _, found := m2["app"]; found {
-		t.Errorf("should not have found the app type")
+	if _, found := m2["dummy"]; found {
+		t.Errorf("should not have found the dummy type")
 	}
 
-	if _, found := m2["dummy"]; !found {
-		t.Errorf("should have found the dummy type")
+	if _, found := m2["app"]; !found {
+		t.Errorf("should have found the app type")
 	}
 
 	// no false positives
-	typs3, err3 := getTypes("+dummy", nil)
+	typs3, err3 := getTypes("+notreal", nil)
 
 	if len(typs3) != 0 {
-		t.Errorf("should have no marked-up types for +dummy")
+		t.Errorf("should have no marked-up types for +notreal")
 	}
 
 	if err3 != nil {
