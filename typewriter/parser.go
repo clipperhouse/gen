@@ -47,7 +47,11 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 
 		for _, docType := range docPkg.Types {
 
-			pointer, tags, found := parseTags(directive, docType.Doc)
+			pointer, tags, found, tagErr := parseTags(directive, docType.Doc)
+
+			if tagErr != nil {
+				return typs, tagErr
+			}
 
 			if !found {
 				continue
@@ -98,9 +102,11 @@ func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error)
 var tagreg = regexp.MustCompile(`(\p{L}[\p{L}\p{N}]*):"([^\"]+?)"`)
 
 // identifies gen-marked types and parses tags
-func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool) {
+func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool, err error) {
 	lines := strings.Split(doc, "\n")
 	for _, line := range lines {
+		original := line
+
 		// strategy is to remove meaningful tokens as they are found
 		// kind of a hack, a real parser someday
 
@@ -114,7 +120,10 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 
 		// next character needs to be a space or end of string
 		if !(len(line) == 0 || strings.HasPrefix(line, " ")) {
-			// TODO: error
+			err = fmt.Errorf(`the directive %s needs to be followed by a space or end of line, see source containing
+%s
+`, directive, original)
+			return
 		}
 
 		// ok, we got something
@@ -131,7 +140,10 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 
 			// if found, next character needs to be a space or end of string
 			if !(len(line) == 0 || strings.HasPrefix(line, " ")) {
-				// TODO: error
+				err = fmt.Errorf(`the pointer needs to be followed by a space or end of line, see source containing
+%s
+`, original)
+				return
 			}
 		}
 
@@ -155,7 +167,13 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 		line = strings.Trim(line, " ")
 
 		// anything remaining is invalid
-		// TODO: return err
+
+		if len(line) > 0 {
+			err = fmt.Errorf(`unknown syntax '%s', see
+%s
+`, line, original)
+			return
+		}
 	}
 	return
 }

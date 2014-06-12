@@ -9,7 +9,11 @@ func TestParseTags(t *testing.T) {
 	doc := `// some stuff that's actually a comment
 +test foo:"bar,Baz"
 `
-	pointer, tags, found := parseTags("+test", doc)
+	pointer, tags, found, err := parseTags("+test", doc)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if !found {
 		t.Errorf("tag should have been found in %s", doc)
@@ -26,7 +30,11 @@ func TestParseTags(t *testing.T) {
 	doc2 := `// some stuff that's actually a comment
 +test foo:"bar,Baz" thing:"Stuff, yay"
 `
-	pointer2, tags2, found2 := parseTags("+test", doc2)
+	pointer2, tags2, found2, err2 := parseTags("+test", doc2)
+
+	if err2 != nil {
+		t.Error(err2)
+	}
 
 	if !found2 {
 		t.Errorf("tags should have been found in %s", doc2)
@@ -51,7 +59,11 @@ func TestParseTags(t *testing.T) {
 	doc3 := `// some stuff that's actually a comment
 +test * foo:"bar,Baz" thing:"Stuff, yay" more:"stuff"
 `
-	pointer3, tags3, found3 := parseTags("+test", doc3)
+	pointer3, tags3, found3, err3 := parseTags("+test", doc3)
+
+	if err3 != nil {
+		t.Error(err3)
+	}
 
 	if !found3 {
 		t.Errorf("tags should have been found in %s", doc3)
@@ -63,6 +75,33 @@ func TestParseTags(t *testing.T) {
 
 	if len(tags3) != 3 {
 		t.Errorf("3 tags should have been found in %s; found %v", doc3, len(tags3))
+	}
+
+	doc4 := `// some stuff that's actually a comment
++test * foo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
+`
+	_, _, _, err4 := parseTags("+test", doc4)
+
+	if err4 == nil {
+		t.Error("invalid syntax should return error")
+	}
+
+	doc5 := `// some stuff that's actually a comment
++testfoo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
+`
+	_, _, _, err5 := parseTags("+test", doc5)
+
+	if err5 == nil {
+		t.Error("invalid syntax should return error")
+	}
+
+	doc6 := `// some stuff that's actually a comment
++test *foo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
+`
+	_, _, _, err6 := parseTags("+test", doc6)
+
+	if err6 == nil {
+		t.Error("invalid syntax should return error")
 	}
 }
 
