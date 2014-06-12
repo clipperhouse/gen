@@ -91,6 +91,19 @@ func TestNewAppFiltered(t *testing.T) {
 	if len(a1.Types) != 1 {
 		t.Errorf("should have found 1 types, found %v", len(a1.Types))
 	}
+
+	// should fail if types can't be evaluated
+	// package.go by itself can't compile since it depends on other types
+	filter2 := func(f os.FileInfo) bool {
+		return f.Name() == "package.go"
+	}
+
+	_, err2 := NewAppFiltered("+test", filter2)
+
+	if err2 == nil {
+		t.Error("should have been unable to create app for an incomplete package")
+	}
+
 }
 
 func TestWrite(t *testing.T) {

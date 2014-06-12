@@ -101,6 +101,19 @@ func TestGetTypes(t *testing.T) {
 	if err3 != nil {
 		t.Error(err3)
 	}
+
+	// should fail if types can't be evaluated
+	// package.go by itself can't compile since it depends on other types
+
+	filter4 := func(f os.FileInfo) bool {
+		return f.Name() == "package.go"
+	}
+
+	_, err4 := getTypes("+test", filter4)
+
+	if err4 == nil {
+		t.Error("should have been unable to evaluate types of incomplete package")
+	}
 }
 
 func typeSliceToMap(typs []Type) map[string]Type {
