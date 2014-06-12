@@ -159,6 +159,9 @@ func writeFile(filename string, byts []byte) error {
 
 	w.Write(byts)
 
+	// TODO: make this optional or do a proper logging/verbosity thing
+	fmt.Printf("  writing %s\n", filename)
+
 	return nil
 }
 
