@@ -2,7 +2,7 @@
 
 `gen` is an attempt to bring some generics-like functionality to Go, with some inspiration from C#’s Linq and JavaScript’s underscore libraries. It’s currently an early alpha.
 
-####[Introduction and docs...](http://clipperhouse.github.io/gen/)
+####[Introduction and docs…](http://clipperhouse.github.io/gen/)
 
 [Changelog](http://clipperhouse.github.io/gen/#Changelog)
 
