@@ -649,6 +649,28 @@ type MyType struct {
 
             <h2 id="Changelog">Changelog</h2>
 
+            <p><strong>12 Jun 2014</strong></p>
+
+            <p>A new architecture based on ‘typewriters’. Ideally you should see little change, but…</p>
+
+            <p>This was a long-lived branch, around 6 weeks. The architecture should be a lot better, as well as the testing. But of course regressions are possible.</p>
+
+            <p>I will mark this with a <a href="https://github.com/clipperhouse/gen/releases">release</a> 2.0 tag following semver conventions, since there are some behavioral changes. If there are regressions for you, you can use gopkg.in to stick with 1.0.</p>
+
+            <p>A few important behavioral changes:</p>
+
+            <ul>
+                <li>Each typewriter now outputs a separate file, eg <code>_gen.go</code> and <code>_container.go</code>. This should not be a breaking change. Formerly, there was a single <code>_gen.go</code> file</li>
+                <li>Previously-gen’d files which have been ‘un-gen’d’ (i.e. removed a tag) will not be deleted as before. Do this manually if need be, but I hope it’s an edge case. Will consider adding it back in.</li>
+                <li>The <code>-force</code> flag is gone. Officially, it was undefined behavior, intended for use if you get yourself into a jam.</li>
+            </ul>
+
+            <p>The contents of your gen’d files may be slightly different, but their behavior should be unchanged.</p>
+
+            <p>We are going to exploit this architecture to do some <strike style="color:#888; text-decoration:line-through">evil</strike> interesting things, stay tuned.</p>
+
+            <p>Any trouble, please let me know via a GitHub issue, or Twitter, or…</p>
+
             <p><strong>9 Mar 2014</strong></p>
 
             <p>Preliminary support for <a href="#Containers">containers</a>, starting with Set, List and Ring. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions), and to add compile-time safety.</p>
