@@ -12,6 +12,33 @@ type {{.Plural}} []{{.Pointer}}{{.Name}}
 `,
 	},
 
+	"predicates": &typewriter.Template{
+		Text: `// {{.Predicate}} is a function that accepts a {{.Pointer}}{{.Name}} and returns a bool.  Used with gen methods below. Use this type where you would use func({{.Pointer}}{{.Name}}) bool.
+type {{.Predicate}} func(item {{.Pointer}}{{.Name}}) bool
+
+// And combines two predicates into a new predicate that is satisfied if both of the original predicates are satisfied
+func (rcv {{.Predicate}}) And(other {{.Predicate}}) {{.Predicate}} {
+	return func (item {{.Pointer}}{{.Name}}) bool {
+		return rcv(item) && other(item)
+	}
+}
+
+// Or combines two predicates into a new predicate that is satisfied if either of the original predicates is satisfied
+func (rcv {{.Predicate}}) Or(other {{.Predicate}}) {{.Predicate}} {
+	return func (item {{.Pointer}}{{.Name}}) bool {
+		return rcv(item)|| other(item)
+	}
+}
+
+// Not inverts a predicate that is satisfied if the original predicates is not satisfied
+func (rcv {{.Predicate}}) Not() {{.Predicate}} {
+	return func (item {{.Pointer}}{{.Name}}) bool {
+		return !rcv(item)
+	}
+}
+`,
+	},
+
 	"All": &typewriter.Template{
 		Text: `
 // All verifies that all elements of {{.Plural}} return true for the passed func. See: http://clipperhouse.github.io/gen/#All

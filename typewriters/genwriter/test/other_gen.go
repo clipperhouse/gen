@@ -12,6 +12,30 @@ import (
 // Others is a slice of type Other, for use with gen methods below. Use this type where you would use []Other. (This is required because slices cannot be method receivers.)
 type Others []Other
 
+// OtherPredicate is a function that accepts a Other and returns a bool.  Used with gen methods below. Use this type where you would use func(Other) bool.
+type OtherPredicate func(item Other) bool
+
+// And combines two predicates into a new predicate that is satisfied if both of the original predicates are satisfied
+func (rcv OtherPredicate) And(other OtherPredicate) OtherPredicate {
+	return func(item Other) bool {
+		return rcv(item) && other(item)
+	}
+}
+
+// Or combines two predicates into a new predicate that is satisfied if either of the original predicates is satisfied
+func (rcv OtherPredicate) Or(other OtherPredicate) OtherPredicate {
+	return func(item Other) bool {
+		return rcv(item) || other(item)
+	}
+}
+
+// Not inverts a predicate that is satisfied if the original predicates is not satisfied
+func (rcv OtherPredicate) Not() OtherPredicate {
+	return func(item Other) bool {
+		return !rcv(item)
+	}
+}
+
 // Max returns the maximum value of Others. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
 func (rcv Others) Max() (result Other, err error) {
 	l := len(rcv)
