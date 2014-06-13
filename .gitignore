@@ -1,4 +1,7 @@
 install.sh
 watch.sh
 coverage.out
+*_bar.go
+*_foo.go
+*_container.go
 *_gen.go
