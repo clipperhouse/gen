@@ -2,6 +2,7 @@
 // TypeWriter: gen
 // Directive: +test on main.Thing
 
+// See http://clipperhouse.github.io/gen for documentation
 // Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -13,7 +14,7 @@ import (
 	"errors"
 )
 
-// Things is a slice of type Thing, for use with gen methods below. Use this type where you would use []Thing. (This is required because slices cannot be method receivers.)
+// Things is a slice of type Thing. Use it where you would use []Thing.
 type Things []Thing
 
 // All verifies that all elements of Things return true for the passed func. See: http://clipperhouse.github.io/gen/#All

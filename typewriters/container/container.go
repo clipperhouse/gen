@@ -39,6 +39,11 @@ func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
+	s := `// See http://clipperhouse.github.io/gen for documentation
+
+`
+	w.Write([]byte(s))
+
 	var list, ring, set bool
 
 	for _, s := range tag.Items {

@@ -7,7 +7,7 @@ import (
 var standardTemplates = typewriter.TemplateSet{
 
 	"plural": &typewriter.Template{
-		Text: `// {{.Plural}} is a slice of type {{.Pointer}}{{.Name}}, for use with gen methods below. Use this type where you would use []{{.Pointer}}{{.Name}}. (This is required because slices cannot be method receivers.)
+		Text: `// {{.Plural}} is a slice of type {{.Pointer}}{{.Name}}. Use it where you would use []{{.Pointer}}{{.Name}}.
 type {{.Plural}} []{{.Pointer}}{{.Name}}
 `,
 	},

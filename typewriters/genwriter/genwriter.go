@@ -136,11 +136,17 @@ func (g GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 		return
 	}
 
+	s := `// See http://clipperhouse.github.io/gen for documentation
+
+`
+	w.Write([]byte(s))
+
 	if includeSortSupport(m.methods) {
 		s := `// Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found at http://golang.org/LICENSE.
+
 `
 		w.Write([]byte(s))
 	}

@@ -2,6 +2,8 @@
 // TypeWriter: gen
 // Directive: +test on main.Other
 
+// See http://clipperhouse.github.io/gen for documentation
+
 package main
 
 import (
@@ -9,7 +11,7 @@ import (
 	"sort"
 )
 
-// Others is a slice of type Other, for use with gen methods below. Use this type where you would use []Other. (This is required because slices cannot be method receivers.)
+// Others is a slice of type Other. Use it where you would use []Other.
 type Others []Other
 
 // Max returns the maximum value of Others. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
