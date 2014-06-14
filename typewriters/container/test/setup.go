@@ -3,10 +3,11 @@
 package main
 
 import (
-	"github.com/clipperhouse/gen/typewriter"
-	_ "github.com/clipperhouse/gen/typewriters/container"
 	"os"
 	"strings"
+
+	"github.com/clipperhouse/gen/typewriter"
+	_ "github.com/clipperhouse/gen/typewriters/container"
 )
 
 func main() {

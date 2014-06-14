@@ -1,8 +1,9 @@
 package genwriter
 
 import (
-	"github.com/clipperhouse/gen/typewriter"
 	"testing"
+
+	"github.com/clipperhouse/gen/typewriter"
 )
 
 func TestEvaluateTags(t *testing.T) {

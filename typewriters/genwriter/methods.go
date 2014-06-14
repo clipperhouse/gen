@@ -2,9 +2,10 @@ package genwriter
 
 import (
 	"fmt"
-	"github.com/clipperhouse/gen/typewriter"
 	"regexp"
 	"strings"
+
+	"github.com/clipperhouse/gen/typewriter"
 )
 
 // This business exists because I overload the methods tag to specify both standard and projection methods.

@@ -1,8 +1,9 @@
 package typewriter
 
 import (
-	"code.google.com/p/go.tools/go/types"
 	"fmt"
+
+	"code.google.com/p/go.tools/go/types"
 )
 
 type Type struct {

@@ -1,8 +1,6 @@
 package typewriter
 
 import (
-	_ "code.google.com/p/go.tools/go/gcimporter"
-	"code.google.com/p/go.tools/go/types"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -13,6 +11,9 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	_ "code.google.com/p/go.tools/go/gcimporter"
+	"code.google.com/p/go.tools/go/types"
 )
 
 func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {

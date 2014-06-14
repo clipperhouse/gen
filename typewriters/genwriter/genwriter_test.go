@@ -3,11 +3,12 @@ package genwriter
 import (
 	"bytes"
 	"fmt"
-	"github.com/clipperhouse/gen/typewriter"
 	"go/parser"
 	"go/token"
 	"strings"
 	"testing"
+
+	"github.com/clipperhouse/gen/typewriter"
 )
 
 func TestValidate(t *testing.T) {
