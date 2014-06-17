@@ -13,10 +13,13 @@ import (
 func get(u bool) {
 	imports := make([]string, 0)
 
-	if _, err := os.Open("_gen.go"); err == nil {
+	if src, err := os.Open("_gen.go"); err == nil {
 		// custom file exists, parse its imports
+
+		defer src.Close()
+
 		fset := token.NewFileSet()
-		if f, err := parser.ParseFile(fset, "_gen.go", nil, parser.ImportsOnly); err == nil {
+		if f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly); err == nil {
 			for _, v := range f.Imports {
 				imports = append(imports, v.Path.Value)
 			}
@@ -26,7 +29,8 @@ func get(u bool) {
 		imports = append(imports, stdImports...)
 	}
 
-	// clean `em up, hacky; TODO: a better way
+	// clean `em up, hacky
+	// TODO: a better way to express imports
 	for i := range imports {
 		imports[i] = strings.Trim(imports[i], `_ "`)
 	}
