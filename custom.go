@@ -21,5 +21,5 @@ func custom() {
 		Main:    false,
 	}
 
-	write(w, p)
+	tmpl.Execute(w, p)
 }

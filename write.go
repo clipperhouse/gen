@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -14,10 +13,6 @@ func getTempDir() (string, error) {
 	caller := filepath.Base(os.Args[0])
 	wd, _ := os.Getwd()
 	return ioutil.TempDir(wd, caller)
-}
-
-func write(w io.Writer, p pkg) {
-	tmpl.Execute(w, p)
 }
 
 var tmpl = template.Must(template.New("package").Parse(`package {{.Name}}
