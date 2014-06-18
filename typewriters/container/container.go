@@ -18,17 +18,17 @@ type ContainerWriter struct {
 	tagsByType map[string]typewriter.Tag // typewriter.Type is not comparable, key by .String()
 }
 
-func NewContainerWriter() ContainerWriter {
-	return ContainerWriter{
+func NewContainerWriter() *ContainerWriter {
+	return &ContainerWriter{
 		tagsByType: make(map[string]typewriter.Tag),
 	}
 }
 
-func (c ContainerWriter) Name() string {
+func (c *ContainerWriter) Name() string {
 	return "container"
 }
 
-func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
+func (c *ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 	tag, found, err := t.Tags.ByName("containers")
 	if found && err == nil {
 		c.tagsByType[t.String()] = tag
@@ -36,7 +36,7 @@ func (c ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 	return found, err
 }
 
-func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
 	s := `// See http://clipperhouse.github.io/gen for documentation
@@ -90,11 +90,11 @@ func (c ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	return
 }
 
-func (c ContainerWriter) Imports(t typewriter.Type) (result []string) {
+func (c *ContainerWriter) Imports(t typewriter.Type) (result []string) {
 	return result
 }
 
-func (c ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
+func (c *ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
 	for _, s := range tag.Items {

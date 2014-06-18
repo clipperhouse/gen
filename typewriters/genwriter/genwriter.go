@@ -21,8 +21,8 @@ type GenWriter struct {
 	validated map[string]bool
 }
 
-func NewGenWriter() GenWriter {
-	return GenWriter{
+func NewGenWriter() *GenWriter {
+	return &GenWriter{
 		models:    make(map[string]model),
 		validated: make(map[string]bool),
 	}
@@ -44,7 +44,7 @@ func (m model) Plural() (result string) {
 }
 
 // genwriter prepares models for later use in the .Validate() method. It must be called prior.
-func (g GenWriter) ensureValidation(t typewriter.Type) error {
+func (g *GenWriter) ensureValidation(t typewriter.Type) error {
 	if !g.validated[t.String()] {
 		return fmt.Errorf("Type '%s' has not been previously validated. TypeWriter.Validate() must be called on all types before using them in subsequent methods.", t.String())
 	}
@@ -52,11 +52,11 @@ func (g GenWriter) ensureValidation(t typewriter.Type) error {
 	return nil
 }
 
-func (g GenWriter) Name() string {
+func (g *GenWriter) Name() string {
 	return "gen"
 }
 
-func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
+func (g *GenWriter) Validate(t typewriter.Type) (bool, error) {
 	standardMethods, projectionMethods, err := evaluateTags(t)
 	if err != nil {
 		return false, err
@@ -123,7 +123,7 @@ func (g GenWriter) Validate(t typewriter.Type) (bool, error) {
 	return true, nil
 }
 
-func (g GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+func (g *GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	err := g.ensureValidation(t)
 
 	if err != nil {
@@ -154,7 +154,7 @@ func (g GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	return
 }
 
-func (g GenWriter) Imports(t typewriter.Type) (result []string) {
+func (g *GenWriter) Imports(t typewriter.Type) (result []string) {
 	err := g.ensureValidation(t)
 
 	if err != nil {
@@ -208,7 +208,7 @@ func (g GenWriter) Imports(t typewriter.Type) (result []string) {
 	return
 }
 
-func (g GenWriter) WriteBody(w io.Writer, t typewriter.Type) {
+func (g *GenWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	err := g.ensureValidation(t)
 
 	if err != nil {
