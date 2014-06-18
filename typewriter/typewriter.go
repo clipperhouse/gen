@@ -13,5 +13,5 @@ type TypeWriter interface {
 	// Imports is a slice of import paths required for the type.
 	Imports(t Type) []string
 	// Write writes to the body of the generated code. This is the meat.
-	Write(w io.Writer, t Type)
+	WriteBody(w io.Writer, t Type)
 }

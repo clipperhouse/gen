@@ -145,7 +145,7 @@ func write(w io.Writer, a *app, t Type, tw TypeWriter) {
 
 	importsTmpl.Execute(w, tw.Imports(t))
 
-	tw.Write(w, t)
+	tw.WriteBody(w, t)
 }
 
 func writeFile(filename string, byts []byte) error {

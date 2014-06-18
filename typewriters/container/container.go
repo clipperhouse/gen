@@ -94,7 +94,7 @@ func (c ContainerWriter) Imports(t typewriter.Type) (result []string) {
 	return result
 }
 
-func (c ContainerWriter) Write(w io.Writer, t typewriter.Type) {
+func (c ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
 	for _, s := range tag.Items {

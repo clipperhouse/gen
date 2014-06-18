@@ -208,7 +208,7 @@ func (g GenWriter) Imports(t typewriter.Type) (result []string) {
 	return
 }
 
-func (g GenWriter) Write(w io.Writer, t typewriter.Type) {
+func (g GenWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	err := g.ensureValidation(t)
 
 	if err != nil {
