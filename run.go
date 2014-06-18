@@ -15,6 +15,7 @@ import (
 func run() {
 	if src, err := os.Open("_gen.go"); err == nil {
 		// custom imports file exists, use it
+		defer src.Close()
 		runCustom(src)
 	} else {
 		// do it the regular way
@@ -35,8 +36,6 @@ func runStandard() {
 }
 
 func runCustom(src *os.File) {
-	defer src.Close()
-
 	temp, err := getTempDir()
 	if err != nil {
 		// TODO return err?
