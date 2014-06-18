@@ -75,7 +75,6 @@ func runCustom(src *os.File) {
 	var out bytes.Buffer
 
 	cmd := exec.Command("go", "run", main.Name(), imports.Name())
-	cmd.Dir = temp
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 
@@ -83,8 +82,11 @@ func runCustom(src *os.File) {
 		fmt.Println(err)
 	}
 
-	if out.Len() > 0 {
-		fmt.Println(out.String())
+	s := strings.TrimRight(out.String(), `
+`)
+
+	if len(s) > 0 {
+		fmt.Println(s)
 	}
 
 	if strings.Contains(out.String(), "cannot find package") {
