@@ -13,7 +13,7 @@ import (
 )
 
 func run() {
-	if src, err := os.Open("_gen.go"); err == nil {
+	if src, err := os.Open(customFilename); err == nil {
 		// custom imports file exists, use it
 		defer src.Close()
 		runCustom(src)
