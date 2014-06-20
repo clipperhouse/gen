@@ -6,6 +6,8 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+const customFilename string = "_gen.go"
+
 func main() {
 	a := &cli.App{
 		Name:    os.Args[0],
@@ -21,7 +23,7 @@ func main() {
 			{
 				Name: "custom",
 				Action: func(c *cli.Context) {
-					custom()
+					custom(customFilename)
 				},
 				Usage: "Creates a custom _gen.go file in which to specify your own typewriter imports",
 			},

@@ -13,7 +13,7 @@ import (
 func get(u bool) {
 	imports := make([]string, 0)
 
-	if src, err := os.Open("_gen.go"); err == nil {
+	if src, err := os.Open(customFilename); err == nil {
 		// custom file exists, parse its imports
 
 		defer src.Close()

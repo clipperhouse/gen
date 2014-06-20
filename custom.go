@@ -5,10 +5,11 @@ import (
 	"os"
 )
 
-func custom() {
-	w, err := os.Create("_gen.go")
+func custom(filename string) {
+	w, err := os.Create(filename)
 
 	if err != nil {
+		// TODO: return err
 		fmt.Println(err)
 		return
 	}
