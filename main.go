@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -10,6 +10,8 @@ import (
 const customFilename string = "_gen.go"
 
 func main() {
+	// keep UI (cli) concerns out of the main routines
+	// output and exit should happen up here, not down there
 	a := &cli.App{
 		Name:    os.Args[0],
 		Usage:   "http://clipperhouse.github.io/gen",
@@ -18,16 +20,16 @@ func main() {
 		Email:   "mwsherman@gmail.com",
 		Action: func(c *cli.Context) {
 			if err := run(); err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				log.Fatalln(err)
 			}
 		},
 		Commands: []cli.Command{
-			// keep UI (cli) concerns out of the main routines
 			{
 				Name: "custom",
 				Action: func(c *cli.Context) {
-					custom(customFilename)
+					if err := custom(customFilename); err != nil {
+						log.Fatalln(err)
+					}
 				},
 				Usage: "Creates a custom _gen.go file in which to specify your own typewriter imports",
 			},

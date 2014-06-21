@@ -1,17 +1,12 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
-func custom(filename string) {
+func custom(filename string) error {
 	w, err := os.Create(filename)
 
 	if err != nil {
-		// TODO: return err
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	defer w.Close()
@@ -22,5 +17,9 @@ func custom(filename string) {
 		Main:    false,
 	}
 
-	tmpl.Execute(w, p)
+	if err := tmpl.Execute(w, p); err != nil {
+		return err
+	}
+
+	return nil
 }
