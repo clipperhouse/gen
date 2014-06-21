@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,43 +13,47 @@ import (
 	"github.com/clipperhouse/gen/typewriter"
 )
 
-func run() {
+func run() error {
 	if src, err := os.Open(customFilename); err == nil {
 		// custom imports file exists, use it
 		defer src.Close()
-		runCustom(src)
+		if err := runCustom(src); err != nil {
+			return err
+		}
 	} else {
 		// do it the regular way
-		runStandard()
+		if err := runStandard(); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func runStandard() {
+func runStandard() error {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if err := app.WriteAll(); err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
-func runCustom(src *os.File) {
+func runCustom(src *os.File) error {
 	temp, err := getTempDir()
 	if err != nil {
-		// TODO return err?
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer os.RemoveAll(temp)
 
 	// set up imports file containing the custom typewriters (from _gen.go)
 	imports, err := os.Create(filepath.Join(temp, "imports.go"))
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer imports.Close()
 
@@ -57,8 +62,7 @@ func runCustom(src *os.File) {
 	// set up main to be run
 	main, err := os.Create(filepath.Join(temp, "main.go"))
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer main.Close()
 
@@ -69,16 +73,23 @@ func runCustom(src *os.File) {
 		},
 		Main: true,
 	}
-	tmpl.Execute(main, p)
 
-	var out bytes.Buffer
+	if err := tmpl.Execute(main, p); err != nil {
+		return err
+	}
+
+	var out, outerr bytes.Buffer
 
 	cmd := exec.Command("go", "run", main.Name(), imports.Name())
 	cmd.Stdout = &out
-	cmd.Stderr = &out
+	cmd.Stderr = &outerr
 
 	if err = cmd.Run(); err != nil {
-		fmt.Println(err)
+		return err
+	}
+
+	if outerr.Len() > 0 {
+		return errors.New(outerr.String())
 	}
 
 	s := strings.TrimRight(out.String(), `
@@ -88,7 +99,5 @@ func runCustom(src *os.File) {
 		fmt.Println(s)
 	}
 
-	if strings.Contains(out.String(), "cannot find package") {
-		fmt.Println("try running `go get` for individual imports in _gen.go")
-	}
+	return nil
 }

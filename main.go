@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -16,7 +17,10 @@ func main() {
 		Author:  "Matt Sherman",
 		Email:   "mwsherman@gmail.com",
 		Action: func(c *cli.Context) {
-			run()
+			if err := run(); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		},
 		Commands: []cli.Command{
 			// keep UI (cli) concerns out of the main routines
