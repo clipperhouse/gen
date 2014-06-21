@@ -154,7 +154,7 @@ func (g *GenWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	return
 }
 
-func (g *GenWriter) Imports(t typewriter.Type) (result []string) {
+func (g *GenWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) {
 	err := g.ensureValidation(t)
 
 	if err != nil {
@@ -202,7 +202,9 @@ func (g *GenWriter) Imports(t typewriter.Type) (result []string) {
 	}
 
 	for s := range imports {
-		result = append(result, s)
+		result = append(result, typewriter.ImportSpec{
+			Path: s,
+		})
 	}
 
 	return

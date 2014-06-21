@@ -200,7 +200,7 @@ func TestImports(t *testing.T) {
 	g.Validate(typ)
 	imports := g.Imports(typ)
 
-	if !sliceContains(imports, "errors") {
+	if !importSliceContains(imports, "errors") {
 		t.Errorf("imports should include 'errors'")
 	}
 
@@ -274,7 +274,7 @@ func TestWrite(t *testing.T) {
 
 		g.Validate(typ)
 		b.WriteString(fmt.Sprintf("package %s\n", pkg.Name()))
-		g.Write(&b, typ)
+		g.WriteBody(&b, typ)
 
 		src := b.String()
 
@@ -287,9 +287,18 @@ func TestWrite(t *testing.T) {
 	}
 }
 
-func sliceContains(a []string, s string) bool {
+func stringSliceContains(a []string, s string) bool {
 	for _, v := range a {
 		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func importSliceContains(a []typewriter.ImportSpec, path string) bool {
+	for _, v := range a {
+		if v.Path == path {
 			return true
 		}
 	}

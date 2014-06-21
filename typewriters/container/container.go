@@ -90,7 +90,8 @@ func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	return
 }
 
-func (c *ContainerWriter) Imports(t typewriter.Type) (result []string) {
+func (c *ContainerWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) {
+	// none
 	return result
 }
 

@@ -167,7 +167,7 @@ func writeFile(filename string, byts []byte) error {
 
 var importsTmpl = template.Must(template.New("imports").Parse(`{{if gt (len .) 0}}
 import ({{range .}}
-	"{{.}}"{{end}}
+	{{.Name}} "{{.Path}}"{{end}}
 )
 {{end}}
 `))
