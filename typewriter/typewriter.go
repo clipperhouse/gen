@@ -14,6 +14,6 @@ type TypeWriter interface {
 	WriteHeader(w io.Writer, t Type)
 	// Imports is a slice of imports required for the type; each will be written into the imports declaration.
 	Imports(t Type) []ImportSpec
-	// Write writes to the body of the generated code, following package declaration, headers and imports. This is the meat.
+	// WriteBody writes to the body of the generated code, following package declaration, headers and imports. This is the meat.
 	WriteBody(w io.Writer, t Type)
 }
