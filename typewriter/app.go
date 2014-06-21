@@ -38,6 +38,10 @@ func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*app, erro
 		return a, err
 	}
 
+	if len(typs) == 0 {
+		return a, fmt.Errorf("no types marked with %s were found, so there is nothing to gen. see http://clipperhouse.github.io/gen to get started.", directive)
+	}
+
 	a.Types = typs
 	a.TypeWriters = typeWriters
 	return a, nil
