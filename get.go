@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/parser"
 	"go/token"
@@ -10,26 +11,27 @@ import (
 	"strings"
 )
 
-func get(u bool) {
+func get(u bool) error {
 	imports := make([]string, 0)
 
 	if src, err := os.Open(customFilename); err == nil {
 		// custom file exists, parse its imports
-
 		defer src.Close()
 
 		fset := token.NewFileSet()
-		if f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly); err == nil {
-			for _, v := range f.Imports {
-				imports = append(imports, v.Path.Value)
-			}
+		f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly)
+		if err != nil {
+			return err
+		}
+		for _, v := range f.Imports {
+			imports = append(imports, v.Path.Value)
 		}
 	} else {
 		// doesn't exist, use standard
 		imports = append(imports, stdImports...)
 	}
 
-	// clean `em up, hacky
+	// clean `em up
 	// TODO: a better way to express imports
 	for i := range imports {
 		imports[i] = strings.Trim(imports[i], `_ "`)
@@ -42,17 +44,23 @@ func get(u bool) {
 
 	get = append(get, imports...)
 
-	var out bytes.Buffer
+	var out, outerr bytes.Buffer
 
 	cmd := exec.Command("go", get...)
 	cmd.Stdout = &out
-	cmd.Stderr = &out
+	cmd.Stderr = &outerr
 
 	if err := cmd.Run(); err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	if out.Len() > 0 {
 		fmt.Println(out.String())
 	}
+
+	if outerr.Len() > 0 {
+		return errors.New(outerr.String())
+	}
+
+	return nil
 }

@@ -37,7 +37,9 @@ func main() {
 			{
 				Name: "get",
 				Action: func(c *cli.Context) {
-					get(c.Bool("u"))
+					if err := get(c.Bool("u")); err != nil {
+						log.Fatalln(err)
+					}
 				},
 				Usage: "Runs `go get` for gen typewriters; intended for custom typewriters in _gen.go; unnecessary when using the defaults",
 				Flags: []cli.Flag{
