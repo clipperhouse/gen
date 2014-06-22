@@ -13,10 +13,12 @@ import (
 	"github.com/clipperhouse/gen/typewriter"
 )
 
-func run() error {
-	if src, err := os.Open(customFilename); err == nil {
+// filename is the optional file containing custom typewriters
+func run(filename string) error {
+	if src, err := os.Open(filename); err == nil {
 		// custom imports file exists, use it
 		defer src.Close()
+
 		if err := runCustom(src); err != nil {
 			return err
 		}
@@ -43,7 +45,8 @@ func runStandard() error {
 	return nil
 }
 
-func runCustom(src *os.File) error {
+func runCustom(src io.Reader) error {
+
 	temp, err := getTempDir()
 	if err != nil {
 		return err

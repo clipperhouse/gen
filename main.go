@@ -19,7 +19,7 @@ func main() {
 		Author:  "Matt Sherman",
 		Email:   "mwsherman@gmail.com",
 		Action: func(c *cli.Context) {
-			if err := run(); err != nil {
+			if err := run(customFilename); err != nil {
 				log.Fatalln(err)
 			}
 		},
