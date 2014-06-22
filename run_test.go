@@ -8,7 +8,7 @@ import (
 // +gen methods:"Where"
 type dummy int
 
-func TestRunCustom(t *testing.T) {
+func TestRun(t *testing.T) {
 	customName := "_gen_test.go"
 	genName := "dummy_gen.go"
 	fooName := "dummy_foo.go"
@@ -47,7 +47,6 @@ func TestRunCustom(t *testing.T) {
 			// non-standard typewriter
 			`_ "github.com/clipperhouse/gen/typewriters/foowriter"`,
 		},
-		Main: false,
 	}
 
 	if err := tmpl.Execute(w, p); err != nil {

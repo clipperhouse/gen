@@ -8,5 +8,4 @@ var stdImports = []string{
 type pkg struct {
 	Name    string
 	Imports []string
-	Main    bool
 }

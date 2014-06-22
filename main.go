@@ -33,7 +33,6 @@ func main() {
 				},
 				Usage: "Creates a custom _gen.go file in which to specify your own typewriter imports",
 			},
-
 			{
 				Name: "get",
 				Action: func(c *cli.Context) {
@@ -45,6 +44,13 @@ func main() {
 				Flags: []cli.Flag{
 					cli.BoolFlag{"u", "use the network to update the typewriter packages and their dependencies"},
 				},
+			},
+			{
+				Name: "list",
+				Action: func(c *cli.Context) {
+					list(customFilename)
+				},
+				Usage: "Lists current typewriters",
 			},
 		},
 	}

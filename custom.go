@@ -14,7 +14,6 @@ func custom(filename string) error {
 	p := pkg{
 		Name:    "main",
 		Imports: stdImports,
-		Main:    false,
 	}
 
 	if err := tmpl.Execute(w, p); err != nil {

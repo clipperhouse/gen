@@ -20,18 +20,33 @@ var tmpl = template.Must(template.New("package").Parse(`package {{.Name}}
 import ({{range .Imports}}
 	{{.}}{{end}}
 )
-{{end}}
-{{if .Main}}
+{{end}}`))
+
+const runBody string = `
 func main() {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if err := app.WriteAll(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
-{{end}}
-`))
+`
+
+const listBody string = `
+func main() {
+	app, err := typewriter.NewApp("+gen")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Installed typewriters (custom):")
+	for _, tw := range app.TypeWriters {
+		fmt.Println("  " + tw.Name())
+	}
+}
+`
