@@ -48,7 +48,9 @@ func main() {
 			{
 				Name: "list",
 				Action: func(c *cli.Context) {
-					list(customFilename)
+					if err := list(customFilename); err != nil {
+						log.Fatalln(err)
+					}
 				},
 				Usage: "Lists current typewriters",
 			},

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,19 +20,14 @@ import (
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
 func execute(standard func() error, customFilename string, imports []string, body string) error {
 	if src, err := os.Open(customFilename); err == nil {
-		// custom imports file exists, use it
 		defer src.Close()
 
-		if err := executeCustom(src, imports, body); err != nil {
-			return err
-		}
+		// custom imports file exists, use it
+		return executeCustom(src, imports, body)
 	} else {
 		// do it the regular way
-		if err := standard(); err != nil {
-			return err
-		}
+		return standard()
 	}
-	return nil
 }
 
 // executeCustom creates a temp directory, copies src into it and generates a main() using the passed imports and body.
@@ -74,22 +71,32 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 		return err
 	}
 
+	var stdout, stderr bytes.Buffer
+
 	// call `go run` on these files & send back output/err
 	cmd := exec.Command("go", "run", main.Name(), imps.Name())
-	out, err := cmd.Output()
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
-	if err != nil {
-		return err
-	}
+	cmderr := cmd.Run()
 
-	s := strings.TrimRight(string(out), `
-`)
-
-	if len(s) > 0 {
+	if s := trimBuffer(stdout); len(s) > 0 {
 		fmt.Println(s)
 	}
 
+	if s := trimBuffer(stderr); len(s) > 0 {
+		return errors.New(s)
+	}
+
+	if cmderr != nil {
+		return cmderr
+	}
+
 	return nil
+}
+
+func trimBuffer(b bytes.Buffer) string {
+	return strings.Trim(b.String(), "\n")
 }
 
 // set up temp directory under current directory
