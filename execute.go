@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,7 +17,7 @@ import (
 // If no custom file exists, it executes the passed 'standard' func.
 //
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
-func execute(standard func() error, customFilename string, imports []string, body string) error {
+func execute(standard func() (io.Reader, error), customFilename string, imports []string, body string) (io.Reader, error) {
 	if src, err := os.Open(customFilename); err == nil {
 		defer src.Close()
 
@@ -33,17 +32,19 @@ func execute(standard func() error, customFilename string, imports []string, bod
 // executeCustom creates a temp directory, copies src into it and generates a main() using the passed imports and body.
 //
 // `go run` is then called on those files via os.Command.
-func executeCustom(src io.Reader, imports []string, body string) error {
+func executeCustom(src io.Reader, imports []string, body string) (io.Reader, error) {
+	var out bytes.Buffer
+
 	temp, err := getTempDir()
 	if err != nil {
-		return err
+		return &out, err
 	}
 	defer os.RemoveAll(temp)
 
 	// set up imports file containing the custom typewriters (from _gen.go)
 	imps, err := os.Create(filepath.Join(temp, "imports.go"))
 	if err != nil {
-		return err
+		return &out, err
 	}
 	defer imps.Close()
 
@@ -52,7 +53,7 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	// set up main to be run
 	main, err := os.Create(filepath.Join(temp, "main.go"))
 	if err != nil {
-		return err
+		return &out, err
 	}
 	defer main.Close()
 
@@ -63,36 +64,32 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 
 	// execute the package declaration and imports
 	if err := tmpl.Execute(main, p); err != nil {
-		return err
+		return &out, err
 	}
 
 	// write the body, usually a main()
 	if _, err := main.WriteString(body); err != nil {
-		return err
+		return &out, err
 	}
 
-	var stdout, stderr bytes.Buffer
+	var stderr bytes.Buffer
 
 	// call `go run` on these files & send back output/err
 	cmd := exec.Command("go", "run", main.Name(), imps.Name())
-	cmd.Stdout = &stdout
+	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
 	cmderr := cmd.Run()
 
-	if s := trimBuffer(stdout); len(s) > 0 {
-		fmt.Println(s)
-	}
-
 	if s := trimBuffer(stderr); len(s) > 0 {
-		return errors.New(s)
+		return &out, errors.New(s)
 	}
 
 	if cmderr != nil {
-		return cmderr
+		return &out, cmderr
 	}
 
-	return nil
+	return &out, nil
 }
 
 func trimBuffer(b bytes.Buffer) string {

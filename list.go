@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/clipperhouse/gen/typewriter"
 )
 
-func list(customFilename string) error {
+func list(customFilename string) (io.Reader, error) {
 	imports := []string{
 		`"fmt"`,
 		`"log"`,
@@ -16,19 +18,21 @@ func list(customFilename string) error {
 	return execute(listStandard, customFilename, imports, listBody)
 }
 
-func listStandard() error {
+func listStandard() (io.Reader, error) {
+	var out bytes.Buffer
+
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
-		return err
+		return &out, err
 	}
 
-	fmt.Println("Installed typewriters:")
+	fmt.Fprintln(&out, "Installed typewriters:")
 	for _, tw := range app.TypeWriters {
-		fmt.Println("  " + tw.Name())
+		fmt.Fprintf(&out, "  %s\n", tw.Name())
 	}
 
-	return nil
+	return &out, nil
 }
 
 const listBody string = `
