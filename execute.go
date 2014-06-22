@@ -1,16 +1,14 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/clipperhouse/gen/typewriter"
+	"text/template"
 )
 
 // execute runs a gen command by first determining whether a custom imports file (typically _gen.go) exists
@@ -77,21 +75,14 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	}
 
 	// call `go run` on these files & send back output/err
-	var out, outerr bytes.Buffer
-
 	cmd := exec.Command("go", "run", main.Name(), imps.Name())
-	cmd.Stdout = &out
-	cmd.Stderr = &outerr
+	out, err := cmd.Output()
 
-	if err = cmd.Run(); err != nil {
+	if err != nil {
 		return err
 	}
 
-	if outerr.Len() > 0 {
-		return errors.New(outerr.String())
-	}
-
-	s := strings.TrimRight(out.String(), `
+	s := strings.TrimRight(string(out), `
 `)
 
 	if len(s) > 0 {
@@ -101,50 +92,17 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	return nil
 }
 
-func run(customFilename string) error {
-	imports := []string{
-		`"log"`,
-		`"github.com/clipperhouse/gen/typewriter"`,
-	}
-
-	return execute(runStandard, customFilename, imports, runBody)
+// set up temp directory under current directory
+// make sure to defer os.RemoveAll() in caller
+func getTempDir() (string, error) {
+	caller := filepath.Base(os.Args[0])
+	wd, _ := os.Getwd()
+	return ioutil.TempDir(wd, caller)
 }
 
-func runStandard() error {
-	app, err := typewriter.NewApp("+gen")
-
-	if err != nil {
-		return err
-	}
-
-	if err := app.WriteAll(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func list(customFilename string) error {
-	imports := []string{
-		`"fmt"`,
-		`"log"`,
-		`"github.com/clipperhouse/gen/typewriter"`,
-	}
-
-	return execute(listStandard, customFilename, imports, listBody)
-}
-
-func listStandard() error {
-	app, err := typewriter.NewApp("+gen")
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Installed typewriters:")
-	for _, tw := range app.TypeWriters {
-		fmt.Println("  " + tw.Name())
-	}
-
-	return nil
-}
+var tmpl = template.Must(template.New("package").Parse(`package {{.Name}}
+{{if gt (len .Imports) 0}}
+import ({{range .Imports}}
+	{{.}}{{end}}
+)
+{{end}}`))
