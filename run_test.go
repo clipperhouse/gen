@@ -19,7 +19,9 @@ func TestRun(t *testing.T) {
 	os.Remove(fooName)
 
 	// standard run
-	run(customName)
+	if _, err := run(customName); err != nil {
+		t.Error(err)
+	}
 
 	// gen file should exist
 	if _, err := os.Open(genName); err != nil {
@@ -54,7 +56,9 @@ func TestRun(t *testing.T) {
 	}
 
 	// custom run
-	run(customName)
+	if _, err := run(customName); err != nil {
+		t.Error(err)
+	}
 
 	// foo file should exist
 	if _, err := os.Open(fooName); err != nil {
