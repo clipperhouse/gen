@@ -16,6 +16,7 @@ const customFilename string = "_gen.go"
 func main() {
 	// keep UI (cli) concerns out of the main routines
 	// output and exit should happen up here, not down there
+	// we send in customFilename and receive 'out' to be a bit more testable; otherwise would use a const and fmt.Println
 	a := &cli.App{
 		Name:    os.Args[0],
 		Usage:   "http://clipperhouse.github.io/gen",
