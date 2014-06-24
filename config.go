@@ -6,12 +6,16 @@ import (
 	"sync"
 )
 
-// global state for output; useful with testing
-var defaultOut io.Writer = os.Stdout
-var out io.Writer = defaultOut
+// lock for changing configs below
 var mu = &sync.Mutex{}
 
-// with inspriation from http://golang.org/src/pkg/log/log.go?s=7258:7285#L229
+// global state for output; useful with testing
+var (
+	defaultOut io.Writer = os.Stdout
+	out        io.Writer = defaultOut
+)
+
+// with inspiration from http://golang.org/src/pkg/log/log.go?s=7258:7285#L229
 func setOutput(w io.Writer) {
 	mu.Lock()
 	defer mu.Unlock()

@@ -2,6 +2,7 @@ package main
 
 import "os"
 
+// custom generates a _gen.go file with default typewriters
 func custom() error {
 	w, err := os.Create(customName)
 
