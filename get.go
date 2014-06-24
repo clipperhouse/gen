@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"go/parser"
 	"go/token"
 	"os"
@@ -11,13 +10,15 @@ import (
 	"strings"
 )
 
+// get runs `go get` for required typewriters, either default or specified in _gen.go
 func get(u bool) error {
 	imports := make([]string, 0)
 
+	// check for existence of custom file
 	if src, err := os.Open(customName); err == nil {
-		// custom file exists, parse its imports
 		defer src.Close()
 
+		// custom file exists, parse its imports
 		fset := token.NewFileSet()
 		f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly)
 		if err != nil {
@@ -44,18 +45,14 @@ func get(u bool) error {
 
 	get = append(get, imports...)
 
-	var out, outerr bytes.Buffer
+	var outerr bytes.Buffer
 
 	cmd := exec.Command("go", get...)
-	cmd.Stdout = &out
+	cmd.Stdout = out
 	cmd.Stderr = &outerr
 
 	if err := cmd.Run(); err != nil {
 		return err
-	}
-
-	if out.Len() > 0 {
-		fmt.Println(out.String())
 	}
 
 	if outerr.Len() > 0 {
