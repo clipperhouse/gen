@@ -12,12 +12,15 @@ func TestList(t *testing.T) {
 	setOutput(&b)
 	defer revertOutput()
 
-	customName := "_gen_test.go"
+	// use custom name so test won't interfere with a real _gen.go
+	setCustomName("_gen_test.go")
+	defer revertCustomName()
+
 	// remove existing files, start fresh
 	os.Remove(customName)
 
 	// standard
-	if err := list(customName); err != nil {
+	if err := list(); err != nil {
 		t.Error(err)
 	}
 
@@ -53,7 +56,7 @@ func TestList(t *testing.T) {
 	}
 
 	// custom file now exists
-	if err := list(customName); err != nil {
+	if err := list(); err != nil {
 		t.Error(err)
 	}
 

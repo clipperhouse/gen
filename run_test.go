@@ -9,7 +9,10 @@ import (
 type dummy int
 
 func TestRun(t *testing.T) {
-	customName := "_gen_test.go"
+	// use custom name so test won't interfere with a real _gen.go
+	setCustomName("_gen_test.go")
+	defer revertCustomName()
+
 	genName := "dummy_gen.go"
 	fooName := "dummy_foo.go"
 
@@ -19,7 +22,7 @@ func TestRun(t *testing.T) {
 	os.Remove(fooName)
 
 	// standard run
-	if err := run(customName); err != nil {
+	if err := run(); err != nil {
 		t.Error(err)
 	}
 
@@ -56,7 +59,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// custom run
-	if err := run(customName); err != nil {
+	if err := run(); err != nil {
 		t.Error(err)
 	}
 

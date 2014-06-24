@@ -17,8 +17,8 @@ import (
 // If no custom file exists, it executes the passed 'standard' func.
 //
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
-func execute(standard func() error, customFilename string, imports []string, body string) error {
-	if src, err := os.Open(customFilename); err == nil {
+func execute(standard func() error, imports []string, body string) error {
+	if src, err := os.Open(customName); err == nil {
 		defer src.Close()
 
 		// custom imports file exists, use it

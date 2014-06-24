@@ -8,15 +8,16 @@ import (
 )
 
 func TestCustom(t *testing.T) {
+	// use custom name so test won't interfere with a real _gen.go
+	setCustomName("_gen_test.go")
+	defer revertCustomName()
+
 	// ensure that generated _gen.go uses the same imports as built into this package
-
-	filename := "_gen_test.go"
-	custom(filename)
-
-	defer os.Remove(filename)
+	custom()
+	defer os.Remove(customName)
 
 	fset := token.NewFileSet()
-	c, err := parser.ParseFile(fset, filename, nil, parser.ImportsOnly)
+	c, err := parser.ParseFile(fset, customName, nil, parser.ImportsOnly)
 
 	if err != nil {
 		t.Error(err)

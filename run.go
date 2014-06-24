@@ -2,13 +2,13 @@ package main
 
 import "github.com/clipperhouse/gen/typewriter"
 
-func run(customFilename string) error {
+func run() error {
 	imports := []string{
 		`"log"`,
 		`"github.com/clipperhouse/gen/typewriter"`,
 	}
 
-	return execute(runStandard, customFilename, imports, runBody)
+	return execute(runStandard, imports, runBody)
 }
 
 func runStandard() error {

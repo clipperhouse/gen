@@ -14,7 +14,7 @@ import (
 func get(u bool) error {
 	imports := make([]string, 0)
 
-	if src, err := os.Open(customFilename); err == nil {
+	if src, err := os.Open(customName); err == nil {
 		// custom file exists, parse its imports
 		defer src.Close()
 

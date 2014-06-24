@@ -6,14 +6,14 @@ import (
 	"github.com/clipperhouse/gen/typewriter"
 )
 
-func list(customFilename string) error {
+func list() error {
 	imports := []string{
 		`"fmt"`,
 		`"log"`,
 		`"github.com/clipperhouse/gen/typewriter"`,
 	}
 
-	return execute(listStandard, customFilename, imports, listBody)
+	return execute(listStandard, imports, listBody)
 }
 
 func listStandard() error {

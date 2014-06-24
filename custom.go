@@ -2,8 +2,8 @@ package main
 
 import "os"
 
-func custom(filename string) error {
-	w, err := os.Create(filename)
+func custom() error {
+	w, err := os.Create(customName)
 
 	if err != nil {
 		return err

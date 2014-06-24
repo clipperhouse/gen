@@ -21,3 +21,18 @@ func setOutput(w io.Writer) {
 func revertOutput() {
 	setOutput(defaultOut)
 }
+
+// global state for custom imports file name; useful with testing
+const defaultCustomName string = "_gen.go"
+
+var customName string = defaultCustomName
+
+func setCustomName(s string) {
+	mu.Lock()
+	defer mu.Unlock()
+	customName = s
+}
+
+func revertCustomName() {
+	setCustomName(defaultCustomName)
+}
