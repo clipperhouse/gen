@@ -12,30 +12,10 @@ import (
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
 func get(u bool) error {
-	imports := make([]string, 0)
+	imports, err := getTypewriterImports()
 
-	// check for existence of custom file
-	if src, err := os.Open(customName); err == nil {
-		defer src.Close()
-
-		// custom file exists, parse its imports
-		fset := token.NewFileSet()
-		f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly)
-		if err != nil {
-			return err
-		}
-		for _, v := range f.Imports {
-			imports = append(imports, v.Path.Value)
-		}
-	} else {
-		// doesn't exist, use standard
-		imports = append(imports, stdImports...)
-	}
-
-	// clean `em up
-	// TODO: a better way to express imports
-	for i := range imports {
-		imports[i] = strings.Trim(imports[i], `_ "`)
+	if err != nil {
+		return err
 	}
 
 	get := []string{"get"}
@@ -60,4 +40,34 @@ func get(u bool) error {
 	}
 
 	return nil
+}
+
+func getTypewriterImports() ([]string, error) {
+	imports := make([]string, 0)
+
+	// check for existence of custom file
+	if src, err := os.Open(customName); err == nil {
+		defer src.Close()
+
+		// custom file exists, parse its imports
+		fset := token.NewFileSet()
+		f, err := parser.ParseFile(fset, "", src, parser.ImportsOnly)
+		if err != nil {
+			return imports, err
+		}
+		for _, v := range f.Imports {
+			imports = append(imports, v.Path.Value)
+		}
+	} else {
+		// doesn't exist, use standard
+		imports = append(imports, stdImports...)
+	}
+
+	// clean `em up
+	// TODO: a better way that strings to express imports
+	for i := range imports {
+		imports[i] = strings.Trim(imports[i], `_ "`)
+	}
+
+	return imports, nil
 }
