@@ -7,7 +7,7 @@ package yours
 
 import (
 	_ "github.com/clipperhouse/gen/typewriters/container"
-	_ "github.com/user/gen/awesomewriter"
+	_ "github.com/janedoe/awesomewriter"
 )
 ```
 
