@@ -1,13 +1,8 @@
 package main
 
-import (
-	"bytes"
-	"io"
+import "github.com/clipperhouse/gen/typewriter"
 
-	"github.com/clipperhouse/gen/typewriter"
-)
-
-func run(customFilename string) (io.Reader, error) {
+func run(customFilename string) error {
 	imports := []string{
 		`"log"`,
 		`"github.com/clipperhouse/gen/typewriter"`,
@@ -16,20 +11,18 @@ func run(customFilename string) (io.Reader, error) {
 	return execute(runStandard, customFilename, imports, runBody)
 }
 
-func runStandard() (io.Reader, error) {
-	var out bytes.Buffer
-
+func runStandard() error {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
-		return &out, err
+		return err
 	}
 
 	if err := app.WriteAll(); err != nil {
-		return &out, err
+		return err
 	}
 
-	return &out, nil
+	return nil
 }
 
 const runBody string = `

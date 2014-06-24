@@ -2,33 +2,32 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"testing"
 )
 
 func TestList(t *testing.T) {
+	// use buffer instead of Stdout so we can inspect the results
+	var b bytes.Buffer
+	setOutput(&b)
+	defer revertOutput()
+
 	customName := "_gen_test.go"
 	// remove existing files, start fresh
 	os.Remove(customName)
 
 	// standard
-	out, err := list(customName)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	b, err := ioutil.ReadAll(out)
-
-	if err != nil {
+	if err := list(customName); err != nil {
 		t.Error(err)
 	}
 
 	// one line for title, 2 standard typewriters
-	if lines := bytes.Count(b, []byte("\n")); lines != 3 {
+	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 3 {
 		t.Errorf("standard list should output 3 lines, got %v", lines)
 	}
+
+	// clear out the output buffer
+	b.Reset()
 
 	// create a custom typewriter import file
 	w, err := os.Create(customName)
@@ -53,21 +52,13 @@ func TestList(t *testing.T) {
 		t.Error(err)
 	}
 
-	// custom
-	out2, err := list(customName)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	b2, err := ioutil.ReadAll(out2)
-
-	if err != nil {
+	// custom file now exists
+	if err := list(customName); err != nil {
 		t.Error(err)
 	}
 
 	// one line for title, 3 custom typewriters
-	if lines := bytes.Count(b2, []byte("\n")); lines != 4 {
+	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 4 {
 		t.Errorf("standard list should output 4 lines, got %v", lines)
 	}
 }

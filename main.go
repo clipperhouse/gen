@@ -1,10 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -24,9 +20,7 @@ func main() {
 		Author:  "Matt Sherman",
 		Email:   "mwsherman@gmail.com",
 		Action: func(c *cli.Context) {
-			out, err := run(customFilename)
-
-			print(out)
+			err := run(customFilename)
 
 			if err != nil {
 				log.Fatalln(err)
@@ -57,9 +51,7 @@ func main() {
 			{
 				Name: "list",
 				Action: func(c *cli.Context) {
-					out, err := list(customFilename)
-
-					print(out)
+					err := list(customFilename)
 
 					if err != nil {
 						log.Fatalln(err)
@@ -71,10 +63,4 @@ func main() {
 	}
 
 	a.Run(os.Args)
-}
-
-func print(r io.Reader) {
-	if s, _ := ioutil.ReadAll(r); len(s) > 0 {
-		fmt.Printf("%s\n", bytes.Trim(s, "\n"))
-	}
 }

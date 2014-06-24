@@ -19,7 +19,7 @@ func TestRun(t *testing.T) {
 	os.Remove(fooName)
 
 	// standard run
-	if _, err := run(customName); err != nil {
+	if err := run(customName); err != nil {
 		t.Error(err)
 	}
 
@@ -56,7 +56,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// custom run
-	if _, err := run(customName); err != nil {
+	if err := run(customName); err != nil {
 		t.Error(err)
 	}
 
