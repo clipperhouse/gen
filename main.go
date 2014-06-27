@@ -20,10 +20,11 @@ func main() {
 	case "get":
 		runCmd(get)
 		// TODO: pass subsequent flags (such as -u) to get
+	case "help":
+		runCmd(help)
 	case "list":
 		runCmd(list)
 	}
-	// TODO: add help command
 	// TODO: verbosity?
 }
 
