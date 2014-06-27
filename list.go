@@ -9,7 +9,7 @@ import (
 func list() error {
 	imports := []string{
 		`"fmt"`,
-		`"log"`,
+		`"os"`,
 		`"github.com/clipperhouse/gen/typewriter"`,
 	}
 
@@ -36,7 +36,8 @@ func main() {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
-		log.Fatal(err)
+		os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
 	}
 
 	fmt.Println("Installed typewriters (custom):")
