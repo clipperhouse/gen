@@ -11,7 +11,7 @@ import (
 )
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
-func get(u bool) error {
+func get() error {
 	imports, err := getTypewriterImports()
 
 	if err != nil {
@@ -19,9 +19,6 @@ func get(u bool) error {
 	}
 
 	get := []string{"get"}
-	if u {
-		get = append(get, "-u")
-	}
 
 	get = append(get, imports...)
 
@@ -64,7 +61,7 @@ func getTypewriterImports() ([]string, error) {
 	}
 
 	// clean `em up
-	// TODO: a better way that strings to express imports
+	// TODO: a better way than strings to express imports
 	for i := range imports {
 		imports[i] = strings.Trim(imports[i], `_ "`)
 	}
