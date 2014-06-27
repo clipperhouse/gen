@@ -13,8 +13,8 @@ func TestRun(t *testing.T) {
 	setCustomName("_gen_test.go")
 	defer revertCustomName()
 
-	genName := "dummy_gen.go"
-	fooName := "dummy_foo.go"
+	genName := "dummy_gen_test.go"
+	fooName := "dummy_foo_test.go"
 
 	// remove existing files, start fresh
 	os.Remove(customName)

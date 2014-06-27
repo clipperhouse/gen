@@ -93,7 +93,8 @@ func (a *app) WriteAll() error {
 		for _, tw := range writersByType[t.String()] {
 			var b bytes.Buffer
 			write(&b, a, t, tw)
-			f := strings.ToLower(fmt.Sprintf("%s_%s.go", t.LocalName(), tw.Name()))
+			// will append _test to file name if the source type is in a _test.go file
+			f := strings.ToLower(fmt.Sprintf("%s_%s%s.go", t.LocalName(), tw.Name(), t.test))
 			buffers[f] = &b
 		}
 	}
