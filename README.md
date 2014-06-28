@@ -1,22 +1,3 @@
-### What’s this branch?
-
-The biggest new feature of this branch is to support custom typewriters, by including a `_gen.go` file in your package. The file will look something like:
-
-```
-package yours
-
-import (
-	_ "github.com/clipperhouse/gen/typewriters/container"
-	_ "github.com/janedoe/awesomewriter"
-)
-```
-
-Calling `gen` will detect the presence of that file and use those typewriters, overriding the defaults (the ones compiled into the gen binary).
-
-You can create it manually, or call `gen custom` at the command line, which will generate a `_gen.go` with default typewriters.
-
-This is nice not just for easily supporting third-party typewriters, but also because it ‘documents’ the typewriters within your repo. That file becomes part of your package.
-
 ## What’s this?
 
 `gen` is an attempt to bring some generics-like functionality to Go, with some inspiration from C#’s Linq and JavaScript’s underscore libraries. It’s currently an early alpha.
