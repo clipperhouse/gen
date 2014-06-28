@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -70,21 +69,13 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 		return err
 	}
 
-	var stderr bytes.Buffer
-
 	// call `go run` on these files & send back output/err
 	cmd := exec.Command("go", "run", main.Name(), imps.Name())
 	cmd.Stdout = out
-	cmd.Stderr = &stderr
+	cmd.Stderr = os.Stderr
 
-	cmderr := cmd.Run()
-
-	if s := trimBuffer(stderr); len(s) > 0 {
-		return errors.New(s)
-	}
-
-	if cmderr != nil {
-		return cmderr
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 
 	return nil

@@ -6,6 +6,17 @@ import (
 )
 
 func TestGet(t *testing.T) {
+	// just run it; not a great test but at least covers the code
+	if err := get([]string{}); err != nil {
+		t.Error(err)
+	}
+
+	if err := get([]string{"-d"}); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetImports(t *testing.T) {
 	// use custom name so test won't interfere with a real _gen.go
 	setCustomName("_gen_test.go")
 	defer revertCustomName()

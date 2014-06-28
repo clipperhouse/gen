@@ -19,8 +19,11 @@ func main() {
 	case "custom":
 		err = custom()
 	case "get":
-		err = get()
-		// TODO: pass subsequent flags (such as -u) to get
+		var tail []string
+		if len(args) > 2 {
+			tail = args[2:]
+		}
+		err = get(tail)
 	case "help":
 		err = help()
 	case "list":

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"go/parser"
 	"go/token"
 	"os"
@@ -11,7 +9,7 @@ import (
 )
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
-func get() error {
+func get(args []string) error {
 	imports, err := getTypewriterImports()
 
 	if err != nil {
@@ -19,21 +17,15 @@ func get() error {
 	}
 
 	get := []string{"get"}
-
+	get = append(get, args...)
 	get = append(get, imports...)
-
-	var outerr bytes.Buffer
 
 	cmd := exec.Command("go", get...)
 	cmd.Stdout = out
-	cmd.Stderr = &outerr
+	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	if outerr.Len() > 0 {
-		return errors.New(outerr.String())
+		return nil
 	}
 
 	return nil
