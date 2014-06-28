@@ -12,7 +12,18 @@ type Type struct {
 	Name                         string
 	Tags                         Tags
 	comparable, numeric, ordered bool
+	test                         test
 	types.Type
+}
+
+type test bool
+
+// a convenience for using bool in file name, see WriteAll
+func (t test) String() string {
+	if t {
+		return "_test"
+	}
+	return ""
 }
 
 func (t *Type) String() (result string) {

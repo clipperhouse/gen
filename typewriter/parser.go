@@ -66,6 +66,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			}
 
 			t, _, err := types.Eval(typ.LocalName(), typesPkg, typesPkg.Scope())
+
 			known := err == nil
 
 			if !known {
@@ -76,6 +77,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			typ.comparable = isComparable(t)
 			typ.numeric = isNumeric(t)
 			typ.ordered = isOrdered(t)
+			typ.test = test(strings.HasSuffix(fset.Position(docType.Decl.Pos()).Filename, "_test.go"))
 			typ.Type = t
 
 			typs = append(typs, typ)

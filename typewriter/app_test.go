@@ -57,21 +57,6 @@ func TestNewApp(t *testing.T) {
 		t.Errorf("should have found 2 typewriters, found %v", len(a1.TypeWriters))
 	}
 
-	a2, err2 := NewApp("+dummy")
-
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	if len(a2.Types) != 0 {
-		t.Errorf("should have found no types, found %v", len(a2.Types))
-	}
-
-	// this merely tests that they get assigned subsequently
-	if len(a2.TypeWriters) != 2 {
-		t.Errorf("should have found 2 typewriters, found %v", len(a2.TypeWriters))
-	}
-
 	// clear 'em out for later tests
 	typeWriters = make([]TypeWriter, 0)
 }
@@ -103,7 +88,6 @@ func TestNewAppFiltered(t *testing.T) {
 	if err2 == nil {
 		t.Error("should have been unable to create app for an incomplete package")
 	}
-
 }
 
 func TestWrite(t *testing.T) {
@@ -142,10 +126,10 @@ func TestWrite(t *testing.T) {
 
 func TestWriteAll(t *testing.T) {
 	// set up some registered typewriters for this app
-	// no error checking here, see TestRegister
 	fw1 := &fooWriter{}
 	bw1 := &barWriter{}
 
+	// no error checking here, see TestRegister
 	Register(fw1)
 	Register(bw1)
 
@@ -277,12 +261,12 @@ func (f *fooWriter) WriteHeader(w io.Writer, t Type) {
 	return
 }
 
-func (f *fooWriter) Imports(t Type) (result []string) {
-	result = append(result, "fmt")
+func (f *fooWriter) Imports(t Type) (result []ImportSpec) {
+	result = append(result, ImportSpec{Path: "fmt"})
 	return result
 }
 
-func (f *fooWriter) Write(w io.Writer, t Type) {
+func (f *fooWriter) WriteBody(w io.Writer, t Type) {
 	f.writeCalls++
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
@@ -308,11 +292,11 @@ func (f *barWriter) WriteHeader(w io.Writer, t Type) {
 	return
 }
 
-func (f *barWriter) Imports(t Type) (result []string) {
+func (f *barWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *barWriter) Write(w io.Writer, t Type) {
+func (f *barWriter) WriteBody(w io.Writer, t Type) {
 	f.writeCalls++
 	return
 }
@@ -335,11 +319,11 @@ func (f *errWriter) WriteHeader(w io.Writer, t Type) {
 	return
 }
 
-func (f *errWriter) Imports(t Type) (result []string) {
+func (f *errWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *errWriter) Write(w io.Writer, t Type) {
+func (f *errWriter) WriteBody(w io.Writer, t Type) {
 	f.writeCalls++
 	return
 }
@@ -358,11 +342,11 @@ func (f *junkWriter) WriteHeader(w io.Writer, t Type) {
 	return
 }
 
-func (f *junkWriter) Imports(t Type) (result []string) {
+func (f *junkWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *junkWriter) Write(w io.Writer, t Type) {
+func (f *junkWriter) WriteBody(w io.Writer, t Type) {
 	w.Write([]byte("this is invalid Go code, innit?"))
 	return
 }

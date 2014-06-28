@@ -3,6 +3,7 @@
 // Directive: +test on main.Thing
 
 // See http://clipperhouse.github.io/gen for documentation
+
 // Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style

@@ -62,7 +62,7 @@ func New{{.Name}}List() *{{.Name}}List { return new({{.Name}}List).Init() }
 // The complexity is O(1).
 func (l *{{.Name}}List) Len() int { return l.len }
 
-// Front returns the first element of list l or nil
+// Front returns the first element of list l or nil.
 func (l *{{.Name}}List) Front() *{{.Name}}Element {
 	if l.len == 0 {
 		return nil
@@ -177,9 +177,9 @@ func (l *{{.Name}}List) MoveToBack(e *{{.Name}}Element) {
 }
 
 // MoveBefore moves element e to its new position before mark.
-// If e is not an element of l, or e == mark, the list is not modified.
+// If e or mark is not an element of l, or e == mark, the list is not modified.
 func (l *{{.Name}}List) MoveBefore(e, mark *{{.Name}}Element) {
-	if e.list != l || e == mark {
+	if e.list != l || e == mark || mark.list != l {
 		return
 	}
 	l.insert(l.remove(e), mark.prev)
@@ -188,7 +188,7 @@ func (l *{{.Name}}List) MoveBefore(e, mark *{{.Name}}Element) {
 // MoveAfter moves element e to its new position after mark.
 // If e is not an element of l, or e == mark, the list is not modified.
 func (l *{{.Name}}List) MoveAfter(e, mark *{{.Name}}Element) {
-	if e.list != l || e == mark {
+	if e.list != l || e == mark || mark.list != l {
 		return
 	}
 	l.insert(l.remove(e), mark)

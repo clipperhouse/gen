@@ -1,19 +1,37 @@
 package main
 
-import (
-	"github.com/clipperhouse/gen/typewriter"
-	_ "github.com/clipperhouse/gen/typewriters/container"
-	_ "github.com/clipperhouse/gen/typewriters/genwriter"
-)
+import "os"
 
 func main() {
-	app, err := typewriter.NewApp("+gen")
+	var err error
 
-	if err != nil {
-		panic(err)
+	args := os.Args
+
+	if len(args) == 1 {
+		// simply typed 'gen'; run is the default command
+		err = run()
+		return
 	}
 
-	if err := app.WriteAll(); err != nil {
-		panic(err)
+	cmd := args[1]
+
+	switch cmd {
+	case "custom":
+		err = custom()
+	case "get":
+		var tail []string
+		if len(args) > 2 {
+			tail = args[2:]
+		}
+		err = get(tail)
+	case "help":
+		err = help()
+	case "list":
+		err = list()
+	}
+
+	if err != nil {
+		os.Stderr.WriteString(err.Error() + "\n")
+		os.Exit(1)
 	}
 }

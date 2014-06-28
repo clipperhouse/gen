@@ -2,9 +2,11 @@
 // TypeWriter: gen
 // Directive: +gen on typewriter.Tag
 
+// See http://clipperhouse.github.io/gen for documentation
+
 package typewriter
 
-// Tags is a slice of type Tag, for use with gen methods below. Use this type where you would use []Tag. (This is required because slices cannot be method receivers.)
+// Tags is a slice of type Tag. Use it where you would use []Tag.
 type Tags []Tag
 
 // Where returns a new Tags slice whose elements return true for func. See: http://clipperhouse.github.io/gen/#Where
