@@ -4,7 +4,7 @@ import (
 	"github.com/clipperhouse/gen/typewriter"
 )
 
-var containerTemplates = typewriter.TemplateSet{
+var templates = typewriter.TemplateSet{
 
 	"List": &typewriter.Template{
 		Text: `
