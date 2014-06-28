@@ -38,9 +38,9 @@ func (c *ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 	// must include at least one item that we recognize
 	any := false
 	for _, item := range tag.Items {
-		any = any || templates.Contains(item)
-		if any {
+		if templates.Contains(item) {
 			// found one, move on
+			any = true
 			break
 		}
 	}
