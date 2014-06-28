@@ -17,7 +17,7 @@ import (
 )
 ```
 
-Change those import paths to other, third-party typewriters.
+Change those import paths to other, third-party typewriters. Then call `gen get`.
 
 Docs on how to create a typewriter are coming soon. In the meantime, have a look at the [container](https://github.com/clipperhouse/gen/tree/master/typewriters/container) typewriter for a decent example.
 
