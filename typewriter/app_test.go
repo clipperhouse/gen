@@ -261,9 +261,12 @@ func (f *fooWriter) WriteHeader(w io.Writer, t Type) {
 	return
 }
 
-func (f *fooWriter) Imports(t Type) (result []ImportSpec) {
-	result = append(result, ImportSpec{Path: "fmt"})
-	return result
+func (f *fooWriter) Imports(t Type) []ImportSpec {
+	imports := []ImportSpec{
+		{Path: "fmt"},
+		{Path: "qux"}, // this is intentionally spurious and should be removed by imports.Process in WriteAll
+	}
+	return imports
 }
 
 func (f *fooWriter) WriteBody(w io.Writer, t Type) {

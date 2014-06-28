@@ -3,7 +3,6 @@ package typewriter
 import (
 	"bytes"
 	"fmt"
-	"go/format"
 	"go/parser"
 	"go/token"
 	"io"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"code.google.com/p/go.tools/imports"
 )
 
 // +test foo:"Bar" baz:"qux,thing"
@@ -103,9 +104,9 @@ func (a *app) WriteAll() error {
 		}
 	}
 
-	// format and commit to files
+	// format, remove unused imports, and commit to files
 	for f, b := range buffers {
-		src, err := format.Source(b.Bytes())
+		src, err := imports.Process(f, b.Bytes(), nil)
 
 		// shouldn't be an error if the ast parsing above succeeded
 		if err != nil {
