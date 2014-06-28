@@ -11,7 +11,7 @@ import (
 )
 ```
 
-Calling `gen` will detect the presence of that file and use those typewriters, overriding the defaults (that are compiled into the gen binary).
+Calling `gen` will detect the presence of that file and use those typewriters, overriding the defaults (the ones compiled into the gen binary).
 
 You can create it manually, or call `gen custom` at the command line, which will generate a `_gen.go` with default typewriters.
 
