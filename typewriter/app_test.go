@@ -57,12 +57,6 @@ func TestNewApp(t *testing.T) {
 		t.Errorf("should have found 2 typewriters, found %v", len(a1.TypeWriters))
 	}
 
-	_, err2 := NewApp("+dummy")
-
-	if err2 == nil {
-		t.Error("should return error if no types found")
-	}
-
 	// clear 'em out for later tests
 	typeWriters = make([]TypeWriter, 0)
 }
