@@ -1,3 +1,25 @@
+###28 Jun 2014
+
+To get the latest: `go install github.com/clipperhouse/gen`. Type `gen help` to see commands.
+
+This release introduces the optional `_gen.go` file for importing custom typewriters.
+
+Prior to this release, typewriters were simply part of the `gen` binary. Now, by creating a file of the above name in your package, third-party typewriters can be included at runtime.
+
+`cd` into your package and type `gen custom`. You will see a new _gen.go file which looks like this:
+
+```
+package main
+
+import (
+	_ "github.com/clipperhouse/gen/typewriters/container"
+	_ "github.com/clipperhouse/gen/typewriters/genwriter"
+)
+```
+
+Change those import paths to other, third-party typewriters.
+
+Docs on how to create a typewriter are coming soon. In the meantime, have a look at the [container](https://github.com/clipperhouse/gen/tree/master/typewriters/container) typewriter for a decent example.
 
 ###12 Jun 2014
 
