@@ -56,10 +56,7 @@
                 <h4><a href="#Subsetting">Subsetting</a></h4>
                 <h4><a href="#Tips">Tips</a></h4>
                 <h4><a href="#FAQ">FAQ</a></h4>
-                <h4><a href="#Changelog">Changelog</a></h4>
-
-                <h4><a href="#Custom" class="strike">Custom Methods</a></h4><br />
-
+                <h4><a href="https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md">Changelog</a></h4>
             </nav>
         </div>
         <div id="content">
@@ -649,87 +646,8 @@ type MyType struct {
 
             <h2 id="Changelog">Changelog</h2>
 
-            <p><strong>12 Jun 2014</strong></p>
-
-            <p>A new architecture based on ‘typewriters’. Ideally you should see little change, but…</p>
-
-            <p>This was a long-lived branch, around 6 weeks. The architecture should be a lot better, as well as the testing. But of course regressions are possible.</p>
-
-            <p>I will mark this with a <a href="https://github.com/clipperhouse/gen/releases">release</a> 2.0 tag following semver conventions, since there are some behavioral changes. If there are regressions for you, you can use gopkg.in to stick with 1.0.</p>
-
-            <p>A few important behavioral changes:</p>
-
-            <ul>
-                <li>Each typewriter now outputs a separate file, eg <code>_gen.go</code> and <code>_container.go</code>. This should not be a breaking change. Formerly, there was a single <code>_gen.go</code> file</li>
-                <li>Previously-gen’d files which have been ‘un-gen’d’ (i.e. removed a tag) will not be deleted as before. Do this manually if need be, but I hope it’s an edge case. Will consider adding it back in.</li>
-                <li>The <code>-force</code> flag is gone. Officially, it was undefined behavior, intended for use if you get yourself into a jam.</li>
-            </ul>
-
-            <p>The contents of your gen’d files may be slightly different, but their behavior should be unchanged.</p>
-
-            <p>We are going to exploit this architecture to do some <strike style="color:#888; text-decoration:line-through">evil</strike> interesting things, stay tuned.</p>
-
-            <p>Any trouble, please let me know via a GitHub issue, or Twitter, or…</p>
-
-            <p><strong>9 Mar 2014</strong></p>
-
-            <p>Preliminary support for <a href="#Containers">containers</a>, starting with Set, List and Ring. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions), and to add compile-time safety.</p>
-
-            <p><strong>1 Feb 2014</strong></p>
-
-            <p>gen will now delete <code>*_gen.go</code> files in the case that a previously-gen’d type has been removed, per <a href="https://github.com/clipperhouse/gen/issues/34">#34</a>. Confirms with the user for safety. And of course you are using version control, right?</p>
-
-            <p>Added new <a href="#Max">Max</a> and <a href="#Min">Min</a> (alongside the existing respective *By). The difference is that these work on types that are known <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a> such as <code>type MyOrderable int</code>. It requires no passed ‘less’ func because we already know what ‘less’ is for such types. <a href="https://github.com/clipperhouse/gen/issues/28">#28</a>.</p>
-
-            <p><a href="#MaxBy">MaxBy(less)</a> and <a href="#MinBy">MinBy(less)</a> are still the way to go for structs or ad-hoc ordering.</p>
-
-            <p><strong>30 Jan 2014</strong></p>
-
-            <p>Added new <a href="#Sort">Sort</a> (alongside the existing SortBy). The difference is that Sort works on types that are known sortable such as <code>type MySortable int</code>. It requires no passed ‘less’ func because we already know what ‘less’ is for such types. :)</p>
-
-            <p><a href="#SortBy">SortBy(less)</a> is still the way to go for structs or any ad-hoc sorts.</p>
-
-            <p>The ‘<a href="https://github.com/clipperhouse/gen/tree/master/test">integration tests</a>’ (those which test the gen’d code) have been rewritten for clarity.</p>
-
-            <p>Generated code is now <a href="https://github.com/clipperhouse/gen/commit/38df7421cdfd243f557f1c12f5a15e2de8834ffc">passed through</a> go/format (gofmt) on output, so you don’t have to.</p>
-
-            <p><strong>26 Jan 2014</strong></p>
-
-            <p>This release includes breaking changes. To update:</p>
-
-<pre>
-go get -u github.com/clipperhouse/gen
-</pre>
-
-            <p>Command-line type specification has been deprecated, and replaced by markup per <a href="https://github.com/clipperhouse/gen/issues/23">#23</a>. It takes the form of:</p>
-
-<pre>// +gen
-type MyType struct {...}
-</pre>
-
-            <p>Where before the command-line would be <code>gen package.Type</code>, now it's simply <code>gen</code>, which will locate and process your marked-up types.</p>
-
-            <p>Here's a larger example:</p>
-
-<pre>// +gen * methods:"Count,Where" projections:"SomeType,int"
-type MyType struct {...}
-</pre>
-
-            <ul>
-                <li>The <code>*</code> is a directive to generate methods which take a pointer type instead of a value type. Optional but recommended.</li>
-                <li>The <code>methods</code> tag is for <a href="http://clipperhouse.github.io/gen/#Subsetting">subsetting</a> methods; replaces <code>gen:"..."</code>. Optional; omit it to generate all standard methods.</li>
-                <li>The <code>projections</code> tag specifies types to be <a href="http://clipperhouse.github.io/gen/#Projections">projected</a> for methods such as <code>Select</code> and <code>GroupBy</code>. Optional. If the <code>methods</code> tag is omitted, all projection methods will be generated, appropriate to each type. (For example, Average will not be generated for non-numeric types.) You can subset projection methods using the <code>methods</code> tag above.</li>
-            </ul><p>The <code>-all</code> flag has been deprecated, it's no longer a valid use case, given the above. The <code>-exported</code> flag, which is a modifier of same, is gone too.</p>
-
-            <p>Custom methods, where specific member fields of a struct are marked up, have been deprecated. The <a href="https://github.com/clipperhouse/gen/issues/23">rationale</a> is that we prefer to project types, not fields.</p>
-
-            <p><code>Sort(func)</code> has been renamed <code>SortBy(func)</code>, and similarly Max → MaxBy, Min → MinBy. This is done in anticipation of methods of those names which will <em>not</em> take a func, see <a href="https://github.com/clipperhouse/gen/issues/28">#28</a>.</p>
-
-
-            <h2 id="Custom">Custom methods</h2>
-
-            <p>...have been deprecated in favor of more-flexible <a href="#Projections">projections</a>. The rationale is <a href="https://github.com/clipperhouse/gen/issues/8">here</a>.</p>
-</div>
+            <p><a href="https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md">github.com/clipperhouse/gen/blob/master/CHANGELOG.md</a>  </p>
+    </div>
 </body>
 </html>
 
