@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/build"
-	"go/doc"
 	"go/parser"
 	"go/token"
 	"os"
@@ -29,6 +28,22 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	}
 
 	for name, astPackage := range astPackages {
+
+		// collect type nodes
+		var nodes []ast.Node
+
+		ast.Inspect(astPackage, func(n ast.Node) bool {
+			// is it a type?
+			// http://golang.org/pkg/go/ast/#GenDecl
+			if d, ok := n.(*ast.GenDecl); ok && d.Tok == token.TYPE {
+				nodes = append(nodes, n)
+
+				// no need to keep walking, we don't care about TypeSpec's children
+				return false
+			}
+			return true
+		})
+
 		astFiles, astErr := getAstFiles(astPackage, rootDir)
 
 		if astErr != nil {
@@ -43,15 +58,16 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 
 		pkg := &Package{typesPkg}
 
-		// doc package is handy for pulling types and their comments
-		docPkg := doc.New(astPackage, name, doc.AllDecls)
+		for _, node := range nodes {
+			// these assertions should be safe, see ast.Inspect above
+			decl := node.(*ast.GenDecl)
+			// the first spec in this Decl should be the type spec, see ast.Inspect above
+			spec := decl.Specs[0].(*ast.TypeSpec)
 
-		for _, docType := range docPkg.Types {
+			pointer, tags, found, err := parseTags(directive, decl.Doc.Text())
 
-			pointer, tags, found, tagErr := parseTags(directive, docType.Doc)
-
-			if tagErr != nil {
-				return typs, tagErr
+			if err != nil {
+				return typs, err
 			}
 
 			if !found {
@@ -61,7 +77,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			typ := Type{
 				Package: pkg,
 				Pointer: pointer,
-				Name:    docType.Name,
+				Name:    spec.Name.Name,
 				Tags:    tags,
 			}
 
@@ -77,7 +93,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			typ.comparable = isComparable(t)
 			typ.numeric = isNumeric(t)
 			typ.ordered = isOrdered(t)
-			typ.test = test(strings.HasSuffix(fset.Position(docType.Decl.Pos()).Filename, "_test.go"))
+			typ.test = test(strings.HasSuffix(fset.Position(spec.Pos()).Filename, "_test.go"))
 			typ.Type = t
 
 			typs = append(typs, typ)
