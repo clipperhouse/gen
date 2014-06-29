@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/build"
 	"go/parser"
 	"go/token"
 	"os"
@@ -105,13 +104,8 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 
 func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error) {
 	// pull map of *ast.File into a slice
-	// and skip files who's out of compile scope (Conditional compile, for example)
-	for name, f := range p.Files {
-		if ok, buildErr := build.Default.MatchFile(rootDir, name); err != nil {
-			err = buildErr
-		} else if ok {
-			result = append(result, f)
-		}
+	for _, f := range p.Files {
+		result = append(result, f)
 	}
 	return
 }
