@@ -49,7 +49,7 @@ func TestNewApp(t *testing.T) {
 
 	// app and dummy types
 	if len(a1.Types) != 2 {
-		t.Errorf("should have found 2 types, found", len(a1.Types))
+		t.Errorf("should have found 2 types, found %v", len(a1.Types))
 	}
 
 	// this merely tests that they've been assigned to the app
