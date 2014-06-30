@@ -2,4 +2,6 @@ install.sh
 watch.sh
 coverage.out
 *_bar.go
+*_bar_test.go
 *_foo.go
+*_foo_test.go
