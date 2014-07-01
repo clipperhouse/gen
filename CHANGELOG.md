@@ -6,7 +6,7 @@ This release introduces the optional `_gen.go` file for importing custom typewri
 
 Prior to this release, typewriters were simply part of the `gen` binary. Now, by creating a file of the above name in your package, third-party typewriters can be included at runtime.
 
-`cd` into your package and type `gen custom`. You will see a new _gen.go file which looks like this:
+`cd` into your package and type `gen custom`. You will see a new `_gen.go` file which looks like this:
 
 ```
 package main
