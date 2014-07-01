@@ -68,4 +68,9 @@ func TestGetImports(t *testing.T) {
 	if len(imps2) != 3 {
 		t.Errorf("should return 3 custom imports, got %v", len(imps2))
 	}
+
+	// custom get
+	if err := get([]string{}); err != nil {
+		t.Error(err)
+	}
 }
