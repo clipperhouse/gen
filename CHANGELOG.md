@@ -1,6 +1,6 @@
 ###28 Jun 2014
 
-To get the latest: `go get github.com/clipperhouse/gen`. Type `gen help` to see commands.
+To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
 
 This release introduces the optional `_gen.go` file for importing custom typewriters.
 
