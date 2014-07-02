@@ -1,6 +1,6 @@
 ## What’s this?
 
-`gen` is code-generation tool for Go. It's intended to offer generics-like functionality on your types. Out of the box, it offers LINQ/underscore/js-insired methods as well as some handy containers.
+`gen` is code-generation tool for Go. It's intended to offer generics-like functionality on your types. Out of the box, it offers LINQ/underscore/js-inspired methods as well as some handy containers. It also offers third-party, runtime extensibility via [typewriters](http://godoc.org/github.com/clipperhouse/gen/typewriter).
 
 ####[Introduction and docs…](http://clipperhouse.github.io/gen/)
 
