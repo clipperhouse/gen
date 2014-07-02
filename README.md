@@ -4,7 +4,7 @@
 
 ####[Introduction and docs…](http://clipperhouse.github.io/gen/)
 
-[Changelog](http://clipperhouse.github.io/gen/#Changelog)
+[Changelog](https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md)
 
 ## Contributing
 
