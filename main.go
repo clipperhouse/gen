@@ -5,12 +5,19 @@ import "os"
 func main() {
 	var err error
 
+	defer func() {
+		if err != nil {
+			os.Stderr.WriteString(err.Error() + "\n")
+			os.Exit(1)
+		}
+	}()
+
 	args := os.Args
 
 	if len(args) == 1 {
 		// simply typed 'gen'; run is the default command
 		err = run()
-		return
+		return // see defer
 	}
 
 	cmd := args[1]
@@ -29,9 +36,5 @@ func main() {
 	case "list":
 		err = list()
 	}
-
-	if err != nil {
-		os.Stderr.WriteString(err.Error() + "\n")
-		os.Exit(1)
-	}
+	return // see defer
 }
