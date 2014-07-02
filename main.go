@@ -24,10 +24,12 @@ func main() {
 			tail = args[2:]
 		}
 		err = get(tail)
-	case "help":
-		err = help()
 	case "list":
 		err = list()
+	case "help":
+		fallthrough
+	default:
+		err = help()
 	}
 
 	if err != nil {
