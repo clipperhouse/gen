@@ -26,8 +26,6 @@ func main() {
 		err = get(tail)
 	case "list":
 		err = list()
-	case "help":
-		fallthrough
 	default:
 		err = help()
 	}
