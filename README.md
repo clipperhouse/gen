@@ -1,6 +1,6 @@
 ## What’s this?
 
-`gen` is code-generation tool for Go. It’s intended to offer generics-like functionality on your types.
+`gen` is a code-generation tool for Go. It’s intended to offer generics-like functionality on your types.
 
 Out of the box, it offers LINQ/underscore/js-inspired methods as well as some handy containers.
 
