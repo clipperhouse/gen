@@ -20,7 +20,7 @@ func TestList(t *testing.T) {
 	os.Remove(customName)
 
 	// standard
-	if err := list(); err != nil {
+	if err := runMain([]string{"gen", "list"}); err != nil {
 		t.Error(err)
 	}
 
@@ -56,7 +56,7 @@ func TestList(t *testing.T) {
 	}
 
 	// custom file now exists
-	if err := list(); err != nil {
+	if err := runMain([]string{"gen", "list"}); err != nil {
 		t.Error(err)
 	}
 

@@ -22,7 +22,7 @@ func TestRun(t *testing.T) {
 	os.Remove(fooName)
 
 	// standard run
-	if err := run(); err != nil {
+	if err := runMain([]string{"gen"}); err != nil {
 		t.Error(err)
 	}
 
@@ -59,7 +59,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// custom run
-	if err := run(); err != nil {
+	if err := runMain([]string{"gen"}); err != nil {
 		t.Error(err)
 	}
 

@@ -12,29 +12,29 @@ func main() {
 		}
 	}()
 
-	args := os.Args
+	err = runMain(os.Args)
+}
 
+func runMain(args []string) error {
 	if len(args) == 1 {
 		// simply typed 'gen'; run is the default command
-		err = run()
-		return // see defer
+		return run()
 	}
 
 	cmd := args[1]
 
 	switch cmd {
 	case "custom":
-		err = custom()
+		return custom()
 	case "get":
 		var tail []string
 		if len(args) > 2 {
 			tail = args[2:]
 		}
-		err = get(tail)
+		return get(tail)
 	case "list":
-		err = list()
+		return list()
 	default:
-		err = help()
+		return help()
 	}
-	return // see defer
 }

@@ -12,10 +12,13 @@ func TestCustom(t *testing.T) {
 	setCustomName("_gen_test.go")
 	defer revertCustomName()
 
-	// ensure that generated _gen.go uses the same imports as built into this package
-	custom()
+	// create custom file
+	if err := runMain([]string{"gen", "custom"}); err != nil {
+		t.Error(err)
+	}
 	defer os.Remove(customName)
 
+	// ensure that generated _gen.go uses the same imports as built into this package
 	fset := token.NewFileSet()
 	c, err := parser.ParseFile(fset, customName, nil, parser.ImportsOnly)
 

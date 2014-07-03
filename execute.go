@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"text/template"
 )
 
@@ -79,10 +77,6 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	}
 
 	return nil
-}
-
-func trimBuffer(b bytes.Buffer) string {
-	return strings.Trim(b.String(), "\n")
 }
 
 // set up temp directory under current directory

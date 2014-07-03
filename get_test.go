@@ -70,7 +70,12 @@ func TestGetImports(t *testing.T) {
 	}
 
 	// custom get
-	if err := get([]string{}); err != nil {
+	if err := runMain([]string{"gen", "get"}); err != nil {
+		t.Error(err)
+	}
+
+	// custom get with param
+	if err := runMain([]string{"gen", "get", "-d"}); err != nil {
 		t.Error(err)
 	}
 }
