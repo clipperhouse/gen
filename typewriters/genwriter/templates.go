@@ -169,7 +169,9 @@ func (rcv {{.Plural}}) MaxBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Nam
 	result = rcv[m]
 	return
 }
-`},
+`,
+		RequiresComparable: true,
+	},
 
 	"MinBy": &typewriter.Template{
 		Text: `
@@ -313,7 +315,9 @@ func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 	}
 	return rcv.SortBy(greater)
 }
-`},
+`,
+		RequiresComparable: true,
+	},
 
 	"IsSortedByDesc": &typewriter.Template{
 		Text: `
@@ -324,7 +328,9 @@ func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointe
 	}
 	return rcv.IsSortedBy(greater)
 }
-`},
+`,
+		RequiresComparable: true,
+	},
 
 	"sortInterface": &typewriter.Template{
 		Text: `
