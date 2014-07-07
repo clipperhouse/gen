@@ -86,8 +86,9 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 				known := err == nil
 
 				if !known {
+					// really shouldn't happen, since the type came from the ast in the first place
 					err = fmt.Errorf("failed to evaluate type %s (%s)", typ.Name, err)
-					continue
+					return typs, err
 				}
 
 				typ.comparable = isComparable(t)
