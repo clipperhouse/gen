@@ -14,8 +14,8 @@ func TestGetTypes(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(typs) != 2 {
-		t.Errorf("should have found the 2 marked-up types, found %v", len(typs))
+	if len(typs) != 4 {
+		t.Errorf("should have found the 4 marked-up types, found %v", len(typs))
 	}
 
 	// put 'em into a map for convenience
@@ -27,6 +27,14 @@ func TestGetTypes(t *testing.T) {
 
 	if _, found := m["dummy"]; !found {
 		t.Errorf("should have found the dummy type")
+	}
+
+	if _, found := m["dummy2"]; !found {
+		t.Errorf("should have found the dummy2 type")
+	}
+
+	if _, found := m["dummy3"]; !found {
+		t.Errorf("should have found the dummy3 type")
 	}
 
 	dummy := m["dummy"]
@@ -41,6 +49,34 @@ func TestGetTypes(t *testing.T) {
 
 	if !dummy.Numeric() {
 		t.Errorf("dummy type should be numeric")
+	}
+
+	dummy2 := m["dummy2"]
+
+	if dummy2.Comparable() {
+		t.Errorf("dummy2 type should not be comparable")
+	}
+
+	if dummy2.Ordered() {
+		t.Errorf("dummy2 type should not be ordered")
+	}
+
+	if dummy2.Numeric() {
+		t.Errorf("dummy2 type should not be numeric")
+	}
+
+	dummy3 := m["dummy3"]
+
+	if !dummy3.Comparable() {
+		t.Errorf("dummy3 type should be comparable")
+	}
+
+	if !dummy3.Ordered() {
+		t.Errorf("dummy3 type should be ordered")
+	}
+
+	if dummy3.Numeric() {
+		t.Errorf("dummy3 type should not be numeric")
 	}
 
 	// check tag existence at a high level here, see also tag parsing tests
