@@ -106,7 +106,7 @@ func (rcv Things) IsSortedBy(less func(Thing, Thing) bool) bool {
 // IsSortedDesc reports whether an instance of Things is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv Things) IsSortedByDesc(less func(Thing, Thing) bool) bool {
 	greater := func(a, b Thing) bool {
-		return less(b, a)
+		return a != b && !less(a, b)
 	}
 	return rcv.IsSortedBy(greater)
 }
@@ -120,7 +120,7 @@ func (rcv Things) MaxBy(less func(Thing, Thing) bool) (result Thing, err error) 
 	}
 	m := 0
 	for i := 1; i < l; i++ {
-		if less(rcv[m], rcv[i]) {
+		if rcv[i] != rcv[m] && !less(rcv[i], rcv[m]) {
 			m = i
 		}
 	}
@@ -185,7 +185,7 @@ func (rcv Things) SortBy(less func(Thing, Thing) bool) Things {
 // SortByDesc returns a new, descending-ordered Things slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv Things) SortByDesc(less func(Thing, Thing) bool) Things {
 	greater := func(a, b Thing) bool {
-		return less(b, a)
+		return a != b && !less(a, b)
 	}
 	return rcv.SortBy(greater)
 }
