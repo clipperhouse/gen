@@ -1,7 +1,6 @@
 package typewriter
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -29,13 +28,13 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	for name, astPackage := range astPackages {
 
 		// collect type nodes
-		var nodes []ast.Node
+		var decls []*ast.GenDecl
 
 		ast.Inspect(astPackage, func(n ast.Node) bool {
 			// is it a type?
 			// http://golang.org/pkg/go/ast/#GenDecl
 			if d, ok := n.(*ast.GenDecl); ok && d.Tok == token.TYPE {
-				nodes = append(nodes, n)
+				decls = append(decls, d)
 
 				// no need to keep walking, we don't care about TypeSpec's children
 				return false
@@ -57,45 +56,48 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 
 		pkg := &Package{typesPkg}
 
-		for _, node := range nodes {
-			// these assertions should be safe, see ast.Inspect above
-			decl := node.(*ast.GenDecl)
-			// the first spec in this Decl should be the type spec, see ast.Inspect above
-			spec := decl.Specs[0].(*ast.TypeSpec)
-
-			pointer, tags, found, err := parseTags(directive, decl.Doc.Text())
-
-			if err != nil {
-				return typs, err
+		for _, decl := range decls {
+			if decl.Lparen == 0 {
+				// not parenthesized, copy GenDecl.Doc into TypeSpec.Doc
+				decl.Specs[0].(*ast.TypeSpec).Doc = decl.Doc
 			}
+			for _, gspec := range decl.Specs {
+				spec := gspec.(*ast.TypeSpec)
 
-			if !found {
-				continue
+				pointer, tags, found, err := parseTags(directive, spec.Doc.Text())
+
+				if err != nil {
+					return typs, err
+				}
+
+				if !found {
+					continue
+				}
+
+				typ := Type{
+					Package: pkg,
+					Pointer: pointer,
+					Name:    spec.Name.Name,
+					Tags:    tags,
+				}
+
+				t, _, err := types.Eval(typ.LocalName(), typesPkg, typesPkg.Scope())
+
+				known := err == nil
+
+				if !known {
+					err = fmt.Errorf("failed to evaluate type %s (%s)", typ.Name, err)
+					continue
+				}
+
+				typ.comparable = isComparable(t)
+				typ.numeric = isNumeric(t)
+				typ.ordered = isOrdered(t)
+				typ.test = test(strings.HasSuffix(fset.Position(spec.Pos()).Filename, "_test.go"))
+				typ.Type = t
+
+				typs = append(typs, typ)
 			}
-
-			typ := Type{
-				Package: pkg,
-				Pointer: pointer,
-				Name:    spec.Name.Name,
-				Tags:    tags,
-			}
-
-			t, _, err := types.Eval(typ.LocalName(), typesPkg, typesPkg.Scope())
-
-			known := err == nil
-
-			if !known {
-				err = errors.New(fmt.Sprintf("failed to evaluate type %s (%s)", typ.Name, err))
-				continue
-			}
-
-			typ.comparable = isComparable(t)
-			typ.numeric = isNumeric(t)
-			typ.ordered = isOrdered(t)
-			typ.test = test(strings.HasSuffix(fset.Position(spec.Pos()).Filename, "_test.go"))
-			typ.Type = t
-
-			typs = append(typs, typ)
 		}
 	}
 
