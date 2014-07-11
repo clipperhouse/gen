@@ -35,9 +35,13 @@ type model struct {
 	projections []Projection
 }
 
-func (m model) Plural() (result string) {
-	result = inflect.Pluralize(m.Name)
-	if result == m.Name {
+func (m model) Plural() string {
+	return plural(m.Type.Name)
+}
+
+func plural(name string) (result string) {
+	result = inflect.Pluralize(name)
+	if result == name {
 		result += "s"
 	}
 	return

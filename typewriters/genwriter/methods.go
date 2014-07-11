@@ -31,12 +31,19 @@ func evaluateTags(t typewriter.Type) (standardMethods, projectionMethods []strin
 
 	nilProjections = !found
 
-	if nilMethods || methods.Negated {
-		// default to all
+	if methods.Negated {
 		standardMethods = standardTemplates.GetAllKeys()
-		if !nilProjections {
-			projectionMethods = projectionTemplates.GetAllKeys()
+	} else if nilMethods {
+		ptype, err := t.Package.Eval(plural(t.Name))
+		if err == nil {
+			standardMethods = t.Package.GetSelectorsOn(ptype.Type)
+		} else {
+			standardMethods = standardTemplates.GetAllKeys()
 		}
+	}
+
+	if !nilProjections && (nilMethods || methods.Negated) {
+		projectionMethods = projectionTemplates.GetAllKeys()
 	}
 
 	if !nilMethods {
