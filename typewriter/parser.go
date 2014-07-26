@@ -48,13 +48,15 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			return typs, astErr
 		}
 
-		typesPkg, typesErr := types.Check(name, fset, astFiles)
+		conf := types.Config{}
+		info := &types.Info{Scopes: make(map[ast.Node]*types.Scope)}
+		typesPkg, typesErr := conf.Check(name, fset, astFiles, info)
 
 		if typesErr != nil {
-			return typs, typesErr
+			fmt.Println("typecheck error:", typesErr, "\nattempting to continue...")
 		}
 
-		pkg := &Package{typesPkg}
+		pkg := &Package{typesPkg, fset, astPackage, info}
 
 		for _, decl := range decls {
 			if decl.Lparen == 0 {
