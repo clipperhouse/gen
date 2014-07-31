@@ -119,9 +119,6 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 		// ok, we got something
 		found = true
 
-		// get rid of leading spaces
-		line = strings.TrimLeft(line, " ")
-
 		l := lex(line)
 
 		// top level can be pointer or tags
