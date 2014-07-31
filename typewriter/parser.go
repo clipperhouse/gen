@@ -148,82 +148,133 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 		// get rid of leading spaces
 		line = strings.TrimLeft(line, " ")
 
-		// is the next character a pointer?
-		p := Pointer(true).String()
-		if strings.HasPrefix(line, p) {
-			pointer = true
-			line = strings.TrimPrefix(line, p)
+		l := lex(line)
 
-			// if found, next character needs to be a space or end of string
-			if !(len(line) == 0 || strings.HasPrefix(line, " ")) {
-				err = fmt.Errorf(`the pointer needs to be followed by a space or end of line, see source containing
-%s
-`, original)
+		// top level can be pointer or tags
+		for {
+			item := l.nextItem()
+
+			if item.typ == itemError {
+				err = &SyntaxError{
+					msg: item.val,
+					Pos: item.pos,
+				}
 				return
 			}
-		}
 
-		// find all matches of tag pattern
-		matches := tagreg.FindAllString(line, -1)
+			// pick up pointer if it exists
+			if item.typ == itemPointer {
+				// have we already seen a pointer?
+				if pointer {
+					err = &SyntaxError{
+						msg: fmt.Sprintf("second pointer declaration"),
+						Pos: item.pos,
+					}
+					return
+				}
 
-		for _, m := range matches {
-			if tag, found := parseTag(m); found {
-				// should always be found since the matches are selected
-				// and substringed (substrung?) using the same regex
+				// have we already seen tags? pointer must be first
+				if len(tags) > 0 {
+					err = &SyntaxError{
+						msg: fmt.Sprintf("pointer declaration must precede tags"),
+						Pos: item.pos,
+					}
+					return
+				}
 
-				// add to the results
-				tags = append(tags, tag)
+				pointer = true
 
-				// remove the tag from the parsed line
-				line = strings.Replace(line, m, "", -1)
+				// and move on
+				item = l.nextItem()
 			}
-		}
 
-		// trim spaces
-		line = strings.Trim(line, " ")
+			if item.typ == itemError {
+				err = &SyntaxError{
+					msg: item.val,
+					Pos: item.pos,
+				}
+				return
+			}
 
-		// anything remaining is invalid
+			// ok to be done at this point
+			if item.typ == itemEOF {
+				return
+			}
 
-		if len(line) > 0 {
-			err = fmt.Errorf(`unknown syntax '%s', see
-%s
-`, line, original)
-			return
+			// next item needs to be an identifier (start of tag)
+			if item.typ != itemIdentifier {
+				err = &SyntaxError{
+					msg: fmt.Sprintf("tag name required, found '%s'", item.String()),
+					Pos: item.pos,
+				}
+				return
+			}
+
+			// we have an identifier, start a tag & move on
+			t := Tag{
+				Name:  item.val,
+				Items: []string{},
+			}
+
+			item = l.nextItem()
+
+			// next item must be a colonquote
+			if item.typ != itemColonQuote {
+				err = &SyntaxError{
+					msg: fmt.Sprintf(`tag name must be followed by ':"', found '%s'`, item.String()),
+					Pos: item.pos,
+				}
+				return
+			}
+
+		TagValues:
+			// now inside a tag, loop through tag values
+			for {
+				item = l.nextItem()
+
+				switch item.typ {
+				case itemError:
+					err = &SyntaxError{
+						msg: item.val,
+						Pos: item.pos,
+					}
+					return
+				case itemEOF:
+					// shouldn't happen within a tag
+					err = &SyntaxError{
+						msg: "expected a close quote",
+						Pos: item.pos,
+					}
+					return
+				case itemIdentifier:
+					t.Items = append(t.Items, item.val)
+				case itemComma:
+					// absorb
+					// de facto, spaces or commas as separators, but prefer commas for readability
+				case itemCloseQuote:
+					// we're done with this tag, get out
+					break TagValues
+				default:
+					err = &SyntaxError{
+						msg: fmt.Sprintf("unknown value '%v' in tag", item.val),
+						Pos: item.pos,
+					}
+					return
+				}
+			}
+
+			tags = append(tags, t)
 		}
 	}
+
 	return
 }
 
-func parseTag(s string) (tag Tag, found bool) {
-	var matches []string
-	if matches = tagreg.FindStringSubmatch(s); matches == nil || len(matches) == 0 {
-		// not a match? not an error, just not a tag
-		return
-	}
+type SyntaxError struct {
+	msg string
+	Pos Pos
+}
 
-	found = true
-
-	var name string
-	var items []string
-	var negated bool
-
-	name = matches[1]
-
-	splitter := regexp.MustCompile(`[, ]+`)
-	if match := matches[2]; len(match) > 0 {
-		index := 0
-		if negated = strings.HasPrefix(match, "-"); negated {
-			index = 1
-		}
-		items = splitter.Split(match[index:], -1)
-	}
-
-	tag = Tag{
-		Name:     name,
-		Items:    items,
-		Negated:  negated,
-		original: s,
-	}
-
-	return
+func (e *SyntaxError) Error() string {
+	return e.msg
 }
