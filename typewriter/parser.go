@@ -6,7 +6,6 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"regexp"
 	"strings"
 
 	_ "code.google.com/p/go.tools/go/gcimporter"
@@ -19,112 +18,87 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	fset := token.NewFileSet()
 	rootDir := "./"
 
-	astPackages, astErr := parser.ParseDir(fset, rootDir, filter, parser.ParseComments)
+	astPackages, err := parser.ParseDir(fset, rootDir, filter, parser.ParseComments)
 
-	if astErr != nil {
-		return typs, astErr
+	if err != nil {
+		return typs, err
 	}
 
 	for name, astPackage := range astPackages {
 
-		// collect type nodes
-		var decls []*ast.GenDecl
-
+		// collect type specs
+		var specs []*ast.TypeSpec
 		ast.Inspect(astPackage, func(n ast.Node) bool {
 			// is it a type?
 			// http://golang.org/pkg/go/ast/#GenDecl
-			if d, ok := n.(*ast.GenDecl); ok && d.Tok == token.TYPE {
-				decls = append(decls, d)
+			d, ok := n.(*ast.GenDecl)
 
-				// no need to keep walking, we don't care about TypeSpec's children
-				return false
+			if !ok || d.Tok != token.TYPE {
+				// never mind, move on
+				return true
 			}
-			return true
+
+			if d.Lparen == 0 {
+				// not parenthesized, copy GenDecl.Doc into TypeSpec.Doc
+				d.Specs[0].(*ast.TypeSpec).Doc = d.Doc
+			}
+
+			for _, s := range d.Specs {
+				specs = append(specs, s.(*ast.TypeSpec))
+			}
+
+			// no need to keep walking, we don't care about TypeSpec's children
+			return false
 		})
 
-		astFiles, astErr := getAstFiles(astPackage, rootDir)
-
-		if astErr != nil {
-			return typs, astErr
+		// pull map into a slice
+		var files []*ast.File
+		for _, f := range astPackage.Files {
+			files = append(files, f)
 		}
 
-		typesPkg, typesErr := types.Check(name, fset, astFiles)
+		typesPkg, err := types.Check(name, fset, files)
 
-		if typesErr != nil {
-			return typs, typesErr
+		if err != nil {
+			return typs, err
 		}
 
 		pkg := &Package{typesPkg}
 
-		for _, decl := range decls {
-			if decl.Lparen == 0 {
-				// not parenthesized, copy GenDecl.Doc into TypeSpec.Doc
-				decl.Specs[0].(*ast.TypeSpec).Doc = decl.Doc
+		for _, spec := range specs {
+			pointer, tags, found, err := parseTags(directive, spec.Doc.Text())
+
+			if err != nil {
+				return typs, err
 			}
-			for _, gspec := range decl.Specs {
-				spec := gspec.(*ast.TypeSpec)
 
-				pointer, tags, found, err := parseTags(directive, spec.Doc.Text())
-
-				if err != nil {
-					return typs, err
-				}
-
-				if !found {
-					continue
-				}
-
-				typ := Type{
-					Package: pkg,
-					Pointer: pointer,
-					Name:    spec.Name.Name,
-					Tags:    tags,
-				}
-
-				t, _, err := types.Eval(typ.LocalName(), typesPkg, typesPkg.Scope())
-
-				known := err == nil
-
-				if !known {
-					// really shouldn't happen, since the type came from the ast in the first place
-					err = fmt.Errorf("failed to evaluate type %s (%s)", typ.Name, err)
-					return typs, err
-				}
-
-				typ.comparable = isComparable(t)
-				typ.numeric = isNumeric(t)
-				typ.ordered = isOrdered(t)
-				typ.test = test(strings.HasSuffix(fset.Position(spec.Pos()).Filename, "_test.go"))
-				typ.Type = t
-
-				typs = append(typs, typ)
+			if !found {
+				continue
 			}
+
+			typ, err := pkg.Eval(pointer.String() + spec.Name.Name)
+
+			if err != nil {
+				// really shouldn't happen, since the type came from the ast in the first place
+				err = fmt.Errorf("failed to evaluate type %s (%s)", typ.Name, err)
+				return typs, err
+			}
+
+			typ.test = test(strings.HasSuffix(fset.Position(spec.Pos()).Filename, "_test.go"))
+			typ.Tags = tags
+
+			typs = append(typs, typ)
 		}
 	}
 
 	return typs, nil
 }
 
-func getAstFiles(p *ast.Package, rootDir string) (result []*ast.File, err error) {
-	// pull map of *ast.File into a slice
-	for _, f := range p.Files {
-		result = append(result, f)
-	}
-	return
-}
-
-// something resembling legal identifiers in Go: http://golang.org/ref/spec#Identifiers
-// TODO: should probably allow underscore
-var tagreg = regexp.MustCompile(`(\p{L}[\p{L}\p{N}]*):"([^\"]+?)"`)
-
 // identifies gen-marked types and parses tags
 func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found bool, err error) {
 	lines := strings.Split(doc, "\n")
 	for _, line := range lines {
 		original := line
-
-		// strategy is to remove meaningful tokens as they are found
-		// kind of a hack, a real parser someday
 
 		// does the line start with the directive?
 		if line = strings.TrimLeft(line, "/ "); !strings.HasPrefix(line, directive) {
