@@ -28,7 +28,7 @@ func TestRegister(t *testing.T) {
 	}
 
 	if len(typeWriters) != 2 {
-		t.Error("should have 2 typewriters registered, found %v", len(typeWriters))
+		t.Errorf("should have 2 typewriters registered, found %v", len(typeWriters))
 	}
 
 	// clear 'em out for later tests

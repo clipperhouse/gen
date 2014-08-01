@@ -42,11 +42,11 @@ func TestParseTags(t *testing.T) {
 	}
 
 	if len(tags2) != 2 {
-		t.Errorf("two tags should have been found in %s; found %v", tags2)
+		t.Errorf("two tags should have been found, found %v", tags2)
 	}
 
 	if tags2[0].Name != "foo" || tags2[1].Name != "thing" {
-		t.Errorf("'foo' and 'thing' should have been found in %s; found %v", tags2)
+		t.Errorf("'foo' and 'thing' should have been found, found %v", tags2)
 	}
 
 	if len(tags2[0].Items) != 2 || len(tags2[1].Items) != 2 {
