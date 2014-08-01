@@ -28,7 +28,7 @@ func NewApp(directive string) (*app, error) {
 	return NewAppFiltered(directive, nil)
 }
 
-// NewAppNewAppFiltered parses the current directory, collecting Types and their related information. Pass a filter to limit which files are operated on.
+// NewAppFiltered parses the current directory, collecting Types and their related information. Pass a filter to limit which files are operated on.
 func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*app, error) {
 	a := &app{
 		Directive: directive,

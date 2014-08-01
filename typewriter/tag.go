@@ -1,9 +1,6 @@
 package typewriter
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
 // +gen methods:"Where"
 type Tag struct {
@@ -28,7 +25,7 @@ func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
 		return
 	}
 
-	err = errors.New(fmt.Sprintf("more than one '%s' specified", name))
+	err = fmt.Errorf("more than one '%s' specified", name)
 
 	return
 }

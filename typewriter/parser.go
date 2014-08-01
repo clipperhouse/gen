@@ -13,7 +13,7 @@ import (
 )
 
 func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
-	typs := make([]Type, 0)
+	var typs []Type
 
 	fset := token.NewFileSet()
 	rootDir := "./"

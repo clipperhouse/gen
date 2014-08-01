@@ -10,9 +10,9 @@ import (
 	"testing"
 )
 
-var fw *fooWriter = &fooWriter{}
-var bw *barWriter = &barWriter{}
-var ew *errWriter = &errWriter{}
+var fw = &fooWriter{}
+var bw = &barWriter{}
+var ew = &errWriter{}
 
 func TestRegister(t *testing.T) {
 	if err := Register(&fooWriter{}); err != nil {
