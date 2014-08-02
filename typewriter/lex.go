@@ -60,10 +60,10 @@ type stateFn func(*lexer) stateFn
 type lexer struct {
 	input   string    // the string being scanned
 	state   stateFn   // the next lexing function to enter
-	pos     Pos       // current position in the input
-	start   Pos       // start position of this item
-	width   Pos       // width of last rune read from input
-	lastPos Pos       // position of most recent item returned by nextItem
+	pos     int       // current position in the input
+	start   int       // start position of this item
+	width   int       // width of last rune read from input
+	lastPos int       // position of most recent item returned by nextItem
 	items   chan item // channel of scanned items
 }
 
@@ -74,7 +74,7 @@ func (l *lexer) next() rune {
 		return eof
 	}
 	r, w := utf8.DecodeRuneInString(l.input[l.pos:])
-	l.width = Pos(w)
+	l.width = w
 	l.pos += l.width
 	return r
 }

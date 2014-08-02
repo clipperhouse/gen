@@ -243,7 +243,7 @@ func parseTags(directive string, doc string) (pointer Pointer, tags []Tag, found
 
 type SyntaxError struct {
 	msg string
-	Pos Pos
+	Pos int
 }
 
 func (e *SyntaxError) Error() string {
