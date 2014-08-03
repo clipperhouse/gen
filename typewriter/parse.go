@@ -218,6 +218,13 @@ func parseTags(d string) (Pointer, Tags, error) {
 				return false, nil, err
 			case itemMinus:
 				t.Negated = true
+				if len(t.Items) > 0 {
+					err := &SyntaxError{
+						msg: fmt.Sprintf("negation must precede tag values"),
+						Pos: item.pos,
+					}
+					return false, nil, err
+				}
 			case itemIdentifier:
 				t.Items = append(t.Items, item.val)
 			case itemComma:

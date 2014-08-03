@@ -64,6 +64,8 @@ func TestParse(t *testing.T) {
 		{`foo:"bar  ,Baz "  `, false, Tags{
 			{"foo", []string{"bar", "Baz"}, false},
 		}, true},
+		{`foo:"bar,-Baz"`, false, nil, false},
+		{`foo:"bar,Baz-"`, false, nil, false},
 		{`foo:bar,Baz" qux:"stuff"`, false, nil, false},
 		{`foo:"bar,Baz" junk qux:"stuff"`, false, nil, false},
 		{`foo:"bar,Baz" 8qux:"stuff"`, false, nil, false},
