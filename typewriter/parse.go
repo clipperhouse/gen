@@ -27,16 +27,16 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			return nil, err
 		}
 
-		tagged := getTaggedTypes(a, directive)
+		specs := getTaggedSpecs(a, directive)
 
-		for t, d := range tagged {
+		for s, d := range specs {
 			pointer, tags, err := parseTags(d)
 
 			if err != nil {
 				return nil, err
 			}
 
-			typ, err := pkg.Eval(pointer.String() + t.Name.Name)
+			typ, err := pkg.Eval(pointer.String() + s.Name.Name)
 
 			if err != nil {
 				// really shouldn't happen, since the type came from the ast in the first place
@@ -44,7 +44,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 				return nil, err
 			}
 
-			typ.test = test(strings.HasSuffix(fset.Position(t.Pos()).Filename, "_test.go"))
+			typ.test = test(strings.HasSuffix(fset.Position(s.Pos()).Filename, "_test.go"))
 			typ.Tags = tags
 
 			typs = append(typs, typ)
@@ -54,10 +54,10 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	return typs, nil
 }
 
-// getTaggedTypes walks the AST and returns types which have directive comment
-// return a map of type spec to directive
-func getTaggedTypes(pkg *ast.Package, directive string) map[*ast.TypeSpec]string {
-	tagged := make(map[*ast.TypeSpec]string)
+// getTaggedSpecs walks the AST and returns types which have directive comment
+// returns a map of TypeSpec to directive
+func getTaggedSpecs(pkg *ast.Package, directive string) map[*ast.TypeSpec]string {
+	specs := make(map[*ast.TypeSpec]string)
 
 	ast.Inspect(pkg, func(n ast.Node) bool {
 		g, ok := n.(*ast.GenDecl)
@@ -78,7 +78,7 @@ func getTaggedTypes(pkg *ast.Package, directive string) map[*ast.TypeSpec]string
 			t := s.(*ast.TypeSpec)
 
 			if found, d := findDirective(t.Doc.Text(), directive); found {
-				tagged[t] = d
+				specs[t] = d
 			}
 		}
 
@@ -86,10 +86,11 @@ func getTaggedTypes(pkg *ast.Package, directive string) map[*ast.TypeSpec]string
 		return false
 	})
 
-	return tagged
+	return specs
 }
 
 // findDirective return the first line of a doc which contains a directive
+// the directive and '//' are removed
 func findDirective(doc, directive string) (bool, string) {
 	// check lines of doc for directive
 	for _, l := range strings.Split(doc, "\n") {
@@ -106,7 +107,7 @@ func findDirective(doc, directive string) (bool, string) {
 			continue
 		}
 
-		return true, strings.TrimLeft(l, " ")
+		return true, strings.TrimSpace(l)
 	}
 
 	return false, ""
