@@ -234,8 +234,6 @@ func parseTags(d string) (Pointer, Tags, error) {
 
 		tags = append(tags, t)
 	}
-
-	return pointer, tags, nil
 }
 
 type SyntaxError struct {
