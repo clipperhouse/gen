@@ -216,6 +216,8 @@ func parseTags(d string) (Pointer, Tags, error) {
 					Pos: item.pos,
 				}
 				return false, nil, err
+			case itemMinus:
+				t.Negated = true
 			case itemIdentifier:
 				t.Items = append(t.Items, item.val)
 			case itemComma:

@@ -31,6 +31,7 @@ const (
 	itemEOF
 	itemSpace
 	itemComma
+	itemMinus
 	itemLeftBracket
 	itemRightBracket
 )
@@ -173,6 +174,8 @@ func lexInsideTagValue(l *lexer) stateFn {
 	case isIdentifierPrefix(r):
 		l.backup()
 		return lexIdentifier(l, lexInsideTagValue)
+	case r == '-':
+		l.emit(itemMinus)
 	case r == ',':
 		l.emit(itemComma)
 	case r == '"':
