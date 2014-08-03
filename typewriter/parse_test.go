@@ -6,103 +6,86 @@ import (
 	"testing"
 )
 
-func TestParseTags(t *testing.T) {
-	doc := `// some stuff that's actually a comment
-+test foo:"bar,Baz"
-`
-	pointer, tags, found, err := parseTags("+test", doc)
+type findDirectiveTest struct {
+	doc, directive string
+	found          bool
+}
 
-	if err != nil {
-		t.Error(err)
+func TestFindDirective(t *testing.T) {
+	tests := []findDirectiveTest{
+		{`+test`, ``, true},
+		{`+test foo:"bar,Baz"`, `foo:"bar,Baz"`, true},
+		{`// there's nothing here`, "", false},
+		{`// some stuff that's a comment
+//+test foo:"bar,Baz"
+`, `foo:"bar,Baz"`, true},
+		{`// some stuff that's a comment
+//+test foo:"bar,Baz"
+// the comment continues
+`, `foo:"bar,Baz"`, true},
+		{`+test * foo:"bar,Baz"`, `* foo:"bar,Baz"`, true},
+		{`+test foo:"bar,Baz" qux:"thing"`, `foo:"bar,Baz" qux:"thing"`, true},
+		{`+tested`, ``, false},
 	}
 
-	if !found {
-		t.Errorf("tag should have been found in %s", doc)
+	for _, test := range tests {
+		found, directive := findDirective(test.doc, "+test")
+		if found != test.found {
+			t.Errorf("found should have been %v for:\n%s", test.found, test.doc)
+		}
+		if directive != test.directive {
+			t.Errorf("directive should have been:\n%s, was:\n%s", test.directive, directive)
+		}
+	}
+}
+
+type parseTest struct {
+	directive string
+	pointer   Pointer
+	tags      Tags
+	valid     bool
+}
+
+func TestParse(t *testing.T) {
+	tests := []parseTest{
+		{`foo:"bar,Baz"`, false, Tags{
+			{"foo", []string{"bar", "Baz"}, false},
+		}, true},
+		{`* foo:"bar,Baz"`, true, Tags{
+			{"foo", []string{"bar", "Baz"}, false},
+		}, true},
+		{`foo:"bar,Baz" qux:"stuff"`, false, Tags{
+			{"foo", []string{"bar", "Baz"}, false},
+			{"qux", []string{"stuff"}, false},
+		}, true},
+		{`foo:"bar  ,Baz "  `, false, Tags{
+			{"foo", []string{"bar", "Baz"}, false},
+		}, true},
+		{`foo:bar,Baz" qux:"stuff"`, false, nil, false},
+		{`foo:"bar,Baz" junk qux:"stuff"`, false, nil, false},
+		{`foo:"bar,Baz" 8qux:"stuff"`, false, nil, false},
+		{`fo^o:"bar,Baz" qux:"stuff"`, false, nil, false},
+		{`foo:"bar,Ba|z" qux:"stuff"`, false, nil, false},
+		{`foo:"bar,Baz" qux:"stuff`, false, nil, false},
+		{`*foo:"bar,Baz" qux:"stuff"`, false, nil, false},
+		{`foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
+		{`* foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
 	}
 
-	if len(tags) != 1 {
-		t.Errorf("one tag should have been found in %s", doc)
-	}
+	for i, test := range tests {
+		pointer, tags, err := parseTags(test.directive)
 
-	if pointer {
-		t.Errorf("pointer should not have been found in %s", doc)
-	}
+		if test.valid != (err == nil) {
+			t.Errorf("[test %v] valid should have been %v for:%s\n%s", i, test.valid, test.directive, err)
+		}
 
-	doc2 := `// some stuff that's actually a comment
-+test foo:"bar,Baz" thing:"Stuff, yay"
-`
-	pointer2, tags2, found2, err2 := parseTags("+test", doc2)
+		if pointer != test.pointer {
+			t.Errorf("[test %v] pointer should have been %v for:\n%s", i, bool(test.pointer), test.directive)
+		}
 
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	if !found2 {
-		t.Errorf("tags should have been found in %s", doc2)
-	}
-
-	if len(tags2) != 2 {
-		t.Errorf("two tags should have been found, found %v", tags2)
-	}
-
-	if tags2[0].Name != "foo" || tags2[1].Name != "thing" {
-		t.Errorf("'foo' and 'thing' should have been found, found %v", tags2)
-	}
-
-	if len(tags2[0].Items) != 2 || len(tags2[1].Items) != 2 {
-		t.Errorf("each tag should have 2 Items")
-	}
-
-	if pointer2 {
-		t.Errorf("pointer should not have been found in %s", doc2)
-	}
-
-	doc3 := `// some stuff that's actually a comment
-+test * foo:"bar,Baz" thing:"Stuff, yay" more:"stuff"
-`
-	pointer3, tags3, found3, err3 := parseTags("+test", doc3)
-
-	if err3 != nil {
-		t.Error(err3)
-	}
-
-	if !found3 {
-		t.Errorf("tags should have been found in %s", doc3)
-	}
-
-	if !pointer3 {
-		t.Errorf("pointer should have been found in %s", doc3)
-	}
-
-	if len(tags3) != 3 {
-		t.Errorf("3 tags should have been found in %s; found %v", doc3, len(tags3))
-	}
-
-	doc4 := `// some stuff that's actually a comment
-+test * foo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
-`
-	_, _, _, err4 := parseTags("+test", doc4)
-
-	if err4 == nil {
-		t.Error("invalid syntax should return error")
-	}
-
-	doc5 := `// some stuff that's actually a comment
-+testfoo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
-`
-	_, _, _, err5 := parseTags("+test", doc5)
-
-	if err5 == nil {
-		t.Error("invalid syntax should return error")
-	}
-
-	doc6 := `// some stuff that's actually a comment
-+test *foo:"bar,Baz" thing:"Stuff, yay" crap more:"stuff" garbage
-`
-	_, _, _, err6 := parseTags("+test", doc6)
-
-	if err6 == nil {
-		t.Error("invalid syntax should return error")
+		if !tags.Equal(test.tags) {
+			t.Errorf("[test %v] tags should have been %v, got %v", i, test.tags, tags)
+		}
 	}
 }
 

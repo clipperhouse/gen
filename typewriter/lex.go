@@ -19,22 +19,6 @@ type item struct {
 	val string   // The value of this item.
 }
 
-func (i item) String() string {
-	switch {
-	case i.typ == itemEOF:
-		return "EOF"
-	case i.typ == itemColonQuote:
-		return "colonquote"
-	case i.typ == itemCloseQuote:
-		return "closequote"
-	case i.typ == itemError:
-		return i.val
-	case len(i.val) > 10:
-		return fmt.Sprintf("%.10q...", i.val)
-	}
-	return fmt.Sprintf("%q", i.val)
-}
-
 // itemType identifies the type of lex items.
 type itemType int
 

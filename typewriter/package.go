@@ -1,6 +1,9 @@
 package typewriter
 
 import (
+	"go/ast"
+	"go/token"
+
 	_ "code.google.com/p/go.tools/go/gcimporter"
 	"code.google.com/p/go.tools/go/types"
 )
@@ -13,6 +16,22 @@ func NewPackage(path, name string) *Package {
 	return &Package{
 		types.NewPackage(path, name),
 	}
+}
+
+func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
+	// pull map into a slice
+	var files []*ast.File
+	for _, f := range a.Files {
+		files = append(files, f)
+	}
+
+	typesPkg, err := types.Check(a.Name, fset, files)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Package{typesPkg}, nil
 }
 
 func (p *Package) Eval(name string) (result Type, err error) {
