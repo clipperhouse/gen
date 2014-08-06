@@ -7,7 +7,13 @@ import (
 func TestEval(t *testing.T) {
 	// this'll create a real package with types from this, um, package
 	// ignore error here, NewApp is tested elsewhere
-	a, _ := NewApp("+test")
+	a, err := NewApp("+test")
+
+	if err != nil {
+		t.Error(err)
+		return // we got problems, continuing will panic
+	}
+
 	p := a.Types[0].Package
 
 	s1 := "app"

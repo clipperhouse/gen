@@ -124,6 +124,10 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should have found the dummy3 type")
 	}
 
+	if t.Failed() {
+		return // get out instead of nil panics below
+	}
+
 	dummy := m["dummy"]
 
 	if !dummy.Comparable() {
