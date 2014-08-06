@@ -6,7 +6,6 @@ import (
 
 func TestEval(t *testing.T) {
 	// this'll create a real package with types from this, um, package
-	// ignore error here, NewApp is tested elsewhere
 	a, err := NewApp("+test")
 
 	if err != nil {
