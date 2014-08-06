@@ -36,6 +36,8 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 				if serr, ok := err.(*SyntaxError); ok {
 					// error should have Pos relative to the whole AST
 					serr.Pos += c.Slash
+					// Go-style syntax error with filename, line number, column
+					serr.msg = fset.Position(serr.Pos).String() + ": " + serr.msg
 				}
 				return nil, err
 			}
