@@ -1,91 +1,90 @@
 package typewriter
 
 import (
+	"go/ast"
 	"os"
 	"strings"
 	"testing"
 )
 
 type findDirectiveTest struct {
-	doc, directive string
-	found          bool
+	text  string
+	found bool
 }
 
 func TestFindDirective(t *testing.T) {
 	tests := []findDirectiveTest{
-		{`+test`, ``, true},
-		{`+test foo:"bar,Baz"`, `foo:"bar,Baz"`, true},
-		{`// there's nothing here`, "", false},
-		{`// some stuff that's a comment
-//+test foo:"bar,Baz"
-`, `foo:"bar,Baz"`, true},
-		{`// some stuff that's a comment
-//+test foo:"bar,Baz"
-// the comment continues
-`, `foo:"bar,Baz"`, true},
-		{`+test * foo:"bar,Baz"`, `* foo:"bar,Baz"`, true},
-		{`+test foo:"bar,Baz" qux:"thing"`, `foo:"bar,Baz" qux:"thing"`, true},
-		{`+tested`, ``, false},
+		{`// +test`, true},
+		{`// +test foo:"bar,Baz"`, true},
+		{`// there's nothing here`, false},
+		{`//+test foo:"bar,Baz"`, true},
+		{`//+test foo:"bar,Baz"`, true},
+		{`// +test * foo:"bar,Baz"`, true},
+		{`// +test foo:"bar,Baz" qux:"thing"`, true},
+		{`// +tested`, false},
 	}
 
-	for _, test := range tests {
-		found, directive := findDirective(test.doc, "+test")
-		if found != test.found {
-			t.Errorf("found should have been %v for:\n%s", test.found, test.doc)
+	for i, test := range tests {
+		c := &ast.CommentGroup{
+			List: []*ast.Comment{{Text: test.text}},
 		}
-		if directive != test.directive {
-			t.Errorf("directive should have been:\n%s, was:\n%s", test.directive, directive)
+		found, _ := findDirective(c, "+test")
+		if found != test.found {
+			t.Errorf("[test %v] found should have been %v for:\n%s", i, test.found, test.text)
 		}
 	}
 }
 
 type parseTest struct {
-	directive string
-	pointer   Pointer
-	tags      Tags
-	valid     bool
+	comment string
+	pointer Pointer
+	tags    Tags
+	valid   bool
 }
 
 func TestParse(t *testing.T) {
 	tests := []parseTest{
-		{`foo:"bar,Baz"`, false, Tags{
+		{`// +test foo:"bar,Baz"`, false, Tags{
 			{"foo", []string{"bar", "Baz"}, false},
 		}, true},
-		{`* foo:"bar,Baz"`, true, Tags{
+		{`// +test * foo:"bar,Baz"`, true, Tags{
 			{"foo", []string{"bar", "Baz"}, false},
 		}, true},
-		{`foo:"bar,Baz" qux:"stuff"`, false, Tags{
+		{`// +test foo:"bar,Baz" qux:"stuff"`, false, Tags{
 			{"foo", []string{"bar", "Baz"}, false},
 			{"qux", []string{"stuff"}, false},
 		}, true},
-		{`foo:"-bar,Baz"`, false, Tags{
+		{`// +test foo:"-bar,Baz"`, false, Tags{
 			{"foo", []string{"bar", "Baz"}, true},
 		}, true},
-		{`foo:"bar  ,Baz "  `, false, Tags{
+		{`// +test foo:"bar  ,Baz "  `, false, Tags{
 			{"foo", []string{"bar", "Baz"}, false},
 		}, true},
-		{`foo:"bar,-Baz"`, false, nil, false},
-		{`foo:"bar,Baz-"`, false, nil, false},
-		{`foo:bar,Baz" qux:"stuff"`, false, nil, false},
-		{`foo:"bar,Baz" junk qux:"stuff"`, false, nil, false},
-		{`foo:"bar,Baz" 8qux:"stuff"`, false, nil, false},
-		{`fo^o:"bar,Baz" qux:"stuff"`, false, nil, false},
-		{`foo:"bar,Ba|z" qux:"stuff"`, false, nil, false},
-		{`foo:"bar,Baz" qux:"stuff`, false, nil, false},
-		{`*foo:"bar,Baz" qux:"stuff"`, false, nil, false},
-		{`foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
-		{`* foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,-Baz"`, false, nil, false},
+		{`// +test foo:"bar,Baz-"`, false, nil, false},
+		{`// +test foo:bar,Baz" qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Baz" junk qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Baz" 8qux:"stuff"`, false, nil, false},
+		{`// +test fo^o:"bar,Baz" qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Ba|z" qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Baz" qux:"stuff`, false, nil, false},
+		{`// +test *foo:"bar,Baz" qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
+		{`// +test * foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
 	}
 
 	for i, test := range tests {
-		pointer, tags, err := parseTags(test.directive)
+		c := &ast.Comment{
+			Text: test.comment,
+		}
+		pointer, tags, err := parseComment(c, "+test")
 
 		if test.valid != (err == nil) {
-			t.Errorf("[test %v] valid should have been %v for:%s\n%s", i, test.valid, test.directive, err)
+			t.Errorf("[test %v] valid should have been %v for:%s\n%s", i, test.valid, test.comment, err)
 		}
 
 		if pointer != test.pointer {
-			t.Errorf("[test %v] pointer should have been %v for:\n%s", i, bool(test.pointer), test.directive)
+			t.Errorf("[test %v] pointer should have been %v for:\n%s", i, bool(test.pointer), test.comment)
 		}
 
 		if !tags.Equal(test.tags) {

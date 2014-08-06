@@ -27,12 +27,16 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			return nil, err
 		}
 
-		specs := getTaggedSpecs(a, directive)
+		specs := getTaggedComments(a, directive)
 
-		for s, d := range specs {
-			pointer, tags, err := parseTags(d)
+		for s, c := range specs {
+			pointer, tags, err := parseComment(c, directive)
 
 			if err != nil {
+				if serr, ok := err.(*SyntaxError); ok {
+					// error should have Pos relative to the whole AST
+					serr.Pos += c.Slash
+				}
 				return nil, err
 			}
 
@@ -54,10 +58,10 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 	return typs, nil
 }
 
-// getTaggedSpecs walks the AST and returns types which have directive comment
+// getTaggedComments walks the AST and returns types which have directive comment
 // returns a map of TypeSpec to directive
-func getTaggedSpecs(pkg *ast.Package, directive string) map[*ast.TypeSpec]string {
-	specs := make(map[*ast.TypeSpec]string)
+func getTaggedComments(pkg *ast.Package, directive string) map[*ast.TypeSpec]*ast.Comment {
+	specs := make(map[*ast.TypeSpec]*ast.Comment)
 
 	ast.Inspect(pkg, func(n ast.Node) bool {
 		g, ok := n.(*ast.GenDecl)
@@ -77,7 +81,7 @@ func getTaggedSpecs(pkg *ast.Package, directive string) map[*ast.TypeSpec]string
 		for _, s := range g.Specs {
 			t := s.(*ast.TypeSpec)
 
-			if found, d := findDirective(t.Doc.Text(), directive); found {
+			if found, d := findDirective(t.Doc, directive); found {
 				specs[t] = d
 			}
 		}
@@ -91,34 +95,40 @@ func getTaggedSpecs(pkg *ast.Package, directive string) map[*ast.TypeSpec]string
 
 // findDirective return the first line of a doc which contains a directive
 // the directive and '//' are removed
-func findDirective(doc, directive string) (bool, string) {
+func findDirective(doc *ast.CommentGroup, directive string) (bool, *ast.Comment) {
+	if doc == nil {
+		return false, nil
+	}
+
 	// check lines of doc for directive
-	for _, l := range strings.Split(doc, "\n") {
+	for _, c := range doc.List {
+		l := c.Text
 		// does the line start with the directive?
-		if l = strings.TrimLeft(l, "/ "); !strings.HasPrefix(l, directive) {
+		t := strings.TrimLeft(l, "/ ")
+		if !strings.HasPrefix(t, directive) {
 			continue
 		}
 
 		// remove the directive from the line
-		l = strings.TrimPrefix(l, directive)
+		t = strings.TrimPrefix(t, directive)
 
 		// must be eof or followed by a space
-		if len(l) > 0 && l[0] != ' ' {
+		if len(t) > 0 && t[0] != ' ' {
 			continue
 		}
 
-		return true, strings.TrimSpace(l)
+		return true, c
 	}
 
-	return false, ""
+	return false, nil
 }
 
 // identifies gen-marked types and parses tags
-func parseTags(d string) (Pointer, Tags, error) {
+func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error) {
 	var pointer Pointer
 	var tags Tags
 
-	l := lex(d)
+	l := lex(comment.Text)
 
 	// top level can be pointer or tags
 	for {
@@ -130,6 +140,19 @@ func parseTags(d string) (Pointer, Tags, error) {
 				Pos: item.pos,
 			}
 			return false, nil, err
+		}
+
+		if item.typ == itemCommentPrefix {
+			// don't care, move on
+			continue
+		}
+
+		if item.typ == itemDirective {
+			// is it the directive we care about?
+			if item.val != directive {
+				return false, nil, nil
+			}
+			continue
 		}
 
 		// pick up pointer if it exists
@@ -248,7 +271,7 @@ func parseTags(d string) (Pointer, Tags, error) {
 
 type SyntaxError struct {
 	msg string
-	Pos int
+	Pos token.Pos
 }
 
 func (e *SyntaxError) Error() string {

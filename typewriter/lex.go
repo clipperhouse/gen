@@ -8,15 +8,16 @@ package typewriter
 
 import (
 	"fmt"
+	"go/token"
 	"unicode"
 	"unicode/utf8"
 )
 
 // item represents a token or text string returned from the scanner.
 type item struct {
-	typ itemType // The type of this item.
-	pos int      // The starting position, in bytes, of this item in the input string.
-	val string   // The value of this item.
+	typ itemType  // The type of this item.
+	pos token.Pos // The starting position, in bytes, of this item in the input string.
+	val string    // The value of this item.
 }
 
 // itemType identifies the type of lex items.
@@ -24,6 +25,8 @@ type itemType int
 
 const (
 	itemError itemType = iota // error occurred; value is text of error
+	itemCommentPrefix
+	itemDirective
 	itemPointer
 	itemIdentifier
 	itemColonQuote
@@ -45,10 +48,10 @@ type stateFn func(*lexer) stateFn
 type lexer struct {
 	input   string    // the string being scanned
 	state   stateFn   // the next lexing function to enter
-	pos     int       // current position in the input
-	start   int       // start position of this item
+	pos     token.Pos // current position in the input
+	start   token.Pos // start position of this item
 	width   int       // width of last rune read from input
-	lastPos int       // position of most recent item returned by nextItem
+	lastPos token.Pos // position of most recent item returned by nextItem
 	items   chan item // channel of scanned items
 }
 
@@ -60,7 +63,7 @@ func (l *lexer) next() rune {
 	}
 	r, w := utf8.DecodeRuneInString(l.input[l.pos:])
 	l.width = w
-	l.pos += l.width
+	l.pos += token.Pos(l.width)
 	return r
 }
 
@@ -73,7 +76,7 @@ func (l *lexer) peek() rune {
 
 // backup steps back one rune. Can only be called once per call of next.
 func (l *lexer) backup() {
-	l.pos -= l.width
+	l.pos -= token.Pos(l.width)
 }
 
 // emit passes an item back to the client.
@@ -90,7 +93,7 @@ func (l *lexer) ignore() {
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
 func (l *lexer) errorf(format string, args ...interface{}) stateFn {
-	l.items <- item{itemError, l.start, fmt.Sprintf(format, args...)}
+	l.items <- item{itemError, l.pos, fmt.Sprintf(format, args...)}
 	return nil
 }
 
@@ -113,22 +116,25 @@ func lex(input string) *lexer {
 
 // run runs the state machine for the lexer.
 func (l *lexer) run() {
-	for l.state = lexDirective; l.state != nil; {
+	for l.state = lexComment; l.state != nil; {
 		l.state = l.state(l)
 	}
 }
 
 // state functions
 
-func lexDirective(l *lexer) stateFn {
+func lexComment(l *lexer) stateFn {
 Loop:
 	for {
 		switch r := l.next(); {
 		case r == eof:
 			break Loop
+		case r == '/':
+			return lexCommentPrefix
+		case r == '+':
+			return lexDirective
 		case isSpace(r):
 			l.ignore()
-			continue
 		case r == '*':
 			l.emit(itemPointer)
 			p := l.peek()
@@ -162,11 +168,11 @@ func lexInsideTag(l *lexer) stateFn {
 		l.ignore()
 	case r == '"':
 		l.emit(itemCloseQuote)
-		return lexDirective
+		return lexComment
 	default:
 		return l.errorf("illegal character '%s' in tag name", string(r))
 	}
-	return lexDirective
+	return lexComment
 }
 
 func lexInsideTagValue(l *lexer) stateFn {
@@ -186,7 +192,7 @@ func lexInsideTagValue(l *lexer) stateFn {
 		l.ignore()
 	case r == eof:
 		// we fell off the end without a close quote
-		return lexDirective
+		return lexComment
 	default:
 		return l.errorf("illegal character '%s' in tag value", string(r))
 	}
@@ -201,6 +207,22 @@ func lexSpace(l *lexer) stateFn {
 	}
 	l.emit(itemSpace)
 	return lexInsideTag
+}
+
+func lexCommentPrefix(l *lexer) stateFn {
+	for l.peek() == '/' {
+		l.next()
+	}
+	l.emit(itemCommentPrefix)
+	return lexComment
+}
+
+func lexDirective(l *lexer) stateFn {
+	for isAlphaNumeric(l.peek()) {
+		l.next()
+	}
+	l.emit(itemDirective)
+	return lexComment
 }
 
 // lexIdentifier scans an alphanumeric.
