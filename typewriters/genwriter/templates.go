@@ -309,7 +309,7 @@ func (rcv {{.Plural}}) IsSortedBy(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 // SortByDesc returns a new, descending-ordered {{.Plural}} slice, determined by a func defining ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) {{.Plural}} {
 	greater := func(a, b {{.Pointer}}{{.Name}}) bool {
-		return a != b && !less(a, b)
+		return less(b, a)
 	}
 	return rcv.SortBy(greater)
 }
@@ -320,7 +320,7 @@ func (rcv {{.Plural}}) SortByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{
 // IsSortedDesc reports whether an instance of {{.Plural}} is sorted in descending order, using the pass func to define ‘less’. See: http://clipperhouse.github.io/gen/#SortBy
 func (rcv {{.Plural}}) IsSortedByDesc(less func({{.Pointer}}{{.Name}}, {{.Pointer}}{{.Name}}) bool) bool {
 	greater := func(a, b {{.Pointer}}{{.Name}}) bool {
-		return a != b && !less(a, b)
+		return less(b, a)
 	}
 	return rcv.IsSortedBy(greater)
 }
