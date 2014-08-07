@@ -145,7 +145,8 @@ Loop:
 			l.backup()
 			return lexInsideTag
 		default:
-			return l.errorf("illegal leading character '%s' in identifier", string(r))
+			l.backup() // back up to the erroneous character for accurate Pos
+			return l.errorf("illegal leading character '%s' in tag name", string(r))
 		}
 	}
 	l.emit(itemEOF)
@@ -170,6 +171,7 @@ func lexInsideTag(l *lexer) stateFn {
 		l.emit(itemCloseQuote)
 		return lexComment
 	default:
+		l.backup() // back up to the erroneous character for accurate Pos
 		return l.errorf("illegal character '%s' in tag name", string(r))
 	}
 	return lexComment
@@ -194,6 +196,7 @@ func lexInsideTagValue(l *lexer) stateFn {
 		// we fell off the end without a close quote
 		return lexComment
 	default:
+		l.backup() // back up to the erroneous character for accurate Pos
 		return l.errorf("illegal character '%s' in tag value", string(r))
 	}
 	return lexInsideTagValue
@@ -234,6 +237,7 @@ Loop:
 			// absorb.
 		default:
 			if !isTerminator(r) {
+				l.backup() // back up to the erroneous character for accurate Pos
 				return l.errorf("illegal character '%c' in identifier", r)
 			}
 			l.backup()
