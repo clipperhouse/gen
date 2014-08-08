@@ -3,6 +3,7 @@ package typewriter
 import (
 	"go/ast"
 	"go/token"
+	"strings"
 
 	_ "code.google.com/p/go.tools/go/gcimporter"
 	"code.google.com/p/go.tools/go/types"
@@ -43,7 +44,7 @@ func (p *Package) Eval(name string) (result Type, err error) {
 	result = Type{
 		Package:    p,
 		Pointer:    isPointer(t),
-		Name:       name,
+		Name:       strings.TrimLeft(name, Pointer(true).String()), // trims the * if it exists
 		comparable: isComparable(t),
 		numeric:    isNumeric(t),
 		ordered:    isOrdered(t),
