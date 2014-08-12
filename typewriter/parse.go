@@ -252,9 +252,6 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 				t.Negated = true
 			case itemIdentifier:
 				t.Items = append(t.Items, item.val)
-			case itemComma:
-				// absorb
-				// de facto, spaces or commas as separators, but prefer commas for readability
 			case itemCloseQuote:
 				// we're done with this tag, get out
 				break TagValues

@@ -33,7 +33,6 @@ const (
 	itemCloseQuote
 	itemEOF
 	itemSpace
-	itemComma
 	itemMinus
 )
 
@@ -183,7 +182,8 @@ func lexInsideTagValue(l *lexer) stateFn {
 	case r == '-':
 		l.emit(itemMinus)
 	case r == ',':
-		l.emit(itemComma)
+		// parser has no use for comma, only important as separator here
+		l.ignore()
 	case r == '"':
 		// defer back up
 		l.backup()
