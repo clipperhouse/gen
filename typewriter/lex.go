@@ -174,29 +174,30 @@ func lexInsideTag(l *lexer) stateFn {
 }
 
 func lexInsideTagValue(l *lexer) stateFn {
-	switch r := l.next(); {
-	case isIdentifierPrefix(r):
-		l.backup()
-		return lexIdentifier(l, lexInsideTagValue)
-	case r == '-':
-		l.emit(itemMinus)
-	case r == ',':
-		// parser has no use for comma, only important as separator here
-		l.ignore()
-	case r == '"':
-		// defer back up
-		l.backup()
-		return lexInsideTag
-	case isSpace(r):
-		l.ignore()
-	case r == eof:
-		// we fell off the end without a close quote
-		return lexComment
-	default:
-		l.backup() // back up to the erroneous character for accurate Pos
-		return l.errorf("illegal character '%s' in tag value", string(r))
+	for {
+		switch r := l.next(); {
+		case isIdentifierPrefix(r):
+			l.backup()
+			return lexIdentifier(l, lexInsideTagValue)
+		case r == '-':
+			l.emit(itemMinus)
+		case r == ',':
+			// parser has no use for comma, only important as separator here
+			l.ignore()
+		case r == '"':
+			// defer back up
+			l.backup()
+			return lexInsideTag
+		case isSpace(r):
+			l.ignore()
+		case r == eof:
+			// we fell off the end without a close quote
+			return lexComment
+		default:
+			l.backup() // back up to the erroneous character for accurate Pos
+			return l.errorf("illegal character '%s' in tag value", string(r))
+		}
 	}
-	return lexInsideTagValue
 }
 
 func lexCommentPrefix(l *lexer) stateFn {
