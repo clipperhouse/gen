@@ -28,11 +28,12 @@ const (
 	itemCommentPrefix
 	itemDirective
 	itemPointer
-	itemIdentifier
+	itemTag
+	itemTagValue
 	itemColonQuote
+	itemMinus
 	itemCloseQuote
 	itemEOF
-	itemMinus
 )
 
 const eof = -1
@@ -154,7 +155,7 @@ func lexInsideTag(l *lexer) stateFn {
 	switch r := l.next(); {
 	case isIdentifierPrefix(r):
 		l.backup()
-		return lexIdentifier(l, lexInsideTag)
+		return lexIdentifier(l, itemTag)
 	case r == ':':
 		if l.next() != '"' {
 			return l.errorf(`expected :" following tag name`)
@@ -178,7 +179,7 @@ func lexInsideTagValue(l *lexer) stateFn {
 		switch r := l.next(); {
 		case isIdentifierPrefix(r):
 			l.backup()
-			return lexIdentifier(l, lexInsideTagValue)
+			return lexIdentifier(l, itemTagValue)
 		case r == '-':
 			l.emit(itemMinus)
 		case r == ',':
@@ -217,7 +218,7 @@ func lexDirective(l *lexer) stateFn {
 }
 
 // lexIdentifier scans an alphanumeric.
-func lexIdentifier(l *lexer, fn stateFn) stateFn {
+func lexIdentifier(l *lexer, typ itemType) stateFn {
 Loop:
 	for {
 		switch r := l.next(); {
@@ -229,11 +230,18 @@ Loop:
 				return l.errorf("illegal character '%c' in identifier", r)
 			}
 			l.backup()
-			l.emit(itemIdentifier)
+			l.emit(typ)
 			break Loop
 		}
 	}
-	return fn
+	switch typ {
+	case itemTag:
+		return lexInsideTag
+	case itemTagValue:
+		return lexInsideTagValue
+	default:
+		return l.errorf("unknown itemType %v", typ)
+	}
 }
 
 func isTerminator(r rune) bool {

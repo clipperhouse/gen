@@ -197,7 +197,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 		}
 
 		// next item needs to be an identifier (start of tag)
-		if item.typ != itemIdentifier {
+		if item.typ != itemTag {
 			err := &SyntaxError{
 				msg: fmt.Sprintf("tag name required, found '%s'", item.val),
 				Pos: item.pos,
@@ -250,7 +250,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 					return false, nil, err
 				}
 				t.Negated = true
-			case itemIdentifier:
+			case itemTagValue:
 				t.Items = append(t.Items, item.val)
 			case itemCloseQuote:
 				// we're done with this tag, get out
