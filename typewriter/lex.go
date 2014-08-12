@@ -152,26 +152,27 @@ Loop:
 
 // lexInsideTag scans the elements inside quotes
 func lexInsideTag(l *lexer) stateFn {
-	switch r := l.next(); {
-	case isIdentifierPrefix(r):
-		l.backup()
-		return lexIdentifier(l, itemTag)
-	case r == ':':
-		if l.next() != '"' {
-			return l.errorf(`expected :" following tag name`)
+	for {
+		switch r := l.next(); {
+		case isIdentifierPrefix(r):
+			l.backup()
+			return lexIdentifier(l, itemTag)
+		case r == ':':
+			if l.next() != '"' {
+				return l.errorf(`expected :" following tag name`)
+			}
+			l.emit(itemColonQuote)
+			return lexInsideTagValue
+		case isSpace(r):
+			l.ignore()
+		case r == '"':
+			l.emit(itemCloseQuote)
+			return lexComment
+		default:
+			l.backup() // back up to the erroneous character for accurate Pos
+			return l.errorf("illegal character '%s' in tag name", string(r))
 		}
-		l.emit(itemColonQuote)
-		return lexInsideTagValue
-	case isSpace(r):
-		l.ignore()
-	case r == '"':
-		l.emit(itemCloseQuote)
-		return lexComment
-	default:
-		l.backup() // back up to the erroneous character for accurate Pos
-		return l.errorf("illegal character '%s' in tag name", string(r))
 	}
-	return lexComment
 }
 
 func lexInsideTagValue(l *lexer) stateFn {
