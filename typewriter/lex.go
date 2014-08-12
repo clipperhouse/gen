@@ -35,8 +35,6 @@ const (
 	itemSpace
 	itemComma
 	itemMinus
-	itemLeftBracket
-	itemRightBracket
 )
 
 const eof = -1
