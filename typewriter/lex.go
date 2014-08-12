@@ -140,7 +140,7 @@ Loop:
 			}
 		case isIdentifierPrefix(r):
 			l.backup()
-			return lexInsideTag
+			return lexTag
 		default:
 			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal leading character '%s' in tag name", string(r))
@@ -150,8 +150,8 @@ Loop:
 	return nil
 }
 
-// lexInsideTag scans the elements inside quotes
-func lexInsideTag(l *lexer) stateFn {
+// lexTag scans the elements inside quotes
+func lexTag(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case isIdentifierPrefix(r):
@@ -162,7 +162,7 @@ func lexInsideTag(l *lexer) stateFn {
 				return l.errorf(`expected :" following tag name`)
 			}
 			l.emit(itemColonQuote)
-			return lexInsideTagValue
+			return lexTagValue
 		case isSpace(r):
 			l.ignore()
 		case r == '"':
@@ -175,7 +175,7 @@ func lexInsideTag(l *lexer) stateFn {
 	}
 }
 
-func lexInsideTagValue(l *lexer) stateFn {
+func lexTagValue(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case isIdentifierPrefix(r):
@@ -189,7 +189,7 @@ func lexInsideTagValue(l *lexer) stateFn {
 		case r == '"':
 			// defer back up
 			l.backup()
-			return lexInsideTag
+			return lexTag
 		case isSpace(r):
 			l.ignore()
 		case r == eof:
@@ -237,9 +237,9 @@ Loop:
 	}
 	switch typ {
 	case itemTag:
-		return lexInsideTag
+		return lexTag
 	case itemTagValue:
-		return lexInsideTagValue
+		return lexTagValue
 	default:
 		return l.errorf("unknown itemType %v", typ)
 	}
