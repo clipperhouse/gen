@@ -32,7 +32,6 @@ const (
 	itemColonQuote
 	itemCloseQuote
 	itemEOF
-	itemSpace
 	itemMinus
 )
 
@@ -198,16 +197,6 @@ func lexInsideTagValue(l *lexer) stateFn {
 		return l.errorf("illegal character '%s' in tag value", string(r))
 	}
 	return lexInsideTagValue
-}
-
-// lexSpace scans a run of space characters.
-// One space has already been seen.
-func lexSpace(l *lexer) stateFn {
-	for isSpace(l.peek()) {
-		l.next()
-	}
-	l.emit(itemSpace)
-	return lexInsideTag
 }
 
 func lexCommentPrefix(l *lexer) stateFn {
