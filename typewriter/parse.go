@@ -196,7 +196,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 			return pointer, tags, nil
 		}
 
-		// next item needs to be an identifier (start of tag)
+		// next item needs to be a tag
 		if item.typ != itemTag {
 			err := &SyntaxError{
 				msg: fmt.Sprintf("tag name required, found '%s'", item.val),
