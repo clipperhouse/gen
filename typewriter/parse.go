@@ -180,15 +180,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 			pointer = true
 
 			// and move on
-			item = l.nextItem()
-		}
-
-		if item.typ == itemError {
-			err := &SyntaxError{
-				msg: item.val,
-				Pos: item.pos,
-			}
-			return false, nil, err
+			continue
 		}
 
 		// ok to be done at this point
