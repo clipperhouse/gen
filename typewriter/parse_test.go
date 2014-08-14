@@ -3,6 +3,7 @@ package typewriter
 import (
 	"go/ast"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -89,7 +90,7 @@ func TestParse(t *testing.T) {
 			t.Errorf("[test %v] pointer should have been %v for:\n%s", i, bool(test.pointer), test.comment)
 		}
 
-		if !tags.Equal(test.tags) {
+		if !reflect.DeepEqual(tags, test.tags) {
 			t.Errorf("[test %v] tags should have been %v, got %v", i, test.tags, tags)
 		}
 	}
