@@ -83,8 +83,8 @@ func getTaggedComments(pkg *ast.Package, directive string) map[*ast.TypeSpec]*as
 		for _, s := range g.Specs {
 			t := s.(*ast.TypeSpec)
 
-			if found, d := findDirective(t.Doc, directive); found {
-				specs[t] = d
+			if c := findDirective(t.Doc, directive); c != nil {
+				specs[t] = c
 			}
 		}
 
@@ -97,9 +97,9 @@ func getTaggedComments(pkg *ast.Package, directive string) map[*ast.TypeSpec]*as
 
 // findDirective return the first line of a doc which contains a directive
 // the directive and '//' are removed
-func findDirective(doc *ast.CommentGroup, directive string) (bool, *ast.Comment) {
+func findDirective(doc *ast.CommentGroup, directive string) *ast.Comment {
 	if doc == nil {
-		return false, nil
+		return nil
 	}
 
 	// check lines of doc for directive
@@ -119,10 +119,10 @@ func findDirective(doc *ast.CommentGroup, directive string) (bool, *ast.Comment)
 			continue
 		}
 
-		return true, c
+		return c
 	}
 
-	return false, nil
+	return nil
 }
 
 // identifies gen-marked types and parses tags

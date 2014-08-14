@@ -25,10 +25,11 @@ func TestFindDirective(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		c := &ast.CommentGroup{
+		g := &ast.CommentGroup{
 			List: []*ast.Comment{{Text: test.text}},
 		}
-		found, _ := findDirective(c, "+test")
+		c := findDirective(g, "+test")
+		found := c != nil
 		if found != test.found {
 			t.Errorf("[test %v] found should have been %v for:\n%s", i, test.found, test.text)
 		}
