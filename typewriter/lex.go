@@ -29,9 +29,10 @@ const (
 	itemDirective
 	itemPointer
 	itemTag
-	itemTagValue
 	itemColonQuote
 	itemMinus
+	itemTagValue
+	itemTypeParameter
 	itemCloseQuote
 	itemEOF
 )
@@ -176,18 +177,33 @@ func lexTag(l *lexer) stateFn {
 }
 
 func lexTagValue(l *lexer) stateFn {
+	bracketDepth := 0
+
 	for {
 		switch r := l.next(); {
+		case r == '-':
+			l.emit(itemMinus)
 		case isIdentifierPrefix(r):
 			l.backup()
 			return lexIdentifier(l, itemTagValue)
-		case r == '-':
-			l.emit(itemMinus)
+		case r == '[':
+			bracketDepth++
+			// parser has no use for bracket, only important as delimiter here
+			l.ignore()
+			return lexTypeParameter
+		case r == ']':
+			if bracketDepth < 0 {
+				l.backup() // back up to the erroneous character for accurate Pos
+				return l.errorf("extra ']' in tag value")
+			}
+			// parser has no use for bracket, only important as delimiter here
+			l.ignore()
+			bracketDepth--
 		case r == ',':
-			// parser has no use for comma, only important as separator here
+			// parser has no use for comma, only important as delimiter here
 			l.ignore()
 		case r == '"':
-			// defer back up
+			// defer up
 			l.backup()
 			return lexTag
 		case isSpace(r):
@@ -198,6 +214,36 @@ func lexTagValue(l *lexer) stateFn {
 		default:
 			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal character '%s' in tag value", string(r))
+		}
+	}
+}
+
+func lexTypeParameter(l *lexer) stateFn {
+	bracketDepth := 0
+
+	for {
+		switch r := l.next(); {
+		case r == '[':
+			// absorb
+			bracketDepth++
+		case r == ']':
+			// closing bracket of type parameter
+			if bracketDepth == 0 {
+				l.backup()
+				l.emit(itemTypeParameter)
+				return lexTagValue
+			}
+			// absorb
+			bracketDepth--
+		case isTypeDef(r):
+			// absorb
+		case r == ',' || r == '"':
+			// premature end
+			l.backup() // back up to the erroneous character for accurate Pos
+			return l.errorf("expected close bracket")
+		default:
+			l.backup() // back up to the erroneous character for accurate Pos
+			return l.errorf("illegal character '%s' in type parameter", string(r))
 		}
 	}
 }
@@ -250,7 +296,7 @@ func isTerminator(r rune) bool {
 		return true
 	}
 	switch r {
-	case eof, ':', ',', '"':
+	case eof, ':', ',', '"', '[', ']':
 		return true
 	}
 	return false
@@ -274,4 +320,10 @@ func isAlphaNumeric(r rune) bool {
 // isIdentifierPrefix reports whether r is an alphabetic or underscore, per http://golang.org/ref/spec#Identifiers
 func isIdentifierPrefix(r rune) bool {
 	return r == '_' || unicode.IsLetter(r)
+}
+
+// isTypeDef reports whether r a character legal in a type declaration, eg map[*Thing]interface{}
+// brackets are a special case, handled in lexTypeParameter
+func isTypeDef(r rune) bool {
+	return r == '*' || r == '{' || r == '}' || isAlphaNumeric(r)
 }

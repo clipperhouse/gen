@@ -199,8 +199,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 
 		// we have an identifier, start a tag & move on
 		t := Tag{
-			Name:  item.val,
-			Items: []string{},
+			Name: item.val,
 		}
 
 		item = l.nextItem()
@@ -214,6 +213,8 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 			return false, nil, err
 		}
 
+		var ti TagValue
+		var tagValueStarted bool
 	TagValues:
 		// now inside a tag, loop through tag values
 		for {
@@ -234,7 +235,7 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 				}
 				return false, nil, err
 			case itemMinus:
-				if len(t.Items) > 0 {
+				if tagValueStarted || len(t.Values) > 0 {
 					err := &SyntaxError{
 						msg: fmt.Sprintf("negation must precede tag values"),
 						Pos: item.pos,
@@ -243,8 +244,22 @@ func parseComment(comment *ast.Comment, directive string) (Pointer, Tags, error)
 				}
 				t.Negated = true
 			case itemTagValue:
-				t.Items = append(t.Items, item.val)
+				if tagValueStarted {
+					t.Values = append(t.Values, ti)
+					tagValueStarted = false
+				}
+
+				ti = TagValue{
+					Name: item.val,
+				}
+				tagValueStarted = true
+			case itemTypeParameter:
+				ti.TypeParameter = item.val
 			case itemCloseQuote:
+				if tagValueStarted {
+					t.Values = append(t.Values, ti)
+					tagValueStarted = false
+				}
 				// we're done with this tag, get out
 				break TagValues
 			default:

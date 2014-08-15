@@ -5,8 +5,13 @@ import "fmt"
 // +gen methods:"Where"
 type Tag struct {
 	Name    string
-	Items   []string
+	Values  []TagValue
 	Negated bool
+}
+
+type TagValue struct {
+	Name          string
+	TypeParameter string
 }
 
 func (ts Tags) ByName(name string) (result Tag, found bool, err error) {

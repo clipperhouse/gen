@@ -47,20 +47,62 @@ type parseTest struct {
 func TestParse(t *testing.T) {
 	tests := []parseTest{
 		{`// +test foo:"bar,Baz"`, false, Tags{
-			{"foo", []string{"bar", "Baz"}, false},
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", ""},
+			}, false},
 		}, true},
 		{`// +test * foo:"bar,Baz"`, true, Tags{
-			{"foo", []string{"bar", "Baz"}, false},
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", ""},
+			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz" qux:"stuff"`, false, Tags{
-			{"foo", []string{"bar", "Baz"}, false},
-			{"qux", []string{"stuff"}, false},
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", ""},
+			}, false},
+			{"qux", []TagValue{
+				{"stuff", ""},
+			}, false},
 		}, true},
 		{`// +test foo:"-bar,Baz"`, false, Tags{
-			{"foo", []string{"bar", "Baz"}, true},
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", ""},
+			}, true},
 		}, true},
 		{`// +test foo:"bar  ,Baz "  `, false, Tags{
-			{"foo", []string{"bar", "Baz"}, false},
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", ""},
+			}, false},
+		}, true},
+		{`// +test foo:"bar,Baz[qaz], qux"`, false, Tags{
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", "qaz"},
+				{"qux", ""},
+			}, false},
+		}, true},
+		{`// +test foo:"bar,Baz[qaz]" qux:"stuff"`, false, Tags{
+			{"foo", []TagValue{
+				{"bar", ""},
+				{"Baz", "qaz"},
+			}, false},
+			{"qux", []TagValue{
+				{"stuff", ""},
+			}, false},
+		}, true},
+		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, Tags{
+			{"foo", []TagValue{
+				{"Baz", "qaz"},
+				{"yo", "dude"},
+			}, false},
+			{"qux", []TagValue{
+				{"stuff", "things"},
+			}, false},
 		}, true},
 		{`// +test foo:"bar,-Baz"`, false, nil, false},
 		{`// +test foo:"bar,Baz-"`, false, nil, false},
@@ -83,11 +125,11 @@ func TestParse(t *testing.T) {
 		pointer, tags, err := parseComment(c, "+test")
 
 		if test.valid != (err == nil) {
-			t.Errorf("[test %v] valid should have been %v for:%s\n%s", i, test.valid, test.comment, err)
+			t.Errorf("[test %v] valid should have been %v for: %s\n%s", i, test.valid, test.comment, err)
 		}
 
 		if pointer != test.pointer {
-			t.Errorf("[test %v] pointer should have been %v for:\n%s", i, bool(test.pointer), test.comment)
+			t.Errorf("[test %v] pointer should have been %v for: \n%s", i, bool(test.pointer), test.comment)
 		}
 
 		if !reflect.DeepEqual(tags, test.tags) {
@@ -179,20 +221,20 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("typ should have 2 Tags, found %v", len(m["app"].Tags))
 	}
 
-	if len(m["app"].Tags[0].Items) != 1 {
-		t.Errorf("Tag should have 1 Item, found %v", len(m["app"].Tags[0].Items))
+	if len(m["app"].Tags[0].Values) != 1 {
+		t.Errorf("Tag should have 1 Item, found %v", len(m["app"].Tags[0].Values))
 	}
 
-	if len(m["app"].Tags[1].Items) != 2 {
-		t.Errorf("Tag should have 2 Items, found %v", len(m["app"].Tags[1].Items))
+	if len(m["app"].Tags[1].Values) != 2 {
+		t.Errorf("Tag should have 2 Values, found %v", len(m["app"].Tags[1].Values))
 	}
 
 	if len(m["dummy"].Tags) != 1 {
 		t.Errorf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
 	}
 
-	if len(m["dummy"].Tags[0].Items) != 1 {
-		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Items))
+	if len(m["dummy"].Tags[0].Values) != 1 {
+		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Values))
 	}
 
 	// filtered types should not show up
