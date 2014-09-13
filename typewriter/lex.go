@@ -210,7 +210,7 @@ func lexTypeParameters(l *lexer) stateFn {
 				return lexTagValues
 			}
 			return l.errorf("additional close bracket")
-		case isTypeDef(r):
+		case isTypeDecl(r):
 			return lexTypeDeclaration
 		case isSpace(r) || r == ',':
 			l.ignore()
@@ -235,7 +235,7 @@ Loop:
 			}
 			// if bracket depth remains > 0, it's part of the type declaration eg []string
 			// absorb
-		case isTypeDef(r):
+		case isTypeDecl(r):
 			// absorb
 			if r == '[' {
 				l.bracketDepth++
@@ -328,8 +328,8 @@ func isIdentifierPrefix(r rune) bool {
 	return r == '_' || unicode.IsLetter(r)
 }
 
-// isTypeDef reports whether r a character legal in a type declaration, eg map[*Thing]interface{}
+// isTypeDecl reports whether r a character legal in a type declaration, eg map[*Thing]interface{}
 // brackets are a special case, handled in lexTypeParameter
-func isTypeDef(r rune) bool {
+func isTypeDecl(r rune) bool {
 	return r == '*' || r == '{' || r == '}' || isAlphaNumeric(r)
 }
