@@ -114,10 +114,13 @@ func TestParse(t *testing.T) {
 				{"Baz", []Type{
 					Type{Name: "qaz"},
 				}},
+				{"yo", []Type{
+					Type{Name: "dude"},
+				}},
 			}, false},
 			{"qux", []TagValue{
-				{"Baz", []Type{
-					Type{Name: "qaz"},
+				{"stuff", []Type{
+					Type{Name: "things"},
 				}},
 			}, false},
 		}, true},
