@@ -30,8 +30,11 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:  "methods",
-			Items: []string{"Count", "Where"},
+			Name: "methods",
+			Values: []typewriter.TagValue{
+				{"Count", nil},
+				{"Where", nil},
+			},
 		},
 	}
 
@@ -51,8 +54,11 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:  "methods",
-			Items: []string{"Count", "Unknown"},
+			Name: "methods",
+			Values: []typewriter.TagValue{
+				{"Count", nil},
+				{"Unknown", nil},
+			},
 		},
 	}
 
@@ -72,8 +78,10 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:  "projections",
-			Items: []string{"SomeType"},
+			Name: "projections",
+			Values: []typewriter.TagValue{
+				{"SomeType", nil},
+			},
 		},
 	}
 
@@ -93,12 +101,16 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:  "methods",
-			Items: []string{"GroupBy"},
+			Name: "methods",
+			Values: []typewriter.TagValue{
+				{"GroupBy", nil},
+			},
 		},
 		{
-			Name:  "projections",
-			Items: []string{"SomeType"},
+			Name: "projections",
+			Values: []typewriter.TagValue{
+				{"SomeType", nil},
+			},
 		},
 	}
 
@@ -138,8 +150,11 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:    "methods",
-			Items:   []string{"Sort", "Any"},
+			Name: "methods",
+			Values: []typewriter.TagValue{
+				{"Sort", nil},
+				{"Any", nil},
+			},
 			Negated: true,
 		},
 	}
@@ -161,14 +176,19 @@ func TestEvaluateTags(t *testing.T) {
 
 	typ.Tags = typewriter.Tags{
 		{
-			Name:    "methods",
-			Items:   []string{"Sort", "Where", "GroupBy"},
+			Name: "methods",
+			Values: []typewriter.TagValue{
+				{"Sort", nil},
+				{"Where", nil},
+				{"GroupBy", nil},
+			},
 			Negated: true,
 		},
 		{
-			Name:  "projections",
-			Items: []string{"int"},
-		},
+			Name: "projections",
+			Values: []typewriter.TagValue{
+				{"int", nil},
+			}},
 	}
 
 	standardMethods8, projectionMethods8, err8 := evaluateTags(typ)

@@ -47,20 +47,20 @@ func evaluateTags(t typewriter.Type) (standardMethods, projectionMethods []strin
 		// collect unknowns for err later
 		unknown := make([]string, 0)
 
-		for _, m := range methods.Items {
-			isStd := standardTemplates.Contains(m)
+		for _, m := range methods.Values {
+			isStd := standardTemplates.Contains(m.Name)
 			if isStd {
-				std = append(std, m)
+				std = append(std, m.Name)
 			}
 
 			// only consider projection methods in presence of projected types
-			isPrj := !nilProjections && projectionTemplates.Contains(m)
+			isPrj := !nilProjections && projectionTemplates.Contains(m.Name)
 			if isPrj {
-				prj = append(prj, m)
+				prj = append(prj, m.Name)
 			}
 
 			if !isStd && !isPrj {
-				unknown = append(unknown, m)
+				unknown = append(unknown, m.Name)
 			}
 		}
 

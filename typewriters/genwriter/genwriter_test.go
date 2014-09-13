@@ -61,8 +61,11 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType2",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name:  "projections",
-				Items: []string{"int", "string"},
+				Name: "projections",
+				Values: []typewriter.TagValue{
+					{"int", nil},
+					{"string", nil},
+				},
 			},
 		},
 	}
@@ -82,9 +85,11 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType3",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name:  "projections",
-				Items: []string{"int", "Foo"},
-			},
+				Name: "projections",
+				Values: []typewriter.TagValue{
+					{"int", nil},
+					{"Foo", nil},
+				}},
 		},
 	}
 
@@ -115,8 +120,11 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType4",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name:  "methods",
-				Items: []string{"All", "Foo"},
+				Name: "methods",
+				Values: []typewriter.TagValue{
+					{"All", nil},
+					{"Foo", nil},
+				},
 			},
 		},
 	}
@@ -152,8 +160,10 @@ func TestWriteHeader(t *testing.T) {
 		Name:    "SomeType",
 		Tags: typewriter.Tags{
 			{
-				Name:  "methods",
-				Items: []string{"All"},
+				Name: "methods",
+				Values: []typewriter.TagValue{
+					{"All", nil},
+				},
 			}, // subset to ensure no Sort
 		},
 	}
@@ -191,8 +201,10 @@ func TestImports(t *testing.T) {
 		Name:    "SomeType",
 		Tags: typewriter.Tags{
 			{
-				Name:  "projections",
-				Items: []string{"int"},
+				Name: "projections",
+				Values: []typewriter.TagValue{
+					{"int", nil},
+				},
 			},
 		},
 	}
@@ -225,8 +237,11 @@ func TestWrite(t *testing.T) {
 			Name:    "SecondType",
 			Tags: typewriter.Tags{
 				{
-					Name:  "projections",
-					Items: []string{"int", "string"}, // with projections
+					Name: "projections",
+					Values: []typewriter.TagValue{
+						{"int", nil},
+						{"string", nil},
+					}, // with projections
 				},
 			},
 		},
@@ -235,8 +250,11 @@ func TestWrite(t *testing.T) {
 			Name:    "ThirdType",
 			Tags: typewriter.Tags{
 				{
-					Name:  "methods",
-					Items: []string{"All", "Any"}, // subsetted
+					Name: "methods",
+					Values: []typewriter.TagValue{
+						{"All", nil},
+						{"Any", nil},
+					}, // subsetted
 				},
 			},
 		},
@@ -245,12 +263,18 @@ func TestWrite(t *testing.T) {
 			Name:    "FourthType",
 			Tags: typewriter.Tags{
 				{
-					Name:  "methods",
-					Items: []string{"All", "Any"}, // subsetted
+					Name: "methods",
+					Values: []typewriter.TagValue{
+						{"All", nil},
+						{"Any", nil},
+					}, // subsetted
 				},
 				{
-					Name:  "projections",
-					Items: []string{"int", "string"}, // and projections
+					Name: "projections",
+					Values: []typewriter.TagValue{
+						{"int", nil},
+						{"string", nil},
+					}, // and projections
 				},
 			},
 		},
@@ -259,8 +283,11 @@ func TestWrite(t *testing.T) {
 			Name:    "FifthType",
 			Tags: typewriter.Tags{
 				{
-					Name:    "methods",
-					Items:   []string{"Count", "Where"},
+					Name: "methods",
+					Values: []typewriter.TagValue{
+						{"Count", nil},
+						{"Where", nil},
+					},
 					Negated: true,
 				},
 			},

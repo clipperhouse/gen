@@ -88,11 +88,11 @@ func (g *GenWriter) Validate(t typewriter.Type) (bool, error) {
 	}
 
 	if found {
-		for _, s := range projectionTag.Items {
-			projectionType, err := t.Package.Eval(s)
+		for _, v := range projectionTag.Values {
+			projectionType, err := t.Package.Eval(v.Name)
 
 			if err != nil {
-				return false, fmt.Errorf("unable to identify type %s, projected on %s (%s)", s, t.Name, err)
+				return false, fmt.Errorf("unable to identify type %s, projected on %s (%s)", v.Name, t.Name, err)
 			}
 
 			for _, pm := range projectionMethods {
@@ -105,7 +105,7 @@ func (g *GenWriter) Validate(t typewriter.Type) (bool, error) {
 				if tmpl.ApplicableTo(projectionType) {
 					m.projections = append(m.projections, Projection{
 						Method: pm,
-						Type:   s,
+						Type:   v.Name,
 						Parent: &m,
 					})
 				}
