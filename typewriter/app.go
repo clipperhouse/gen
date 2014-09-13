@@ -14,7 +14,7 @@ import (
 	"code.google.com/p/go.tools/imports"
 )
 
-// +test foo:"Bar" baz:"qux,thing"
+// +test foo:"Bar" baz:"qux[struct{}],thing"
 type app struct {
 	// All typewriter.Type found in the current directory.
 	Types []Type

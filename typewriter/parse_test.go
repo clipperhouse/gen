@@ -3,7 +3,6 @@ package typewriter
 import (
 	"go/ast"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -11,6 +10,16 @@ import (
 type findDirectiveTest struct {
 	text  string
 	found bool
+}
+
+// dummy type evaluator
+type eval struct{}
+
+func (eval) Eval(name string) (Type, error) {
+	return Type{
+		Name:    name,
+		Package: NewPackage("dummy", "dummy"),
+	}, nil
 }
 
 func TestFindDirective(t *testing.T) {
@@ -48,60 +57,68 @@ func TestParse(t *testing.T) {
 	tests := []parseTest{
 		{`// +test foo:"bar,Baz"`, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", ""},
+				{"bar", nil},
+				{"Baz", nil},
 			}, false},
 		}, true},
 		{`// +test * foo:"bar,Baz"`, true, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", ""},
+				{"bar", nil},
+				{"Baz", nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz" qux:"stuff"`, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", ""},
+				{"bar", nil},
+				{"Baz", nil},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", ""},
+				{"stuff", nil},
 			}, false},
 		}, true},
 		{`// +test foo:"-bar,Baz"`, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", ""},
+				{"bar", nil},
+				{"Baz", nil},
 			}, true},
 		}, true},
 		{`// +test foo:"bar  ,Baz "  `, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", ""},
+				{"bar", nil},
+				{"Baz", nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[qaz], qux"`, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", "qaz"},
-				{"qux", ""},
+				{"bar", nil},
+				{"Baz", []Type{
+					Type{Name: "qaz"},
+				}},
+				{"qux", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"bar,Baz[qaz]" qux:"stuff"`, false, Tags{
+		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, Tags{
 			{"foo", []TagValue{
-				{"bar", ""},
-				{"Baz", "qaz"},
+				{"bar", nil},
+				{"Baz", []Type{
+					Type{Name: "qaz"},
+					Type{Name: "hey"},
+				}},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", ""},
+				{"stuff", nil},
 			}, false},
 		}, true},
 		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, Tags{
 			{"foo", []TagValue{
-				{"Baz", "qaz"},
-				{"yo", "dude"},
+				{"Baz", []Type{
+					Type{Name: "qaz"},
+				}},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", "things"},
+				{"Baz", []Type{
+					Type{Name: "qaz"},
+				}},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,-Baz"`, false, nil, false},
@@ -122,7 +139,7 @@ func TestParse(t *testing.T) {
 		c := &ast.Comment{
 			Text: test.comment,
 		}
-		pointer, tags, err := parseComment(c, "+test")
+		pointer, tags, err := parse(c.Text, "+test", eval{})
 
 		if test.valid != (err == nil) {
 			t.Errorf("[test %v] valid should have been %v for: %s\n%s", i, test.valid, test.comment, err)
@@ -132,10 +149,54 @@ func TestParse(t *testing.T) {
 			t.Errorf("[test %v] pointer should have been %v for: \n%s", i, bool(test.pointer), test.comment)
 		}
 
-		if !reflect.DeepEqual(tags, test.tags) {
+		if !tagsEqual(tags, test.tags) {
 			t.Errorf("[test %v] tags should have been %v, got %v", i, test.tags, tags)
 		}
 	}
+}
+
+func tagsEqual(tags, other Tags) bool {
+	if len(tags) != len(other) {
+		return false
+	}
+
+	for i, _ := range tags {
+		t := tags[i]
+		o := other[i]
+
+		if t.Name != o.Name {
+			return false
+		}
+
+		if t.Negated != o.Negated {
+			return false
+		}
+
+		if len(t.Values) != len(o.Values) {
+			return false
+		}
+
+		for j, _ := range t.Values {
+			tv := t.Values[j]
+			ov := o.Values[j]
+
+			if tv.Name != ov.Name {
+				return false
+			}
+
+			if len(tv.TypeParameters) != len(ov.TypeParameters) {
+				return false
+			}
+
+			for k, _ := range tv.TypeParameters {
+				if tv.TypeParameters[k].String() != ov.TypeParameters[k].String() {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
 }
 
 func TestGetTypes(t *testing.T) {
@@ -187,6 +248,14 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("dummy type should be numeric")
 	}
 
+	if len(dummy.Tags) != 1 {
+		t.Errorf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
+	}
+
+	if len(dummy.Tags[0].Values) != 1 {
+		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Values))
+	}
+
 	dummy2 := m["dummy2"]
 
 	if dummy2.Comparable() {
@@ -217,24 +286,22 @@ func TestGetTypes(t *testing.T) {
 
 	// check tag existence at a high level here, see also tag parsing tests
 
-	if len(m["app"].Tags) != 2 {
-		t.Errorf("typ should have 2 Tags, found %v", len(m["app"].Tags))
+	app := m["app"]
+
+	if len(app.Tags) != 2 {
+		t.Errorf("typ should have 2 Tags, found %v", len(app.Tags))
 	}
 
-	if len(m["app"].Tags[0].Values) != 1 {
-		t.Errorf("Tag should have 1 Item, found %v", len(m["app"].Tags[0].Values))
+	if len(app.Tags[0].Values) != 1 {
+		t.Errorf("Tag should have 1 Item, found %v", len(app.Tags[0].Values))
 	}
 
-	if len(m["app"].Tags[1].Values) != 2 {
-		t.Errorf("Tag should have 2 Values, found %v", len(m["app"].Tags[1].Values))
+	if len(app.Tags[1].Values) != 2 {
+		t.Errorf("Tag should have 2 Values, found %v", len(app.Tags[1].Values))
 	}
 
-	if len(m["dummy"].Tags) != 1 {
-		t.Errorf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
-	}
-
-	if len(m["dummy"].Tags[0].Values) != 1 {
-		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Values))
+	if len(app.Tags[1].Values[0].TypeParameters) != 1 {
+		t.Errorf("TagValue should have 1 TypeParameter, found %v", len(app.Tags[1].Values[0].TypeParameters))
 	}
 
 	// filtered types should not show up

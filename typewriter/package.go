@@ -9,6 +9,10 @@ import (
 	"code.google.com/p/go.tools/go/types"
 )
 
+type evaluator interface {
+	Eval(string) (Type, error)
+}
+
 type Package struct {
 	*types.Package
 }

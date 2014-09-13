@@ -44,13 +44,14 @@ type stateFn func(*lexer) stateFn
 
 // lexer holds the state of the scanner.
 type lexer struct {
-	input   string    // the string being scanned
-	state   stateFn   // the next lexing function to enter
-	pos     token.Pos // current position in the input
-	start   token.Pos // start position of this item
-	width   int       // width of last rune read from input
-	lastPos token.Pos // position of most recent item returned by nextItem
-	items   chan item // channel of scanned items
+	input        string    // the string being scanned
+	state        stateFn   // the next lexing function to enter
+	pos          token.Pos // current position in the input
+	start        token.Pos // start position of this item
+	width        int       // width of last rune read from input
+	lastPos      token.Pos // position of most recent item returned by nextItem
+	items        chan item // channel of scanned items
+	bracketDepth int
 }
 
 // next returns the next rune in the input.
@@ -140,10 +141,8 @@ Loop:
 				return l.errorf("pointer must be followed by a space or EOL")
 			}
 		case isIdentifierPrefix(r):
-			l.backup()
 			return lexTag
 		default:
-			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal leading character '%s' in tag name", string(r))
 		}
 	}
@@ -156,96 +155,104 @@ func lexTag(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case isIdentifierPrefix(r):
-			l.backup()
 			return lexIdentifier(l, itemTag)
 		case r == ':':
 			if l.next() != '"' {
 				return l.errorf(`expected :" following tag name`)
 			}
 			l.emit(itemColonQuote)
-			return lexTagValue
+			return lexTagValues
 		case isSpace(r):
 			l.ignore()
 		case r == '"':
 			l.emit(itemCloseQuote)
 			return lexComment
 		default:
-			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal character '%s' in tag name", string(r))
 		}
 	}
 }
 
-func lexTagValue(l *lexer) stateFn {
-	bracketDepth := 0
-
+func lexTagValues(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case r == '-':
 			l.emit(itemMinus)
 		case isIdentifierPrefix(r):
-			l.backup()
 			return lexIdentifier(l, itemTagValue)
 		case r == '[':
-			bracketDepth++
+			l.bracketDepth++
 			// parser has no use for bracket, only important as delimiter here
 			l.ignore()
-			return lexTypeParameter
-		case r == ']':
-			if bracketDepth < 0 {
-				l.backup() // back up to the erroneous character for accurate Pos
-				return l.errorf("extra ']' in tag value")
-			}
-			// parser has no use for bracket, only important as delimiter here
-			l.ignore()
-			bracketDepth--
-		case r == ',':
+			return lexTypeParameters
+		case isSpace(r) || r == ',':
 			// parser has no use for comma, only important as delimiter here
 			l.ignore()
 		case r == '"':
-			// defer up
+			// let lexTag handle it
 			l.backup()
 			return lexTag
-		case isSpace(r):
-			l.ignore()
 		case r == eof:
 			// we fell off the end without a close quote
 			return lexComment
 		default:
-			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal character '%s' in tag value", string(r))
 		}
 	}
 }
 
-func lexTypeParameter(l *lexer) stateFn {
-	bracketDepth := 0
-
+func lexTypeParameters(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
-		case r == '[':
-			// absorb
-			bracketDepth++
 		case r == ']':
-			// closing bracket of type parameter
-			if bracketDepth == 0 {
-				l.backup()
-				l.emit(itemTypeParameter)
-				return lexTagValue
+			if l.bracketDepth == 0 {
+				// closing bracket of type parameter
+				return lexTagValues
 			}
-			// absorb
-			bracketDepth--
+			return l.errorf("additional close bracket")
 		case isTypeDef(r):
-			// absorb
-		case r == ',' || r == '"':
+			return lexTypeDeclaration
+		case isSpace(r) || r == ',':
+			l.ignore()
+		case r == '"':
 			// premature end
-			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("expected close bracket")
 		default:
-			l.backup() // back up to the erroneous character for accurate Pos
 			return l.errorf("illegal character '%s' in type parameter", string(r))
 		}
 	}
+}
+
+func lexTypeDeclaration(l *lexer) stateFn {
+Loop:
+	for {
+		switch r := l.next(); {
+		case r == ']':
+			l.bracketDepth--
+			if l.bracketDepth == 0 {
+				// closing bracket of type parameter
+				break Loop
+			}
+			// if bracket depth remains > 0, it's part of the type declaration eg []string
+			// absorb
+		case isTypeDef(r):
+			// absorb
+			if r == '[' {
+				l.bracketDepth++
+			}
+		case isSpace(r) || r == ',':
+			// legal delimiters for multiple type parameters
+			break Loop
+		default:
+			// anything else is illegal
+			return l.errorf("illegal character '%c' in type declaration", r)
+		}
+	}
+
+	// once we get here, we've absorbed the delimiter; backup as not to emit it
+	l.backup()
+	l.emit(itemTypeParameter)
+	return lexTypeParameters
 }
 
 func lexCommentPrefix(l *lexer) stateFn {
@@ -273,7 +280,6 @@ Loop:
 			// absorb.
 		default:
 			if !isTerminator(r) {
-				l.backup() // back up to the erroneous character for accurate Pos
 				return l.errorf("illegal character '%c' in identifier", r)
 			}
 			l.backup()
@@ -285,7 +291,7 @@ Loop:
 	case itemTag:
 		return lexTag
 	case itemTagValue:
-		return lexTagValue
+		return lexTagValues
 	default:
 		return l.errorf("unknown itemType %v", typ)
 	}
