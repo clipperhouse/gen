@@ -282,11 +282,14 @@ Loop:
 			if !isTerminator(r) {
 				return l.errorf("illegal character '%c' in identifier", r)
 			}
-			l.backup()
-			l.emit(typ)
 			break Loop
 		}
 	}
+
+	// once we get here, we've absorbed the delimiter; backup as not to emit it
+	l.backup()
+	l.emit(typ)
+
 	switch typ {
 	case itemTag:
 		return lexTag
