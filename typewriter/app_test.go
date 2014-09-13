@@ -273,7 +273,7 @@ func (f *fooWriter) WriteBody(w io.Writer, t Type) {
 	f.writeCalls++
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
-		}`, t.LocalName())))
+		}`, t.String())))
 	return
 }
 

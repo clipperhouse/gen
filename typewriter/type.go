@@ -26,11 +26,7 @@ func (t test) String() string {
 	return ""
 }
 
-func (t *Type) String() (result string) {
-	return fmt.Sprintf("%s%s.%s", t.Pointer.String(), t.Package.Name(), t.Name)
-}
-
-func (t *Type) LocalName() (result string) {
+func (t Type) String() (result string) {
 	return fmt.Sprintf("%s%s", t.Pointer.String(), t.Name)
 }
 

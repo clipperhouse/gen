@@ -10,8 +10,8 @@ type Tag struct {
 }
 
 type TagValue struct {
-	Name          string
-	TypeParameter string
+	Name           string
+	TypeParameters []Type
 }
 
 func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
