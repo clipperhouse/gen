@@ -32,8 +32,10 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType2",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name:  "containers",
-				Items: []string{},
+				Name: "containers",
+				Values: []typewriter.TagValue{
+					{"string", nil},
+				},
 			},
 		},
 	}
@@ -53,8 +55,11 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType3",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name:  "containers",
-				Items: []string{"List", "Foo"},
+				Name: "containers",
+				Values: []typewriter.TagValue{
+					{"List", nil},
+					{"Foo", nil},
+				},
 			},
 		},
 	}

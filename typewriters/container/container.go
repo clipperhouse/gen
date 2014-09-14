@@ -37,8 +37,8 @@ func (c *ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 
 	// must include at least one item that we recognize
 	any := false
-	for _, item := range tag.Items {
-		if templates.Contains(item) {
+	for _, v := range tag.Values {
+		if templates.Contains(v.Name) {
 			// found one, move on
 			any = true
 			break
@@ -64,14 +64,14 @@ func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 
 	var list, ring, set bool
 
-	for _, s := range tag.Items {
-		if s == "List" {
+	for _, v := range tag.Values {
+		if v.Name == "List" {
 			list = true
 		}
-		if s == "Ring" {
+		if v.Name == "Ring" {
 			ring = true
 		}
-		if s == "Set" {
+		if v.Name == "Set" {
 			set = true
 		}
 	}
@@ -116,8 +116,8 @@ func (c *ContainerWriter) Imports(t typewriter.Type) (result []typewriter.Import
 func (c *ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
-	for _, s := range tag.Items {
-		tmpl, err := templates.Get(s) // validate above to avoid err check here?
+	for _, v := range tag.Values {
+		tmpl, err := templates.Get(v.Name) // validate above to avoid err check here?
 		if err != nil {
 			continue
 		}
