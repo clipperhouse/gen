@@ -37,6 +37,6 @@ func (f *fooWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) 
 func (f *fooWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
-		}`, t.LocalName())))
+		}`, t.String())))
 	return
 }
