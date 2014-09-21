@@ -129,6 +129,7 @@ type parsr struct {
 	lex       *lexer
 	token     [2]item // two-token lookahead for parser.
 	peekCount int
+	evaluator evaluator
 }
 
 // next returns the next token.
@@ -160,7 +161,8 @@ func parse(input, directive string, evaluator evaluator) (Pointer, Tags, error) 
 	var pointer Pointer
 	var tags Tags
 	p := &parsr{
-		lex: lex(input),
+		lex:       lex(input),
+		evaluator: evaluator,
 	}
 
 Loop:
@@ -219,7 +221,7 @@ Loop:
 				return false, nil, err
 			}
 
-			negated, vals, err := parseTagValues(p, evaluator)
+			negated, vals, err := parseTagValues(p)
 
 			if err != nil {
 				return false, nil, err
@@ -237,7 +239,7 @@ Loop:
 	return pointer, tags, nil
 }
 
-func parseTagValues(p *parsr, evaluator evaluator) (bool, []TagValue, error) {
+func parseTagValues(p *parsr) (bool, []TagValue, error) {
 	var negated bool
 	var vals []TagValue
 
@@ -273,7 +275,7 @@ func parseTagValues(p *parsr, evaluator evaluator) (bool, []TagValue, error) {
 			}
 
 			if p.peek().typ == itemTypeParameter {
-				typs, err := parseTypeParameters(p, evaluator)
+				typs, err := parseTypeParameters(p)
 				if err != nil {
 					serr := &SyntaxError{
 						msg: err.Error(),
@@ -294,7 +296,7 @@ func parseTagValues(p *parsr, evaluator evaluator) (bool, []TagValue, error) {
 	}
 }
 
-func parseTypeParameters(p *parsr, evaluator evaluator) ([]Type, error) {
+func parseTypeParameters(p *parsr) ([]Type, error) {
 	var typs []Type
 
 	for {
@@ -302,7 +304,7 @@ func parseTypeParameters(p *parsr, evaluator evaluator) ([]Type, error) {
 
 		switch item.typ {
 		case itemTypeParameter:
-			typ, err := evaluator.Eval(item.val)
+			typ, err := p.evaluator.Eval(item.val)
 			if err != nil {
 				serr := &SyntaxError{
 					msg: err.Error(),
