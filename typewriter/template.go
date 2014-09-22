@@ -15,10 +15,16 @@ type Template struct {
 	RequiresComparable bool
 	// An ordered type is one where greater-than and less-than are supported
 	RequiresOrdered bool
+	// Indicates that this template requires an exact number of type parameters. Default is zero.
+	RequiresTypeParameters int
 }
 
 func (tmpl Template) ApplicableToType(t Type) bool {
 	return (!tmpl.RequiresComparable || t.Comparable()) && (!tmpl.RequiresNumeric || t.Numeric()) && (!tmpl.RequiresOrdered || t.Ordered())
+}
+
+func (tmpl Template) ApplicableToValue(v TagValue) bool {
+	return tmpl.RequiresTypeParameters == len(v.TypeParameters)
 }
 
 // TemplateSet is a map of string names to Template.
