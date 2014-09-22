@@ -2,6 +2,8 @@ package typewriter
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"code.google.com/p/go.tools/go/types"
 )
@@ -40,6 +42,16 @@ func (t *Type) Numeric() bool {
 
 func (t *Type) Ordered() bool {
 	return t.ordered
+}
+
+func (typ Type) LongName() string {
+	name := ""
+	r := regexp.MustCompile(`[\[\]{}*]`)
+	els := r.Split(typ.String(), -1)
+	for _, s := range els {
+		name += strings.Title(s)
+	}
+	return name
 }
 
 // Pointer exists as a type to allow simple use as bool or as String, which returns *
