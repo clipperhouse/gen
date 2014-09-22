@@ -71,7 +71,7 @@ func (g *GenWriter) Validate(t typewriter.Type) (bool, error) {
 			return false, err
 		}
 
-		if !tmpl.ApplicableTo(t) {
+		if !tmpl.ApplicableToType(t) {
 			standardMethods = remove(standardMethods, s)
 		}
 	}
@@ -102,7 +102,7 @@ func (g *GenWriter) Validate(t typewriter.Type) (bool, error) {
 					return false, fmt.Errorf("unknown projection method %v", pm)
 				}
 
-				if tmpl.ApplicableTo(projectionType) {
+				if tmpl.ApplicableToType(projectionType) {
 					m.projections = append(m.projections, Projection{
 						Method: pm,
 						Type:   v.Name,

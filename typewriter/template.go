@@ -17,7 +17,7 @@ type Template struct {
 	RequiresOrdered bool
 }
 
-func (tmpl Template) ApplicableTo(t Type) bool {
+func (tmpl Template) ApplicableToType(t Type) bool {
 	return (!tmpl.RequiresComparable || t.Comparable()) && (!tmpl.RequiresNumeric || t.Numeric()) && (!tmpl.RequiresOrdered || t.Ordered())
 }
 
