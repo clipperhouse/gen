@@ -14,6 +14,21 @@ type TagValue struct {
 	TypeParameters []Type
 }
 
+func (v TagValue) String() string {
+	s := v.Name
+	if len(v.TypeParameters) > 0 {
+		s += "["
+		for i, typ := range v.TypeParameters {
+			s += typ.String()
+			if i < len(v.TypeParameters)-1 {
+				s += ","
+			}
+		}
+		s += "]"
+	}
+	return s
+}
+
 func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
 	tags := ts.Where(func(t Tag) bool {
 		return t.Name == name
