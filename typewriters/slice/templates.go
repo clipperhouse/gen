@@ -118,47 +118,47 @@ func (rcv {{.SliceName}}) First(fn func({{.Type}}) bool) (result {{.Type}}, err 
 }
 `},
 
-	// 	"Max": &typewriter.Template{
-	// 		Text: `
-	// // Max returns the maximum value of {{.SliceName}}. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
-	// func (rcv {{.SliceName}}) Max() (result {{.Type}}, err error) {
-	// 	l := len(rcv)
-	// 	if l == 0 {
-	// 		err = errors.New("cannot determine the Max of an empty slice")
-	// 		return
-	// 	}
-	// 	result = rcv[0]
-	// 	for _, v := range rcv {
-	// 		if v > result {
-	// 			result = v
-	// 		}
-	// 	}
-	// 	return
-	// }
-	// `,
-	// 		TypeConstraint: typewriter.Constraint{Ordered: true},
-	// 	},
+	"Max": &typewriter.Template{
+		Text: `
+	// Max returns the maximum value of {{.SliceName}}. In the case of multiple items being equally maximal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Max
+	func (rcv {{.SliceName}}) Max() (result {{.Type}}, err error) {
+		l := len(rcv)
+		if l == 0 {
+			err = errors.New("cannot determine the Max of an empty slice")
+			return
+		}
+		result = rcv[0]
+		for _, v := range rcv {
+			if v > result {
+				result = v
+			}
+		}
+		return
+	}
+	`,
+		TypeConstraint: typewriter.Constraint{Ordered: true},
+	},
 
-	// 	"Min": &typewriter.Template{
-	// 		Text: `
-	// // Min returns the minimum value of {{.SliceName}}. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
-	// func (rcv {{.SliceName}}) Min() (result {{.Type}}, err error) {
-	// 	l := len(rcv)
-	// 	if l == 0 {
-	// 		err = errors.New("cannot determine the Min of an empty slice")
-	// 		return
-	// 	}
-	// 	result = rcv[0]
-	// 	for _, v := range rcv {
-	// 		if v < result {
-	// 			result = v
-	// 		}
-	// 	}
-	// 	return
-	// }
-	// `,
-	// 		TypeConstraint: typewriter.Constraint{Ordered: true},
-	// 	},
+	"Min": &typewriter.Template{
+		Text: `
+	// Min returns the minimum value of {{.SliceName}}. In the case of multiple items being equally minimal, the first such element is returned. Returns error if no elements. See: http://clipperhouse.github.io/gen/#Min
+	func (rcv {{.SliceName}}) Min() (result {{.Type}}, err error) {
+		l := len(rcv)
+		if l == 0 {
+			err = errors.New("cannot determine the Min of an empty slice")
+			return
+		}
+		result = rcv[0]
+		for _, v := range rcv {
+			if v < result {
+				result = v
+			}
+		}
+		return
+	}
+	`,
+		TypeConstraint: typewriter.Constraint{Ordered: true},
+	},
 
 	"MaxBy": &typewriter.Template{
 		Text: `
@@ -637,7 +637,7 @@ func (rcv {{.SliceName}}) Min{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.T
 	"Select[T]": &typewriter.Template{
 		Text: `
 // Select{{.TypeParameter.LongName}} returns a slice of {{.Type}} in {{.SliceName}}, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
-func (rcv {{.SliceName}}) Select{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.Type}}) (result []{{.Type}}) {
+func (rcv {{.SliceName}}) Select{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.TypeParameter}}) (result []{{.TypeParameter}}) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
 	}
@@ -653,7 +653,7 @@ func (rcv {{.SliceName}}) Select{{.TypeParameter.LongName}}(fn func({{.Type}}) {
 	"Sum[T]": &typewriter.Template{
 		Text: `
 // Sum{{.TypeParameter.LongName}} sums {{.Type}} over elements in {{.SliceName}}. See: http://clipperhouse.github.io/gen/#Sum
-func (rcv {{.SliceName}}) Sum{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.Type}}) (result {{.Type}}) {
+func (rcv {{.SliceName}}) Sum{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.TypeParameter}}) (result {{.TypeParameter}}) {
 	for _, v := range rcv {
 		result += fn(v)
 	}
