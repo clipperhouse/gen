@@ -30,6 +30,19 @@ func (v TagValue) String() string {
 	return v.Name + "[" + strings.Join(a, ",") + "]"
 }
 
+func (v TagValue) TemplateKey() string {
+	if len(v.TypeParameters) == 0 {
+		return v.Name
+	}
+
+	var a []string
+	for i := 0; i < len(v.TypeParameters); i++ {
+		a = append(a, "T")
+	}
+
+	return v.Name + "[" + strings.Join(a, ",") + "]"
+}
+
 func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
 	tags := ts.Where(func(t Tag) bool {
 		return t.Name == name

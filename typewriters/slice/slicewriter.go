@@ -20,7 +20,7 @@ type cache struct {
 	values []typewriter.TagValue
 }
 
-func Plural(typ typewriter.Type) string {
+func SliceName(typ typewriter.Type) string {
 	return typ.Name + "Slice"
 }
 
@@ -56,29 +56,16 @@ func (sw *SliceWriter) Validate(typ typewriter.Type) (bool, error) {
 
 	var values []typewriter.TagValue
 
-	// filter methods applicable to type
 	for _, v := range tag.Values {
-		tmpl, ok := templates[v.Name]
+		// just a validation here, template is used in Write()
+		_, err := templates.Get(v)
 
-		if !ok {
-			err = fmt.Errorf("unknown slice method %s", v.Name)
-			return false, err
-		}
-
-		if !tmpl.ApplicableToType(typ) {
-			// TODO better error message
-			err = fmt.Errorf("type %s cannot implement %s", typ, v)
-			return false, err
-		}
-
-		if !tmpl.ApplicableToValue(v) {
-			err = fmt.Errorf("type %s cannot implement %s; requires %d type parameters", typ, v, tmpl.RequiresTypeParameters)
+		if err != nil {
 			return false, err
 		}
 
 		values = append(values, v)
 	}
-
 	// store it for later, so we don't have to look for the tag again
 	sw.caches[typ.String()] = cache{values}
 
@@ -172,11 +159,15 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 		return
 	}
 
-	tmpl, _ := templates.Get("slice")
+	tmpl, err := templates.ByName("slice")
+
+	if err != nil {
+		panic(err)
+	}
 
 	m := model{
-		Type:   typ,
-		Plural: Plural(typ),
+		Type:      typ,
+		SliceName: SliceName(typ),
 	}
 
 	if err := tmpl.Execute(w, m); err != nil {
@@ -192,12 +183,32 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 
 		m := model{
 			Type:          typ,
-			Plural:        Plural(typ),
+			SliceName:     SliceName(typ),
 			TypeParameter: tp,
 			TagValue:      v,
 		}
 
-		tmpl, _ := templates.Get(v.Name) // already validated above
+		tmpl, err := templates.Get(v) // already validated above
+
+		if err != nil {
+			panic(err)
+		}
+
+		if err := tmpl.Execute(w, m); err != nil {
+			panic(err)
+		}
+	}
+
+	if includeSortInterface(cache.values) {
+		tmpl, _ := templates.ByName("sortInterface") // already validated above
+		err := tmpl.Execute(w, m)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if includeSortSupport(cache.values) {
+		tmpl, _ := templates.ByName("sortSupport") // already validated above
 		err := tmpl.Execute(w, m)
 		if err != nil {
 			panic(err)

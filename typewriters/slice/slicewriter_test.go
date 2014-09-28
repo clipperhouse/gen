@@ -84,7 +84,7 @@ func TestWrite(t *testing.T) {
 			t.Errorf("should write %s", typ)
 		}
 
-		b.WriteString(fmt.Sprintf("package %s\n", typ.Package.Name()))
+		b.WriteString(fmt.Sprintf("package %s\n\n", typ.Package.Name()))
 		sw.WriteBody(&b, typ)
 
 		src := b.String()

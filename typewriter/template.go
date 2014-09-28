@@ -9,42 +9,48 @@ import (
 
 // Template includes the text of a template as well as requirements for the types to which it can be applied.
 type Template struct {
-	Text            string
-	RequiresNumeric bool
-	// A comparable type is one that supports the == operator. Map keys must be comparable, for example.
-	RequiresComparable bool
-	// An ordered type is one where greater-than and less-than are supported
-	RequiresOrdered bool
-	// Indicates that this template requires an exact number of type parameters. Default is zero.
-	RequiresTypeParameters int
+	Text           string
+	TypeConstraint Constraint
+	// Indicates both the number of required type parameters, and the constraints of each (if any)
+	TypeParameterConstraints []Constraint
 }
 
-func (tmpl Template) ApplicableToType(t Type) bool {
-	return (!tmpl.RequiresComparable || t.Comparable()) && (!tmpl.RequiresNumeric || t.Numeric()) && (!tmpl.RequiresOrdered || t.Ordered())
-}
+func (tmpl *Template) tryTypeAndValue(t Type, v TagValue) error {
+	if err := tmpl.TypeConstraint.tryType(t); err != nil {
+		return fmt.Errorf("cannot implement %s: %s", v, err)
+	}
 
-func (tmpl Template) ApplicableToValue(v TagValue) bool {
-	return tmpl.RequiresTypeParameters == len(v.TypeParameters)
+	if len(tmpl.TypeParameterConstraints) != len(v.TypeParameters) {
+		return fmt.Errorf("%s requires %d type parameters", v.Name, len(tmpl.TypeParameterConstraints))
+	}
+
+	for i := range v.TypeParameters {
+		c := tmpl.TypeParameterConstraints[i]
+		tp := v.TypeParameters[i]
+		if err := c.tryType(tp); err != nil {
+			return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
+		}
+	}
+
+	return nil
 }
 
 // TemplateSet is a map of string names to Template.
 type TemplateSet map[string]*Template
 
-// Contains returns true if the TemplateSet includes a template of a given name.
-func (ts TemplateSet) Contains(name string) bool {
-	_, ok := ts[name]
-	return ok
+// Get attempts to 1) locate a template of that name and 2) parse the template
+func (ts TemplateSet) Get(v TagValue) (*template.Template, error) {
+	return ts.ByName(v.TemplateKey())
 }
 
-// Get attempts to 1) locate a tempalte of that name and 2) parse the template
-// Returns an error if the template is not found, and panics if the template can not be parsed (per text/template.Must)
-func (ts TemplateSet) Get(name string) (t *template.Template, err error) {
-	if !ts.Contains(name) {
-		err = fmt.Errorf("%s is not a known template", name)
-		return
+// Get attempts to 1) locate a template of that name and 2) parse the template
+func (ts TemplateSet) ByName(name string) (*template.Template, error) {
+	tmpl, found := ts[name]
+	if !found {
+		err := fmt.Errorf("%s is not a known template", name)
+		return nil, err
 	}
-	t = template.Must(template.New(name).Parse(ts[name].Text))
-	return
+	return template.New(name).Parse(tmpl.Text)
 }
 
 // GetAllKeys returns a slice of all 'exported' key names of templates in the TemplateSet
