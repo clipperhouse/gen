@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+// +test slice:"Any,All,Count,Distinct,DistinctBy,Each,First,MaxBy,MinBy,Single,Where,SortBy,SortByDesc,IsSortedBy,IsSortedByDesc,Aggregate[Other],Average[Other],GroupBy[Other],Max[Other],Min[Other],Select[Other],Sum[Other]"
+type Thing struct {
+	Name   string
+	Number Other
+}
+
 var zero = Thing{}
 var first = Thing{"First", 60}
 var second = Thing{"Second", 40}

@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+// methods where underlying type is ordered
+// +test slice:"Max,Min, Average, Sort,IsSorted,SortDesc,IsSortedDesc"
+type Other Underlying
+
+type Underlying int
+
 var others = OtherSlice{50, 100, 9, 7, 100, 99}
 
 func TestAverage(t *testing.T) {
