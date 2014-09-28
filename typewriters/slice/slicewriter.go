@@ -159,6 +159,9 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 		return
 	}
 
+	// a bit frustrating that errors are still possible here (templates mainly),
+	// but all we can do is panic
+
 	tmpl, err := templates.ByName("slice")
 
 	if err != nil {
