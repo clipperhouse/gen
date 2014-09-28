@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	err := typewriter.Register(&SliceWriter{})
+	err := typewriter.Register(NewSliceWriter())
 	if err != nil {
 		panic(err)
 	}
