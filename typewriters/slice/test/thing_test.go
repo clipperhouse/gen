@@ -4,6 +4,36 @@ import (
 	"testing"
 )
 
+var zero = Thing{}
+var first = Thing{"First", 60}
+var second = Thing{"Second", 40}
+var third = Thing{"Third", 100}
+var anotherThird = Thing{"Third", 100}
+var fourth = Thing{"Fourth", 40}
+var fifth = Thing{"Fifth", 70}
+var sixth = Thing{"Sixth", 10}
+var seventh = Thing{"Seventh", 50}
+var eighth = Thing{"Eighth", 110}
+
+var things = ThingSlice{
+	first,
+	second,
+	third,
+	anotherThird,
+	fourth,
+}
+
+var lotsOfThings = ThingSlice{
+	first,
+	second,
+	third,
+	fourth,
+	fifth,
+	sixth,
+	seventh,
+	eighth,
+}
+
 func TestAll(t *testing.T) {
 	all1 := things.All(func(x Thing) bool {
 		return x.Name == "First"
@@ -21,7 +51,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("All should evaulate true for Number > 1")
 	}
 
-	all3 := noThings.All(func(x Thing) bool {
+	all3 := ThingSlice{}.All(func(x Thing) bool {
 		return false
 	})
 
@@ -47,7 +77,7 @@ func TestAny(t *testing.T) {
 		t.Errorf("Any should evaulate true for Number > 50")
 	}
 
-	any3 := noThings.Any(func(x Thing) bool {
+	any3 := ThingSlice{}.Any(func(x Thing) bool {
 		return true
 	})
 
@@ -81,7 +111,7 @@ func TestCount(t *testing.T) {
 		t.Errorf("Count should no items for Name == Dummy")
 	}
 
-	count4 := noThings.Count(func(x Thing) bool {
+	count4 := ThingSlice{}.Count(func(x Thing) bool {
 		return true
 	})
 
@@ -129,7 +159,7 @@ func TestFirst(t *testing.T) {
 		t.Errorf("First should fail when finding Name == Dummy")
 	}
 
-	f3, err := noThings.First(func(x Thing) bool {
+	f3, err := ThingSlice{}.First(func(x Thing) bool {
 		return true
 	})
 
@@ -151,7 +181,7 @@ func TestMinBy(t *testing.T) {
 		t.Errorf("MinBy Number should return %v, got %v", second, min1)
 	}
 
-	min2, err := noThings.MinBy(func(a, b Thing) bool {
+	min2, err := ThingSlice{}.MinBy(func(a, b Thing) bool {
 		return true
 	})
 
@@ -173,7 +203,7 @@ func TestMaxBy(t *testing.T) {
 		t.Errorf("MaxBy Number should return %v, got %v", third, max1)
 	}
 
-	max2, err := noThings.MaxBy(func(a, b Thing) bool {
+	max2, err := ThingSlice{}.MaxBy(func(a, b Thing) bool {
 		return true
 	})
 
@@ -203,7 +233,7 @@ func TestSingle(t *testing.T) {
 		t.Errorf("Single should error on Name == Third")
 	}
 
-	single3, err := noThings.Single(func(a Thing) bool {
+	single3, err := ThingSlice{}.Single(func(a Thing) bool {
 		return true
 	})
 
@@ -302,7 +332,7 @@ func TestWhere(t *testing.T) {
 		t.Errorf("Where should result in empty slice, got %v", where2)
 	}
 
-	where3 := noThings.Where(func(x Thing) bool {
+	where3 := ThingSlice{}.Where(func(x Thing) bool {
 		return true
 	})
 
@@ -341,7 +371,7 @@ func TestAverageOther(t *testing.T) {
 		t.Errorf("Average should be %v, got %v", avg1, average1)
 	}
 
-	average2, err := noThings.AverageOther(number)
+	average2, err := ThingSlice{}.AverageOther(number)
 
 	if err == nil || average2 != 0 {
 		t.Errorf("Average should fail on empty slice")
@@ -392,7 +422,7 @@ func TestMaxInt(t *testing.T) {
 		t.Errorf("Max should be %v, got %v", 100, max1)
 	}
 
-	max2, err := noThings.MaxOther(number)
+	max2, err := ThingSlice{}.MaxOther(number)
 
 	if err == nil || max2 != 0 {
 		t.Errorf("Max should fail on empty slice")
@@ -414,7 +444,7 @@ func TestMinOther(t *testing.T) {
 		t.Errorf("Min should be %v, got %v", 40, min1)
 	}
 
-	min2, err := noThings.MinOther(number)
+	min2, err := ThingSlice{}.MinOther(number)
 
 	if err == nil || min2 != 0 {
 		t.Errorf("Min should fail on empty slice")

@@ -47,6 +47,25 @@ func (rcv {{.SliceName}}) Any(fn func({{.Type}}) bool) bool {
 }
 `},
 
+	"Average": &typewriter.Template{
+		Text: `
+// Average sums {{.SliceName}} over all elements and divides by len({{.SliceName}}). See: http://clipperhouse.github.io/gen/#Average
+func (rcv {{.SliceName}}) Average() (result {{.Type}}, err error) {
+	l := len(rcv)
+	if l == 0 {
+		err = errors.New("cannot determine Average of zero-length {{.SliceName}}")
+		return
+	}
+	for _, v := range rcv {
+		result += v
+	}
+	result = result / {{.Type}}(l)
+	return
+}
+`,
+		TypeConstraint: typewriter.Constraint{Numeric: true},
+	},
+
 	"Count": &typewriter.Template{
 		Text: `
 // Count gives the number elements of {{.SliceName}} that return true for the passed func. See: http://clipperhouse.github.io/gen/#Count

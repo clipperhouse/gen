@@ -7,7 +7,7 @@ type Thing struct {
 }
 
 // methods where underlying type is ordered
-// +test slice:"Max,Min, Sort,IsSorted,SortDesc,IsSortedDesc"
+// +test slice:"Max,Min, Average, Sort,IsSorted,SortDesc,IsSortedDesc"
 type Other Underlying
 
 type Underlying int
