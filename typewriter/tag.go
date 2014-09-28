@@ -1,6 +1,9 @@
 package typewriter
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // +gen methods:"Where"
 type Tag struct {
@@ -15,18 +18,16 @@ type TagValue struct {
 }
 
 func (v TagValue) String() string {
-	s := v.Name
-	if len(v.TypeParameters) > 0 {
-		s += "["
-		for i, typ := range v.TypeParameters {
-			s += typ.String()
-			if i < len(v.TypeParameters)-1 {
-				s += ","
-			}
-		}
-		s += "]"
+	if len(v.TypeParameters) == 0 {
+		return v.Name
 	}
-	return s
+
+	var a []string
+	for i := 0; i < len(v.TypeParameters); i++ {
+		a = append(a, v.TypeParameters[i].Name)
+	}
+
+	return v.Name + "[" + strings.Join(a, ",") + "]"
 }
 
 func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
