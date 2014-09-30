@@ -8,7 +8,7 @@ import (
 type model struct {
 	Type      typewriter.Type
 	SliceName string
-	// these tempaltes only ever happen to use one type parameter
+	// these templates only ever happen to use one type parameter
 	TypeParameter typewriter.Type
 	typewriter.TagValue
 }
@@ -50,17 +50,18 @@ func (rcv {{.SliceName}}) Any(fn func({{.Type}}) bool) bool {
 	"Average": &typewriter.Template{
 		Text: `
 // Average sums {{.SliceName}} over all elements and divides by len({{.SliceName}}). See: http://clipperhouse.github.io/gen/#Average
-func (rcv {{.SliceName}}) Average() (result {{.Type}}, err error) {
+func (rcv {{.SliceName}}) Average() ({{.Type}}, error) {
+	var result {{.Type}}
+
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine Average of zero-length {{.SliceName}}")
-		return
+		return result, errors.New("cannot determine Average of zero-length {{.SliceName}}")
 	}
 	for _, v := range rcv {
 		result += v
 	}
 	result = result / {{.Type}}(l)
-	return
+	return result, nil
 }
 `,
 		TypeConstraint: typewriter.Constraint{Numeric: true},
