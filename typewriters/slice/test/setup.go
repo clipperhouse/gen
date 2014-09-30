@@ -14,7 +14,7 @@ import (
 func main() {
 	// don't let bad test or gen files get us stuck
 	filter := func(f os.FileInfo) bool {
-		return !strings.HasSuffix(f.Name(), "_test.go") && !strings.HasSuffix(f.Name(), "_slice.go")
+		return !strings.HasSuffix(f.Name(), "_slice.go")
 	}
 
 	a, err := typewriter.NewAppFiltered("+test", filter)

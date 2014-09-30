@@ -47,17 +47,18 @@ func (rcv OtherSlice) Min() (result Other, err error) {
 }
 
 // Average sums OtherSlice over all elements and divides by len(OtherSlice). See: http://clipperhouse.github.io/gen/#Average
-func (rcv OtherSlice) Average() (result Other, err error) {
+func (rcv OtherSlice) Average() (Other, error) {
+	var result Other
+
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine Average of zero-length OtherSlice")
-		return
+		return result, errors.New("cannot determine Average of zero-length OtherSlice")
 	}
 	for _, v := range rcv {
 		result += v
 	}
 	result = result / Other(l)
-	return
+	return result, nil
 }
 
 // Sort returns a new ordered OtherSlice. See: http://clipperhouse.github.io/gen/#Sort
