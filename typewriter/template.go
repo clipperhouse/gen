@@ -2,8 +2,7 @@ package typewriter
 
 import (
 	"fmt"
-	"go/ast"
-	"sort"
+
 	"text/template"
 )
 
@@ -51,15 +50,4 @@ func (ts TemplateSet) ByName(name string) (*template.Template, error) {
 		return nil, err
 	}
 	return template.New(name).Parse(tmpl.Text)
-}
-
-// GetAllKeys returns a slice of all 'exported' key names of templates in the TemplateSet
-func (ts TemplateSet) GetAllKeys() (result []string) {
-	for k := range ts {
-		if ast.IsExported(k) {
-			result = append(result, k)
-		}
-	}
-	sort.Strings(result)
-	return
 }
