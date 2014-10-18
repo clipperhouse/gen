@@ -35,10 +35,11 @@ func (c *ContainerWriter) Validate(t typewriter.Type) (bool, error) {
 		return false, err
 	}
 
-	// must include at least one item that we recognize
+	// must include at least one item that we recognize; others containers ok
 	any := false
 	for _, v := range tag.Values {
-		if templates.Contains(v.Name) {
+		_, err := templates.Get(v)
+		if err == nil {
 			// found one, move on
 			any = true
 			break
@@ -117,7 +118,7 @@ func (c *ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	tag := c.tagsByType[t.String()] // validated above
 
 	for _, v := range tag.Values {
-		tmpl, err := templates.Get(v.Name) // validate above to avoid err check here?
+		tmpl, err := templates.Get(v)
 		if err != nil {
 			continue
 		}
