@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// +gen methods:"Where"
+// +gen slice:"Where"
 type dummy int
 
 func TestRun(t *testing.T) {
@@ -13,12 +13,12 @@ func TestRun(t *testing.T) {
 	setCustomName("_gen_test.go")
 	defer revertCustomName()
 
-	genName := "dummy_gen_test.go"
+	sliceName := "dummy_slice_test.go"
 	fooName := "dummy_foo_test.go"
 
 	// remove existing files, start fresh
 	os.Remove(customName)
-	os.Remove(genName)
+	os.Remove(sliceName)
 	os.Remove(fooName)
 
 	// standard run
@@ -27,7 +27,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// gen file should exist
-	if _, err := os.Open(genName); err != nil {
+	if _, err := os.Open(sliceName); err != nil {
 		t.Error(err)
 	}
 
@@ -37,7 +37,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// remove just-gen'd file
-	os.Remove(genName)
+	os.Remove(sliceName)
 
 	// create a custom typewriter import file
 	w, err := os.Create(customName)
@@ -69,8 +69,8 @@ func TestRun(t *testing.T) {
 	}
 
 	// gen file should not exist, because it was not included in the custom file
-	if _, err := os.Open(genName); err == nil {
-		t.Errorf("%s should not have been generated", genName)
+	if _, err := os.Open(sliceName); err == nil {
+		t.Errorf("%s should not have been generated", sliceName)
 	}
 
 	// remove just-gen'd file

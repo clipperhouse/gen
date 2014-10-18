@@ -49,7 +49,7 @@ func TestGetImports(t *testing.T) {
 		Imports: []string{
 			// non-standard typewriter
 			`_ "github.com/clipperhouse/gen/typewriters/foowriter"`,
-			`_ "github.com/clipperhouse/gen/typewriters/genwriter"`,
+			`_ "github.com/clipperhouse/gen/typewriters/slice"`,
 			`_ "github.com/clipperhouse/gen/typewriters/container"`,
 		},
 	}
