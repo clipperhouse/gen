@@ -5,7 +5,7 @@ import (
 )
 
 // methods where underlying type is ordered
-// +test slice:"Max,Min, Average, Sort,IsSorted,SortDesc,IsSortedDesc"
+// +test slice:"Max,Min, Average, Sum, Sort,IsSorted,SortDesc,IsSortedDesc"
 type Other Underlying
 
 type Underlying int
@@ -93,5 +93,13 @@ func TestSort(t *testing.T) {
 
 	if !sort2.IsSortedDesc() {
 		t.Errorf("IsSortedDesc should be true for %v", sort1)
+	}
+}
+
+func TestSum(t *testing.T) {
+	sum := others.Sum()
+
+	if sum != 365 {
+		t.Errorf("Sum should result in %v, got %v", 365, sum)
 	}
 }

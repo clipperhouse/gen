@@ -36,6 +36,7 @@ var templates = typewriter.TemplateSet{
 	"MinBy":        minBy,
 	"Select[T]":    selectT,
 	"Single":       single,
+	"Sum":          sum,
 	"Sum[T]":       sumT,
 	"Where":        where,
 

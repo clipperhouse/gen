@@ -2,6 +2,19 @@ package slice
 
 import "github.com/clipperhouse/gen/typewriter"
 
+var sum = &typewriter.Template{
+	Text: `
+// Sum sums {{.Type}} elements in {{.SliceName}}. See: http://clipperhouse.github.io/gen/#Sum
+func (rcv {{.SliceName}}) Sum() (result {{.Type}}) {
+	for _, v := range rcv {
+		result += v
+	}
+	return
+}
+`,
+	TypeConstraint: typewriter.Constraint{Numeric: true},
+}
+
 var sumT = &typewriter.Template{
 	Text: `
 // Sum{{.TypeParameter.LongName}} sums {{.Type}} over elements in {{.SliceName}}. See: http://clipperhouse.github.io/gen/#Sum

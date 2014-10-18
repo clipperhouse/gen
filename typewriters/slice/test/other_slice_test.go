@@ -61,6 +61,14 @@ func (rcv OtherSlice) Average() (Other, error) {
 	return result, nil
 }
 
+// Sum sums Other elements in OtherSlice. See: http://clipperhouse.github.io/gen/#Sum
+func (rcv OtherSlice) Sum() (result Other) {
+	for _, v := range rcv {
+		result += v
+	}
+	return
+}
+
 // Sort returns a new ordered OtherSlice. See: http://clipperhouse.github.io/gen/#Sort
 func (rcv OtherSlice) Sort() OtherSlice {
 	result := make(OtherSlice, len(rcv))

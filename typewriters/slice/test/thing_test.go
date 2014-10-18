@@ -470,7 +470,7 @@ func TestSelectOther(t *testing.T) {
 	}
 }
 
-func TestSum(t *testing.T) {
+func TestSumT(t *testing.T) {
 	number := func(x Thing) Other {
 		return x.Number
 	}

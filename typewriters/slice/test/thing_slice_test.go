@@ -208,11 +208,11 @@ func (rcv ThingSlice) AggregateOther(fn func(Other, Thing) Other) (result Other)
 	return
 }
 
-// AverageOther sums Thing over all elements and divides by len(ThingSlice). See: http://clipperhouse.github.io/gen/#Average
+// AverageOther sums Other over all elements and divides by len(ThingSlice). See: http://clipperhouse.github.io/gen/#Average
 func (rcv ThingSlice) AverageOther(fn func(Thing) Other) (result Other, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine Average of zero-length ThingSlice")
+		err = errors.New("cannot determine Average[Other] of zero-length ThingSlice")
 		return
 	}
 	for _, v := range rcv {
@@ -270,7 +270,7 @@ func (rcv ThingSlice) MinOther(fn func(Thing) Other) (result Other, err error) {
 	return
 }
 
-// SelectOther returns a slice of Thing in ThingSlice, projected by passed func. See: http://clipperhouse.github.io/gen/#Select
+// SelectOther projects a slice of Other from ThingSlice, typically called a map in other frameworks. See: http://clipperhouse.github.io/gen/#Select
 func (rcv ThingSlice) SelectOther(fn func(Thing) Other) (result []Other) {
 	for _, v := range rcv {
 		result = append(result, fn(v))
