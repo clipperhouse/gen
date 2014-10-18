@@ -211,7 +211,7 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 	}
 
 	if includeSortSupport(cache.values) {
-		tmpl, _ := templates.ByName("sortSupport") // already validated above
+		tmpl, _ := templates.ByName("sortImplementation") // already validated above
 		err := tmpl.Execute(w, m)
 		if err != nil {
 			panic(err)
