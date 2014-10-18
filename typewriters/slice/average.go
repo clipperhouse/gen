@@ -24,11 +24,11 @@ func (rcv {{.SliceName}}) Average() ({{.Type}}, error) {
 
 var averageT = &typewriter.Template{
 	Text: `
-// Average{{.TypeParameter.LongName}} sums {{.Type}} over all elements and divides by len({{.SliceName}}). See: http://clipperhouse.github.io/gen/#Average
+// Average{{.TypeParameter.LongName}} sums {{.TypeParameter}} over all elements and divides by len({{.SliceName}}). See: http://clipperhouse.github.io/gen/#Average
 func (rcv {{.SliceName}}) Average{{.TypeParameter.LongName}}(fn func({{.Type}}) {{.TypeParameter}}) (result {{.TypeParameter}}, err error) {
 	l := len(rcv)
 	if l == 0 {
-		err = errors.New("cannot determine Average of zero-length {{.SliceName}}")
+		err = errors.New("cannot determine Average[{{.TypeParameter}}] of zero-length {{.SliceName}}")
 		return
 	}
 	for _, v := range rcv {
