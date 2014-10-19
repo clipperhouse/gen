@@ -40,56 +40,16 @@ func init() {
 	typs = append(typs, t1)
 }
 
-func TestValidate(t *testing.T) {
-	sw := NewSliceWriter()
-
-	for _, typ := range typs {
-		if sw.validated[typ.String()] {
-			t.Errorf("type should not show having been validated yet")
-		}
-
-		write, err := sw.Validate(typ)
-
-		if !write {
-			t.Errorf("type should write")
-		}
-
-		if err != nil {
-			t.Errorf("type should be valid; got error '%s'", err)
-		}
-
-		if !sw.validated[typ.String()] {
-			t.Errorf("type should show having been validated")
-		}
-
-		if _, ok := sw.caches[typ.String()]; !ok {
-			t.Errorf("type should appear in sw.caches")
-		}
-	}
-}
-
 func TestWrite(t *testing.T) {
 	for _, typ := range typs {
 		var b bytes.Buffer
 
 		sw := NewSliceWriter()
 
-		write, err := sw.Validate(typ)
-
-		if err != nil {
-			t.Error(err)
-		}
-
-		if !write {
-			t.Errorf("should write %s", typ)
-		}
-
 		b.WriteString(fmt.Sprintf("package %s\n\n", typ.Package.Name()))
 		sw.WriteBody(&b, typ)
 
 		src := b.String()
-
-		fmt.Println(src)
 
 		fset := token.NewFileSet()
 		if _, err := parser.ParseFile(fset, "testwrite.go", src, 0); err != nil {

@@ -1,7 +1,6 @@
 package slice
 
 import (
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -24,68 +23,25 @@ func SliceName(typ typewriter.Type) string {
 	return typ.Name + "Slice"
 }
 
-type SliceWriter struct {
-	// map key is type name; type is not comparable, use typ.String()
-	validated map[string]bool
-	caches    map[string]cache
-}
+type SliceWriter struct{}
 
 func NewSliceWriter() *SliceWriter {
-	return &SliceWriter{
-		validated: make(map[string]bool),
-		caches:    make(map[string]cache),
-	}
+	return &SliceWriter{}
 }
 
 func (sw *SliceWriter) Name() string {
 	return "slice"
 }
 
-func (sw *SliceWriter) Validate(typ typewriter.Type) (bool, error) {
+func (sw *SliceWriter) WriteHeader(w io.Writer, typ typewriter.Type) error {
 	tag, found, err := typ.Tags.ByName("slice")
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if !found {
-		return false, nil
-	}
-
-	sw.validated[typ.String()] = true
-
-	var values []typewriter.TagValue
-
-	for _, v := range tag.Values {
-		// just a validation here, template is used in Write()
-		_, err := templates.Get(v)
-
-		if err != nil {
-			return false, err
-		}
-
-		values = append(values, v)
-	}
-	// store it for later, so we don't have to look for the tag again
-	sw.caches[typ.String()] = cache{values}
-
-	return true, nil
-}
-
-func (sw *SliceWriter) ensureValidation(typ typewriter.Type) {
-	if !sw.validated[typ.String()] {
-		err := fmt.Errorf("Type '%s' has not been previously validated. TypeWriter.Validate() must be called on all types before using them in subsequent methods.", typ)
-		panic(err)
-	}
-}
-
-func (sw *SliceWriter) WriteHeader(w io.Writer, typ typewriter.Type) {
-	sw.ensureValidation(typ)
-
-	cache, exists := sw.caches[typ.String()]
-
-	if !exists {
-		return
+		return nil
 	}
 
 	s := `// See http://clipperhouse.github.io/gen for documentation
@@ -93,7 +49,7 @@ func (sw *SliceWriter) WriteHeader(w io.Writer, typ typewriter.Type) {
 `
 	w.Write([]byte(s))
 
-	if includeSortSupport(cache.values) {
+	if includeSortSupport(tag.Values) {
 		s := `// Sort implementation is a modification of http://golang.org/pkg/sort/#Sort
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -102,12 +58,20 @@ func (sw *SliceWriter) WriteHeader(w io.Writer, typ typewriter.Type) {
 `
 		w.Write([]byte(s))
 	}
+
+	return nil
 }
 
-func (sw *SliceWriter) Imports(typ typewriter.Type) []typewriter.ImportSpec {
-	sw.ensureValidation(typ)
+func (sw *SliceWriter) Imports(typ typewriter.Type) (result []typewriter.ImportSpec) {
+	tag, found, err := typ.Tags.ByName("slice")
 
-	var result []typewriter.ImportSpec
+	if err != nil {
+		return
+	}
+
+	if !found {
+		return
+	}
 
 	methodRequiresErrors := map[string]bool{
 		"First":   true,
@@ -123,15 +87,9 @@ func (sw *SliceWriter) Imports(typ typewriter.Type) []typewriter.ImportSpec {
 		"Sort": true,
 	}
 
-	cache, exists := sw.caches[typ.String()]
-
-	if !exists {
-		return result
-	}
-
 	imports := make(map[string]bool)
 
-	for _, v := range cache.values {
+	for _, v := range tag.Values {
 		if methodRequiresErrors[v.Name] {
 			imports["errors"] = true
 		}
@@ -150,22 +108,21 @@ func (sw *SliceWriter) Imports(typ typewriter.Type) []typewriter.ImportSpec {
 	return result
 }
 
-func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
-	sw.ensureValidation(typ)
+func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) error {
+	tag, found, err := typ.Tags.ByName("slice")
 
-	cache, exists := sw.caches[typ.String()]
-
-	if !exists {
-		return
+	if err != nil {
+		return err
 	}
 
-	// a bit frustrating that errors are still possible here (templates mainly),
-	// but all we can do is panic
+	if !found {
+		return nil
+	}
 
 	tmpl, err := templates.ByName("slice")
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	m := model{
@@ -174,10 +131,10 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 	}
 
 	if err := tmpl.Execute(w, m); err != nil {
-		panic(err)
+		return err
 	}
 
-	for _, v := range cache.values {
+	for _, v := range tag.Values {
 		var tp typewriter.Type
 
 		if len(v.TypeParameters) > 0 {
@@ -194,29 +151,31 @@ func (sw *SliceWriter) WriteBody(w io.Writer, typ typewriter.Type) {
 		tmpl, err := templates.Get(v) // already validated above
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		if err := tmpl.Execute(w, m); err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	if includeSortInterface(cache.values) {
+	if includeSortInterface(tag.Values) {
 		tmpl, _ := templates.ByName("sortInterface") // already validated above
 		err := tmpl.Execute(w, m)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	if includeSortSupport(cache.values) {
+	if includeSortSupport(tag.Values) {
 		tmpl, _ := templates.ByName("sortImplementation") // already validated above
 		err := tmpl.Execute(w, m)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
+
+	return nil
 }
 
 func includeSortSupport(values []typewriter.TagValue) bool {
