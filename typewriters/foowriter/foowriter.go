@@ -24,9 +24,9 @@ func (f *fooWriter) Validate(t typewriter.Type) (bool, error) {
 	return true, nil
 }
 
-func (f *fooWriter) WriteHeader(w io.Writer, t typewriter.Type) {
+func (f *fooWriter) WriteHeader(w io.Writer, t typewriter.Type) error {
 	w.Write([]byte("// foowriter was here"))
-	return
+	return nil
 }
 
 func (f *fooWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) {
@@ -34,9 +34,9 @@ func (f *fooWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) 
 	return result
 }
 
-func (f *fooWriter) WriteBody(w io.Writer, t typewriter.Type) {
+func (f *fooWriter) WriteBody(w io.Writer, t typewriter.Type) error {
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
 		}`, t.String())))
-	return
+	return nil
 }
