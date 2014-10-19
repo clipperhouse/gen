@@ -1,6 +1,7 @@
 package container
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/clipperhouse/gen/typewriter"
@@ -17,9 +18,10 @@ func TestValidate(t *testing.T) {
 		Tags:    typewriter.Tags{},
 	}
 
-	write, err := g.Validate(typ)
+	var b bytes.Buffer
+	err := g.WriteHeader(&b, typ)
 
-	if write {
+	if b.Len() > 0 {
 		t.Errorf("no 'containers' tag should not write")
 	}
 
@@ -32,21 +34,20 @@ func TestValidate(t *testing.T) {
 		Name:    "SomeType2",
 		Tags: typewriter.Tags{
 			typewriter.Tag{
-				Name: "containers",
-				Values: []typewriter.TagValue{
-					{"string", nil},
-				},
+				Name:   "containers",
+				Values: []typewriter.TagValue{},
 			},
 		},
 	}
 
-	write2, err2 := g.Validate(typ2)
+	var b2 bytes.Buffer
+	err := g.WriteBody(&b2, typ2)
 
-	if write2 {
+	if b2.Len() > 0 {
 		t.Errorf("empty 'containers' tag should not write")
 	}
 
-	if err2 != nil {
+	if err != nil {
 		t.Error(err)
 	}
 
@@ -58,19 +59,19 @@ func TestValidate(t *testing.T) {
 				Name: "containers",
 				Values: []typewriter.TagValue{
 					{"List", nil},
-					{"Foo", nil},
 				},
 			},
 		},
 	}
 
-	write3, err3 := g.Validate(typ3)
+	var b3 bytes.Buffer
+	err := g.WriteBody(&b3, typ3)
 
-	if !write3 {
+	if b3.Len() == 0 {
 		t.Errorf("'containers' tag with List should write (and ignore others)")
 	}
 
-	if err3 != nil {
+	if err != nil {
 		t.Error(err)
 	}
 }

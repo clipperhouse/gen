@@ -1,7 +1,6 @@
 package container
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/clipperhouse/gen/typewriter"
@@ -14,49 +13,26 @@ func init() {
 	}
 }
 
-type ContainerWriter struct {
-	tagsByType map[string]typewriter.Tag // typewriter.Type is not comparable, key by .String()
-}
+type ContainerWriter struct{}
 
 func NewContainerWriter() *ContainerWriter {
-	return &ContainerWriter{
-		tagsByType: make(map[string]typewriter.Tag),
-	}
+	return &ContainerWriter{}
 }
 
 func (c *ContainerWriter) Name() string {
 	return "container"
 }
 
-func (c *ContainerWriter) Validate(t typewriter.Type) (bool, error) {
+func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) error {
 	tag, found, err := t.Tags.ByName("containers")
 
-	if !found || err != nil {
-		return false, err
+	if !found {
+		return nil
 	}
 
-	// must include at least one item that we recognize; others containers ok
-	any := false
-	for _, v := range tag.Values {
-		_, err := templates.Get(v)
-		if err == nil {
-			// found one, move on
-			any = true
-			break
-		}
+	if err != nil {
+		return err
 	}
-
-	if !any {
-		// not an error, but irrelevant
-		return false, nil
-	}
-
-	c.tagsByType[t.String()] = tag
-	return true, nil
-}
-
-func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
-	tag := c.tagsByType[t.String()] // validated above
 
 	s := `// See http://clipperhouse.github.io/gen for documentation
 
@@ -80,13 +56,17 @@ func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 	if list {
 		license := `// List is a modification of http://golang.org/pkg/container/list/
 `
-		w.Write([]byte(license))
+		if _, err := w.Write([]byte(license)); err != nil {
+			return err
+		}
 	}
 
 	if ring {
 		license := `// Ring is a modification of http://golang.org/pkg/container/ring/
 `
-		w.Write([]byte(license))
+		if _, err := w.Write([]byte(license)); err != nil {
+			return err
+		}
 	}
 
 	if list || ring {
@@ -95,7 +75,9 @@ func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 // license that can be found at http://golang.org/LICENSE
 
 `
-		w.Write([]byte(license))
+		if _, err := w.Write([]byte(license)); err != nil {
+			return err
+		}
 	}
 
 	if set {
@@ -103,10 +85,13 @@ func (c *ContainerWriter) WriteHeader(w io.Writer, t typewriter.Type) {
 // The MIT License (MIT)
 // Copyright (c) 2013 Ralph Caraveo (deckarep@gmail.com)
 `
-		w.Write([]byte(license))
+
+		if _, err := w.Write([]byte(license)); err != nil {
+			return err
+		}
 	}
 
-	return
+	return nil
 }
 
 func (c *ContainerWriter) Imports(t typewriter.Type) (result []typewriter.ImportSpec) {
@@ -114,20 +99,27 @@ func (c *ContainerWriter) Imports(t typewriter.Type) (result []typewriter.Import
 	return result
 }
 
-func (c *ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) {
-	tag := c.tagsByType[t.String()] // validated above
+func (c *ContainerWriter) WriteBody(w io.Writer, t typewriter.Type) error {
+	tag, found, err := t.Tags.ByName("containers")
+
+	if !found {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
 
 	for _, v := range tag.Values {
 		tmpl, err := templates.Get(v)
 		if err != nil {
-			continue
+			return err
 		}
-		err = tmpl.Execute(w, t)
-		if err != nil {
-			fmt.Println(err)
-			continue
+
+		if err := tmpl.Execute(w, t); err != nil {
+			return err
 		}
 	}
 
-	return
+	return nil
 }
