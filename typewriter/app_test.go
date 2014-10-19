@@ -123,20 +123,32 @@ func TestWrite(t *testing.T) {
 	}
 }
 
+func cleanup(files []string) {
+	for _, f := range files {
+		os.Remove(f)
+	}
+}
+
 func TestWriteAll(t *testing.T) {
+	var written []string
+	var err error
+
 	// set up some registered typewriters for this app
 	fw1 := &fooWriter{}
 
 	// no error checking here, see TestRegister
 	Register(fw1)
 
-	a1, err1 := NewApp("+test")
+	a1, err := NewApp("+test")
 
-	if err1 != nil {
-		t.Error(err1)
+	if err != nil {
+		t.Error(err)
 	}
 
-	if err := a1.WriteAll(); err != nil {
+	written, err = a1.WriteAll()
+	cleanup(written) // we don't need the written files
+
+	if err != nil {
 		t.Error(err)
 	}
 
@@ -163,7 +175,12 @@ func TestWriteAll(t *testing.T) {
 
 	a2, _ := NewApp("+test") // error checked above, ignore here
 
-	a2.WriteAll()
+	written, err = a2.WriteAll()
+	cleanup(written) // we don't need the written files
+
+	if err != nil {
+		t.Error(err)
+	}
 
 	if fw.writeHeaderCalls != 0 {
 		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
@@ -204,9 +221,10 @@ func TestWriteAll(t *testing.T) {
 
 	a3, _ := NewApp("+test") // error checked above, ignore here
 
-	err3 := a3.WriteAll()
+	written, err = a3.WriteAll()
+	cleanup(written) // we don't need the written files
 
-	if err3 == nil {
+	if err == nil {
 		t.Errorf("writer producing invalid Go code should return an error")
 	}
 

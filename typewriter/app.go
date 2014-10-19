@@ -65,7 +65,9 @@ func Register(tw TypeWriter) error {
 }
 
 // WriteAll writes the generated code for all Types and TypeWriters in the App to respective files.
-func (a *app) WriteAll() error {
+func (a *app) WriteAll() ([]string, error) {
+	var written []string
+
 	// one buffer for each file, keyed by file name
 	buffers := make(map[string]*bytes.Buffer)
 
@@ -76,7 +78,7 @@ func (a *app) WriteAll() error {
 			n, err := write(&b, a, t, tw)
 
 			if err != nil {
-				return err
+				return written, err
 			}
 
 			// don't generate a file if no bytes were written by WriteHeader or WriteBody
@@ -95,7 +97,7 @@ func (a *app) WriteAll() error {
 	for f, b := range buffers {
 		if _, err := parser.ParseFile(token.NewFileSet(), f, b.String(), 0); err != nil {
 			// TODO: prompt to write (ignored) _file on error? parsing errors are meaningless without.
-			return err
+			return written, err
 		}
 	}
 
@@ -105,15 +107,17 @@ func (a *app) WriteAll() error {
 
 		// shouldn't be an error if the ast parsing above succeeded
 		if err != nil {
-			return err
+			return written, err
 		}
 
 		if err := writeFile(f, src); err != nil {
-			return err
+			return written, err
 		}
+
+		written = append(written, f)
 	}
 
-	return nil
+	return written, nil
 }
 
 var twoLines = bytes.Repeat([]byte{'\n'}, 2)
@@ -169,9 +173,6 @@ func writeFile(filename string, byts []byte) error {
 	defer w.Close()
 
 	w.Write(byts)
-
-	// TODO: make this optional or do a proper logging/verbosity thing
-	fmt.Printf("  Writing %s\n", filename)
 
 	return nil
 }

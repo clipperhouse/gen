@@ -32,7 +32,7 @@ func runStandard() error {
 		return fmt.Errorf("No typewriters were imported. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
-	if err := app.WriteAll(); err != nil {
+	if _, err := app.WriteAll(); err != nil {
 		return err
 	}
 
@@ -62,7 +62,7 @@ func gen() error {
 		return fmt.Errorf("No typewriters were imported. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
-	if err := app.WriteAll(); err != nil {
+	if _, err := app.WriteAll(); err != nil {
 		return err
 	}
 
