@@ -2,7 +2,6 @@ package typewriter
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -127,11 +126,9 @@ func TestWrite(t *testing.T) {
 func TestWriteAll(t *testing.T) {
 	// set up some registered typewriters for this app
 	fw1 := &fooWriter{}
-	bw1 := &barWriter{}
 
 	// no error checking here, see TestRegister
 	Register(fw1)
-	Register(bw1)
 
 	a1, err1 := NewApp("+test")
 
@@ -143,30 +140,12 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if fw1.validateCalls != len(a1.Types) {
-		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.validateCalls)
-	}
-
-	if bw1.validateCalls != len(a1.Types) {
-		t.Errorf(".Validate() should have been called %v times (once for each type); was called %v", len(a1.Types), bw.validateCalls)
-	}
-
 	if fw1.writeHeaderCalls != len(a1.Types) {
 		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeHeaderCalls)
 	}
 
-	// see Validate implementation below; chooses not to write dummy
-	if bw1.writeHeaderCalls != len(a1.Types)-1 {
-		t.Errorf(".WriteHeader() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeHeaderCalls)
-	}
-
 	if fw1.writeCalls != len(a1.Types) {
 		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeCalls)
-	}
-
-	// see Validate implementation below; chooses not to write dummy
-	if bw1.writeCalls != len(a1.Types)-1 {
-		t.Errorf(".Write() should have been called %v times; was called %v", len(a1.Types)-1, bw.writeCalls)
 	}
 
 	// clear 'em out
@@ -184,14 +163,7 @@ func TestWriteAll(t *testing.T) {
 
 	a2, _ := NewApp("+test") // error checked above, ignore here
 
-	err2 := a2.WriteAll()
-
-	// if any writer returns an error on Validate(), everything should stop
-	// ie, don't write some and then fail on others
-
-	if err2 == nil {
-		t.Errorf("a validation that returns an error should return on WriteAll")
-	}
+	a2.WriteAll()
 
 	if fw.writeHeaderCalls != 0 {
 		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
@@ -243,22 +215,17 @@ func TestWriteAll(t *testing.T) {
 }
 
 type fooWriter struct {
-	validateCalls, writeHeaderCalls, writeCalls int
+	writeHeaderCalls, writeCalls int
 }
 
 func (f *fooWriter) Name() string {
 	return "foo"
 }
 
-func (f *fooWriter) Validate(t Type) (bool, error) {
-	f.validateCalls++
-	return true, nil
-}
-
-func (f *fooWriter) WriteHeader(w io.Writer, t Type) {
+func (f *fooWriter) WriteHeader(w io.Writer, t Type) error {
 	f.writeHeaderCalls++
 	w.Write([]byte("// some licensing stuff"))
-	return
+	return nil
 }
 
 func (f *fooWriter) Imports(t Type) []ImportSpec {
@@ -269,66 +236,56 @@ func (f *fooWriter) Imports(t Type) []ImportSpec {
 	return imports
 }
 
-func (f *fooWriter) WriteBody(w io.Writer, t Type) {
+func (f *fooWriter) WriteBody(w io.Writer, t Type) error {
 	f.writeCalls++
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
 		}`, t.String())))
-	return
+	return nil
 }
 
 type barWriter struct {
-	validateCalls, writeHeaderCalls, writeCalls int
+	writeHeaderCalls, writeCalls int
 }
 
 func (f *barWriter) Name() string {
 	return "bar"
 }
 
-func (f *barWriter) Validate(t Type) (bool, error) {
-	f.validateCalls++
-	return t.Name != "dummy", nil // indicates not going to write for the dummy type
-}
-
-func (f *barWriter) WriteHeader(w io.Writer, t Type) {
+func (f *barWriter) WriteHeader(w io.Writer, t Type) error {
 	f.writeHeaderCalls++
-	return
+	return nil
 }
 
 func (f *barWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *barWriter) WriteBody(w io.Writer, t Type) {
+func (f *barWriter) WriteBody(w io.Writer, t Type) error {
 	f.writeCalls++
-	return
+	return nil
 }
 
 type errWriter struct {
-	validateCalls, writeHeaderCalls, writeCalls int
+	writeHeaderCalls, writeCalls int
 }
 
 func (f *errWriter) Name() string {
 	return "err"
 }
 
-func (f *errWriter) Validate(t Type) (bool, error) {
-	f.validateCalls++
-	return true, errors.New("sorry")
-}
-
-func (f *errWriter) WriteHeader(w io.Writer, t Type) {
+func (f *errWriter) WriteHeader(w io.Writer, t Type) error {
 	f.writeHeaderCalls++
-	return
+	return nil
 }
 
 func (f *errWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *errWriter) WriteBody(w io.Writer, t Type) {
+func (f *errWriter) WriteBody(w io.Writer, t Type) error {
 	f.writeCalls++
-	return
+	return nil
 }
 
 type junkWriter struct{}
@@ -337,19 +294,15 @@ func (f *junkWriter) Name() string {
 	return "junk"
 }
 
-func (f *junkWriter) Validate(t Type) (bool, error) {
-	return true, nil
-}
-
-func (f *junkWriter) WriteHeader(w io.Writer, t Type) {
-	return
+func (f *junkWriter) WriteHeader(w io.Writer, t Type) error {
+	return nil
 }
 
 func (f *junkWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *junkWriter) WriteBody(w io.Writer, t Type) {
+func (f *junkWriter) WriteBody(w io.Writer, t Type) error {
 	w.Write([]byte("this is invalid Go code, innit?"))
-	return
+	return nil
 }
