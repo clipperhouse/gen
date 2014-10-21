@@ -10,6 +10,8 @@ It also offers third-party, runtime extensibility via [typewriters](http://godoc
 
 [Changelog](https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md)
 
+[Unstable branch](https://github.com/clipperhouse/gen/tree/v4)
+
 ## Contributing
 
 It’s early days and the API is likely volatile, ideas and contributions are welcome. Have a look at the design principles below. Feel free to [open an issue](//github.com/clipperhouse/gen/issues), send a pull request, or ping Matt Sherman [@clipperhouse](http://twitter.com/clipperhouse).
