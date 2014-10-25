@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<title>
+		gen &middot; type-driven code generation for Go
+		{% if page.title != "home" %}
+			&middot; {{ page.title }} 
+		{% endif %}
+	</title>
+
+	</head>
+	<body>
+		<ul class="nav navbar-nav">
+			{% assign pages_list = site.pages %}
+			{% for order in (1..site.pages.size) %}
+				{% for node in pages_list %}
+					{% if node.title != null and node.order == order %}
+						{% if node.layout == "page" %}
+							<li {% if page.url == node.url %} class="active" {% endif %}>
+								<a href="{{site.github.url}}{{ node.url }}">{{ node.title }}</a>
+							</li>
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+			{% endfor %}
+		</ul>
+		<div class="container">
+			{{ content }}
+		</div>
+	</body>
+</html>

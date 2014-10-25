@@ -1,653 +1,126 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=980, initial-scale=1">
-        <title>gen - a generics library for Go</title>
-        <meta name="description" content="gen is a tool for adding generics-like functionality to Go, in the style of C#'s Linq or JavaScript's underscore.">
-        <meta name="keywords" content="golang generics linq underscore">
-        <meta name="viewport" content="width=device-width">
-        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
-        <link rel="stylesheet" href="gen.css">
-        <link rel="icon" type="image/png" href="gopher.png">
-    </head>
-    <body>
-        <div id="sidebar">
-            <nav>
-                <h4><a href="#Concepts">Concepts</a></h4>
-                <h4><a href="#Quick">Quick start</a></h4>
-                <h4><a href="#Usage">Usage</a></h4>
-                <h4><a href="#Methods">Standard Methods</a></h4>
-                <p class="methods">
-                    <a href="#Where">- Where</a>
-                    <a href="#Count">- Count</a>
-                    <a href="#Any">- Any</a>
-                    <a href="#All">- All</a>
-                    <a href="#First">- First</a>
-                    <a href="#Single">- Single</a>
-                    <a href="#Each">- Each</a>
-                    <a href="#Sort">- Sort</a>
-                    <a href="#SortBy">- SortBy</a>
-                    <a href="#Distinct">- Distinct</a>
-                    <a href="#DistinctBy">- DistinctBy</a>
-                    <a href="#Min">- Min</a>
-                    <a href="#MinBy">- MinBy</a>
-                    <a href="#Max">- Max</a>
-                    <a href="#MaxBy">- MaxBy</a>
-                </p>
-                <h4><a href="#Projections">Projection Methods</a></h4>
-                <p class="methods">
-                    <a href="#Select">- Select</a>
-                    <a href="#GroupBy">- GroupBy</a>
-                    <a href="#Sum">- Sum</a>
-                    <a href="#Average">- Average</a>
-                    <a href="#MaxProjection">- Max</a>
-                    <a href="#MinProjection">- Min</a>
-                    <a href="#Aggregate">- Aggregate</a>
-                </p>
-                <h4><a href="#Containers">Containers</a></h4>
-                <p class="methods">
-                    <a href="#Set">- Set</a>
-                    <a href="#List">- List</a>
-                    <a href="#Ring">- Ring</a>
-                </p>
+<h1>gen</h1>
 
-                <h4><a href="#Subsetting">Subsetting</a></h4>
-                <h4><a href="#Tips">Tips</a></h4>
-                <h4><a href="#FAQ">FAQ</a></h4>
-                <h4><a href="https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md">Changelog</a></h4>
-            </nav>
-        </div>
-        <div id="content">
-            <div id="right">
-                <p><a href="https://github.com/DisposaBoy/GoSublime"><img src="completion.png" id="completion"></a></p>
-                <p><a href="https://github.com/clipperhouse/gen" id="github">Source</a>&nbsp;</p>
-                <p><a href="https://twitter.com/clipperhouse" id="twitter">@clipperhouse</a>&nbsp;</p>
-            </div>
-            <h1>gen <span class="alpha">alpha</span></h1>
-            <h3>
-                A library for bringing generics-like functionality to Go
-            </h3>
-            <p>
-                gen is an attempt to bring some generics-like functionality to Go, with inspiration from C#’s <a href="http://msdn.microsoft.com/en-us/library/system.linq.enumerable_methods(v=vs.110).aspx">Linq</a>, JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods">Array methods</a> and the <a href="http://underscorejs.org/">underscore</a> library. Operations include filtering, grouping, sorting and more.
-            </p>
+<h3>A type-driven code generation tool for Go</h3>
 
-            <p>The pattern is to pass func’s as you would pass lambdas in Linq or functions in JavaScript.</p>
+<p><strong>gen</strong> is an attempt to bring some generics-like functionality to Go. It uses type annotations to add &ldquo;of &lt;T&gt;&rdquo; functionality to your packages.</p>
 
-            <h2 id="Concepts">Concepts</h2>
-            <p>gen generates code for your types, at development time, using the <strong>command line</strong>. gen is not an import; the generated source becomes part of your project and takes no external dependencies.</p>
+<p>gen generates code for your types, at development time, using the command line. It is not an import; the generated source becomes part of your package and takes no external dependencies.</p>
 
-            <p>You specify the types for which you’d like to generate <a href="#Methods">methods</a> by marking them up with <strong>tags</strong>.</p>
+<h2>Quick start</h2>
 
-            <p>A new slice type is generated for the types you specify. We call it the <strong>plural type</strong>. For example, if you gen an existing type Thing, a new plural type will be created:</p>
+<p>Of course, start by installing Go, <a href="http://golang.org/doc/code.html">setting up paths</a>, etc. Then:</p>
 
-<pre>
-type Things []Thing
-</pre>
-
-            <p>…and you’ll use this wherever you would otherwise use a slice.</p>
-
-<pre>
-myThings := Things{...}
-otherThings := myThings.Where(func).Sort(func)
-</pre>
-            <h2 id="Quick">Quick start</h2>
-            <p>Of course, start by installing Go, <a href="http://golang.org/doc/code.html">setting up paths</a>, etc. Then:</p>
-
-<pre>
+<p><code>
 go get github.com/clipperhouse/gen
-</pre>
-            <p>Create a new Go project, and <code>cd</code> into it. Create a main.go file and define a type in it.</p>
+</code></p>
 
-            <p>Now, mark it up with a simple <code>+gen</code> tag in an adjacent comment like so:</p>
-<pre>
-// +gen
+<p>Create a new Go project, and <code>cd</code> into it. Create a <code>main.go</code> file and define a type.</p>
+
+<p>Now, mark it up with a <code>+gen</code> annotation in an adjacent comment like so:</p>
+
+<p><code>
+// +gen slice:"Where,Count,GroupBy[string]"
 type MyType struct {
     ...
 }
-</pre>
-            <p>And at the command line, simply type</p>
-<pre>
+</code></p>
+
+<p>And at the command line, simply type:</p>
+
+<p><code>
 gen
-</pre>
+</code></p>
 
-            <p>You should see a new file, named <code>mytype_gen.go</code>. Have a look around. Try out that plural type.</p>
+<p>You should see a new file, named <code>mytype_slice.go</code>. Have a look around.</p>
 
-            <h2 id="Usage">Usage</h2>
+<p>(The annotation syntax will look familiar to Go users, it is modeled after struct tags.)</p>
 
-            <p>If you’d like to generate methods that take pointers instead of value types, add the <code>*</code> directive.</p>
-<pre>
-// +gen *
+<h2>TypeWriters</h2>
+
+<p>gen is driven by &ldquo;type writers&rdquo; &ndash; packages which are responsible for interpreting the annotated tags and turning them into generated code.</p>
+
+<p>gen includes two built-in TypeWriters.</p>
+
+<h3><code>slice</code></h3>
+
+<p>The <code>slice</code> typewriter generates functional convenience methods that will look familiar to users of C#&rsquo;s LINQ or JavaScript&rsquo;s Array methods. It is intended to save you some loops, using a &ldquo;pass a function&rdquo; pattern. It offers grouping, filtering, ad-hoc sorts and projections. <a href="slice">Details and docs&hellip;</a></p>
+
+<h3><code>container</code></h3>
+
+<p>The <code>container</code> typewriter implements strongly-typed versions of the List and Ring containers from the Go standard library, as well as a simple Set implementation. <a href="container">Details and docs&hellip;</a></p>
+
+<h3>Using third-party TypeWriters</h3>
+
+<p>TypeWriters can be implemented by third-parties and used at &ldquo;gen time&rdquo;. To use a third-party typewriter, <code>cd</code> into the root of your package and type:</p>
+
+<p><code>
+gen custom
+</code></p>
+
+<p>This will create a <code>_gen.go</code> file. Have a look at it &ndash; it contains the two built-in typewriters (above) as imports.</p>
+
+<p>You&rsquo;ll note that typewriters are imported similarly to <a href="http://golang.org/pkg/image/png/">codecs</a> in the image package, or <a href="http://golang.org/pkg/database/sql/driver/">drivers</a> in the sql package. If you know the import path of a third-party typewriter, add the import:</p>
+
+<p><code>
+. "gitplace.com/kimye/bling"
+</code></p>
+
+<p>Now, make sure to type:</p>
+
+<p><code>
+gen get
+</code></p>
+
+<p>Add the third-party tag to your type annotation:</p>
+
+<p><code>
+// +gen slice:"Where,Count,GroupBy[string]" bling:"Diamonds,Bentleys"
 type MyType struct {
-    ...
 }
-</pre>
-            <p>To select only a <a href="#Subsetting">subset</a> of methods, use:</p>
-<pre>
-// +gen * methods:"Any,Where,Count"
-type MyType struct {
-    ...
-}
-</pre>
-            <p>(You’ll recognize this as the syntax of  <a href="http://golang.org/pkg/reflect/#StructTag">struct tags</a>. Avoid spaces within tags.)</p>
+</code></p>
 
-            <p>To include <a href="#Projections">projection methods</a>, specify projected types:</p>
-            
-<pre>
-// +gen * projections:"int,OtherType"
-type MyType struct {
-    ...
-}
-</pre>
+<p>And gen it again:</p>
 
-            <h2 id="Methods">Methods</h2>
+<p><code>
+gen
+</code></p>
 
-            <h4>Signatures use the example type *Thing.</h4>
+<p>You should have a new file <code>mytype_bling.go</code> (assuming the author followed naming conventions). Refer to the third-party&rsquo;s documentation to understand what their tags do, of course.</p>
 
-            <h3 id="Where">Where</h3>
-            <p>
-                Returns a new slice (plural type) whose elements return true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534803(v=vs.110).aspx">Where</a> and JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">filter</a>.
-            </p>
-<pre>
-func (rcv Things) Where(fn func(*Thing) bool) Things
-</pre>
-            <p>Example:</p>
+<h3>Implementing TypeWriters</h3>
 
-<pre>
-shiny := func(p *Product) bool {
-    return p.Manufacturer == "Apple"
-}
-wishlist := products.Where(shiny)
-</pre>
+<p>You can create your own type writer by implementing the <a href="godoc">TypeWriter interface</a>.</p>
 
-            <h3 id="Count">Count</h3>
-            <p>
-                Returns an int representing the number of elements which return true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535181(v=vs.110).aspx">Count</a>.
-            </p>
-<pre>
-func (rcv Things) Count(fn func(*Thing) bool) int
-</pre>
-            <p>Example:</p>
+<p>As mentioned above, typewriters follow the pattern of codecs in the image package of Go&rsquo;s standard library. They are registered via an <code>init()</code> method.</p>
 
-<pre>
-countDracula := monsters.Count(func(m *Monster) bool {
-    return m.HasFangs()
-})
-</pre>
+<p>The best thing to do is have a look at an existing implementation, <a href="https://github.com/clipperhouse/typewriters/container">List</a> is straightforward.</p>
 
-            <h3 id="Any">Any</h3>
-            <p>
-                Returns true if one or more elements returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534972(v=vs.110).aspx">Any</a> or underscore’s <a href="http://underscorejs.org/#some">some</a>.
-            </p>
-<pre>
-func (rcv Things) Any(fn func(*Thing) bool) bool
-</pre>
-            <p>Example:</p>
+<p>The <a href="https://github.com/clipperhouse/typewriter">typewriter package</a> handles tag parsing and type evaluation, and passes this information to your typewriter. It offers some conveniences for text templating, as well.</p>
 
-<pre>
-bueller := func(s *Student) bool {
-    return s.IsTruant
-}
-willBeHijinks := students.Any(bueller)
-</pre>
+<p>There aren&rsquo;t many third-party packages as of this writing, so don&rsquo;t hesistate to ask me (Matt) for help. We want to make it easy, and maybe even build an ecosystem.</p>
 
-            <h3 id="All">All</h3>
-            <p>
-                Returns true if every element returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548541(v=vs.110).aspx">All</a> or underscore’s <a href="http://underscorejs.org/#every">every</a>.
-            </p>
-<pre>
-func (rcv Things) All(fn func(*Thing) bool) bool
-</pre>
-            <p>Example:</p>
+<p>We&rsquo;d love to see a typewriter for strongly-typed json serialization, for example.</p>
 
-<pre>
-mustPass := func(t *Thing) bool {
-    return !t.IsEternal
-}
-cliché := things.All(mustPass)
-</pre>
+<h2>FAQ</h2>
 
-            <h3 id="First">First</h3>
-            <p>
-                Returns first element which returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535050(v=vs.110).aspx">First</a> or underscore’s <a href="http://underscorejs.org/#find">find</a>.
-            </p>
-<pre>
-func (rcv Things) First(fn func(*Thing) bool) (*Thing, error)
-</pre>
-            <p>Example:</p>
+<p><strong>Codegen, really?</strong></p>
 
-<pre>
-come := func(c *Customer) bool {
-    return c.IsHere
-}
-served, err := people.First(come)
-</pre>
-            <p>Returns error if no elements satisfy the func.</p>
+<p>Yes! It felt a bit dirty to us at the beginning, too. But it turns out that a lot of actual generics implementations look a lot like code generation &ndash; you just don&rsquo;t see it. (Compilers and JITs do it for you.)</p>
 
-            <h3 id="Single">Single</h3>
-            <p>
-                Returns unique element which returns true for passed func. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb535118(v=vs.110).aspx">Single</a>.
-            </p>
-<pre>
-func (rcv Things) Single(fn func(*Thing) bool) (*Thing, error)
-</pre>
-            <p>Example:</p>
+<p>Code generation removes mystery. It&rsquo;s just code, right there in your package. Read it. The history goes in your repo like everything else.</p>
 
-<pre>
-id := request.Id
-byId := func(t *Thing) bool {
-    return t.Id == id
-}
-item, err := things.Single(byId)
-</pre>
-            <p>Returns error if multiple or no elements satisfy the func.</p>
+<p>You get all the usual compiler checks and optimizations, of course, so gen won&rsquo;t introduce surprises in production.</p>
 
-            <h3 id="Each">Each</h3>
-            <p>
-                Invokes passed func on every element. Comparable to underscore’s <a href="http://underscorejs.org/#each">each</a>.
-            </p>
-<pre>
-func (rcv Things) Each(fn func(*Thing))
-</pre>
-            <p>Example:</p>
+<p>gen is a <em>tool</em> that helps the developer produce code on their local workstation, alongside their text editor and utilities.</p>
 
-<pre>
-update := func(s *Score) {
-    s.Recalc()
-}
-scores.Each(update)
-</pre>
+<p><strong>Wait, is this <code>go generate</code>?</strong></p>
 
-            <h3 id="Sort">Sort</h3>
-            <p>
-                Returns a new slice (plural type) whose elements are sorted.
-            </p>
+<p>No, <a href="https://docs.google.com/document/d/1V03LUfjSADDooDMhe-_K59EgpTEm3V8uvQRuNMAEnjg/edit">that&rsquo;s</a> different (and very cool). <code>go generate</code> will run any command and is intended to obviate <code>make</code> files and such. <code>gen</code> is specifically about codegen for types.</p>
 
-<pre>
-type SortableThing int
+<p>The two tools are complementary.</p>
 
-func (rcv SortableThings) Sort() SortableThings
-</pre>
+<p><strong>Can I run gen on the server?</strong></p>
 
-            <p>Sort uses Go’s <a href="http://golang.org/pkg/sort/">sort package</a> by implementing the <a href="http://golang.org/pkg/sort/#Interface">interface</a> required to use it. Similarly, <strong>SortDesc</strong> and <strong>IsSorted(Desc)</strong>.</p>
+<p>Like as part of the build? Sure, but that&rsquo;s not what it&rsquo;s designed around so we don&rsquo;t recommend it.</p>
 
-            <p>In keeping with gen’s design, Sort returns a new sorted slice. If this is too expensive for you, you can just as easily use Go’s <a href="http://golang.org/pkg/sort/#Sort">sort.Sort</a>, which operates in-place.</p>
-
-            <p><strong>Note:</strong> Sort will only be generated for types that can be compared greater than or less than one another (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
-
-            <h3 id="SortBy">SortBy</h3>
-            <p>
-                Returns a new slice (plural type) whose elements are sorted based on a func defining ‘less’. The less func takes two elements, and returns true if the first element is less than the second element. 
-            </p>
-<pre>
-func (rcv Things) SortBy(less func(*Thing, *Thing) bool) Things
-</pre>
-            <p>Example:</p>
-
-<pre>
-rank := func(a, b *Player) bool {
-    return a.Rank &lt; b.Rank
-}
-leaderboard := player.SortBy(rank)
-</pre>
-
-            <p><strong>SortByDesc</strong> works similarly, returning the elements in reverse order.</p>
-
-            <p><strong>IsSortedBy(Desc)</strong> uses a similar idiom, returning true if the elements are sorted according to the ‘less’ comparer.</p>
-
-            <h3 id="Distinct">Distinct</h3>
-            <p>
-                Returns a new slice (plural type) representing unique elements. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/system.linq.enumerable.distinct(v=vs.110).aspx">Distinct</a> or underscore’s <a href="http://underscorejs.org/#uniq">uniq</a>.
-            </p>
-<pre>
-func (rcv Things) Distinct() Things
-</pre>
-            <p>Example:</p>
-
-<pre>
-snowflakes := hipsters.Distinct()
-</pre>
-
-            <p><strong>Note:</strong> Distinct will only be generated for types that support <a href="http://golang.org/doc/go1#equality">equality</a>.</p>
-
-            <p>Keep in mind that pointers and values have different notions of equality, and therefore distinctness.</p>
-
-            <h3 id="DistinctBy">DistinctBy</h3>
-            <p>
-                Returns a new slice (plural type) representing unique elements, where equality is defined by a passed func.
-            </p>
-<pre>
-func (rcv Things) DistinctBy(func(*Thing, *Thing) bool) Things
-</pre>
-            <p>Example:</p>
-
-<pre>
-hairstyle := func(a *Fashionista, b *Fashionista) bool {
-    a.Hairstyle == b.Hairstyle
-}
-trendsetters := fashionistas.DistinctBy(hairstyle)</pre>
-
-            <h3 id="Min">Min</h3>
-<pre>
-func (rcv Things) Min() (*Thing, error)
-</pre>
-            <p>Returns the minimum value of Things. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
-
-<p>Example:</p>
-
-<pre>
-type Price float64
-cheapest, err := prices.Min()
-</pre>
-
-            <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
-
-            <p><strong>Note:</strong> Min will only be generated for types that support less than/greater than (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
-
-            <h3 id="MinBy">MinBy</h3>
-<pre>
-func (rcv Things) MinBy(less func(*Thing, *Thing) bool) (*Thing, error)
-</pre>
-            <p>Returns the element containing the minimum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
-
-<p>Example:</p>
-
-<pre>
-price := func(a, b *Product) bool {
-    return a.Price &lt; b.Price
-}
-cheapest, err := products.MinBy(price)
-</pre>
-
-            <p>In the case of multiple items being equally minimal, the first such element is returned.</p>
-
-            <h3 id="Max">Max</h3>
-<pre>
-func (rcv Things) Max() (*Thing, error)
-</pre>
-            <p>Returns the maximum value of slice (plural type). Returns an error when invoked on an empty slice, considered an invalid operation.</p>
-
-<p>Example:</p>
-
-<pre>
-type Price float64
-dearest, err := prices.Max()
-</pre>
-            <p>In the case of multiple items being equally maximal, the first such element is returned.</p>
-
-            <p><strong>Note:</strong> Max will only be generated for types that support less than/greater than (‘<a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered</a>’ in Go terminology).</p>
-
-            <h3 id="MaxBy">MaxBy</h3>
-<pre>
-func (rcv Things) MaxBy(less func(*Thing, *Thing) bool) (*Thing, error)
-</pre>
-            <p>Returns the element containing the maximum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.</p>
-
-<p>Example:</p>
-
-<pre>
-area := func(a, b *House) bool {
-    return a.Area() &lt; b.Area()
-}
-roomiest, err := houses.MaxBy(area)
-</pre>
-
-            <h2 id="Projections">Projections</h2>
-
-            <h4>Projections allow ad-hoc mapping of one type to another.</h4>
-
-            <p>Projections are specified by listing types in a <code>projection</code> tag. Here’s a marked-up type and some handy func’s, used in the examples below:</p>
-<pre>
-// +gen projections:"int,string"
-type Thing struct { 
-    Department string
-    Year       int
-    Sales      float64
-    ...
-}
-
-getYear := func(t *Thing) int {
-    return t.Year
-}
-
-getSales := func(t *Thing) float64 {
-    return t.Sales
-}
-</pre>
-            <h3 id="Select">Select</h3>
-
-            <p>Returns a projected slice given a func which maps Thing to {{Type}}. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548891(v=vs.110).aspx">Select</a> or underscore’s <a href="http://underscorejs.org/#map">map</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-names := myThings.SelectString(func(t *Thing) string {
-    return t.Department
-})
-// => ["Widgets", "Doodads"]
-</pre>
-
-            <h3 id="GroupBy">GroupBy</h3>
-
-            <p>Groups elements into a map keyed by {{Type}}. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534501(v=vs.110).aspx">GroupBy</a> or underscore’s <a href="http://underscorejs.org/#groupBy">groupBy</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-report := myThings.GroupByInt(getYear)
-// => { "1995": [Thing1, Thing2], "2008": [Thing3, Thing4] }
-</pre>
-
-            <p><strong>Note:</strong> Because map keys must be compared for equality, GroupBy() will only be generated for types that support <a href="http://golang.org/doc/go1#equality">equality</a>.</p>
-
-            <h3 id="Sum">Sum</h3>
-
-            <p>Sums over all elements. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb298381(v=vs.110).aspx">Sum</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-revenue := myThings.SumFloat64(getSales)
-// => 9457846.74
-</pre>
-            <p><strong>Note:</strong> Sum will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">numeric types</a>.</p>
-
-            <h3 id="Average">Average</h3>
-
-            <p>Sums over all elements and divides by len(Things). Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb358946(v=vs.110).aspx">Average</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-avg := myThings.AverageFloat64(getSales)
-// => 30005.74
-</pre>
-            <p><strong>Note:</strong> Average will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">numeric types</a>.</p>
-
-            <h3 id="MaxProjection">Max</h3>
-
-            <p>Selects the largest projected value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb534962(v=vs.110).aspx">Max</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-bigmoney := myThings.MaxFloat64(getSales)
-// => 68598.99
-</pre>
-
-            <p><strong>Note:</strong> Max will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered types</a>, that is, types which can be evaluated as greater or less.</p>
-
-            <h3 id="MinProjection">Min</h3>
-
-            <p>Selects the least projected value. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548741(v=vs.110).aspx">Min</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-earliest := myThings.MinInt(getYear)
-// => 1995
-</pre>
-            <p><strong>Note:</strong> Min will only be generated for <a href="http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo">ordered types</a>, that is, types which can be evaluated as greater or less.</p>
-
-            <h3 id="Aggregate">Aggregate</h3>
-
-            <p>Iterates over Things, operating on each element while maintaining ‘state’. Comparable to Linq’s <a href="http://msdn.microsoft.com/en-us/library/bb548651(v=vs.110).aspx">Aggregate</a> or underscore’s <a href="http://underscorejs.org/#reduce">reduce</a>.</p>
-
-<p>Example:</p>
-
-<pre>
-var join = func(state string, value Thing) string {
-    if state != "" {
-        state += ", "
-    }
-    return state + value.Department
-}
-list := myThings.AggregateString(join)
-// => "Sales, Marketing, Finance"
-</pre>
-
-            <h2 id="Subsetting">Subsetting</h2>
-
-            <p>By default, all of the above <a href="#Methods">standard methods</a> are created when you <code>gen</code> a type. Similarly, all of the above <a href="#Projections">projection methods</a> are generated when you include a <code>projections</code> tag.</p>
-
-            <p>If you would prefer only to generate specific methods, you can do so with a <code>methods</code> tag.</p>
-
-<pre>
-// +gen methods:"Count,Where,Select,GroupBy" projections:"string,float64"
-type Thing struct {
-    Name  string
-    Year  int  
-    Sales float64
-}
-</pre>
-
-            <h4>Negative subsetting</h4>
-
-            <p>You can also gen every method <em>except</em> the ones specified by prepending the tag contents with <code>-</code></p>
-
-<pre>
-// +gen methods:"-Count,Where,Select,GroupBy" projections:"string,float64"
-</pre>
-
-            <p>Negative subsetting is unsupported on the <code>projections</code> tag.</p>
-
-            <h2 id="Containers">Containers</h2>
-
-            <p>Containers are type-specific data structures, such as lists, trees, etc. The goal is to remove the need for casting (type assertions) that are required in other implementations.</p>
-
-            <p>Containers are specified using the <code>containers</code> tag.</p>
-<pre>
-// +gen containers:"Set,List,Ring"
-type Thing struct {
-    ...
-}
-</pre>
-            <h3 id="Set">Set</h3>
-
-<pre>
-type ThingSet map[Thing]struct{}
-</pre>
-            <p>
-                Implements a strongly-typed set with common <a href="http://godoc.org/github.com/deckarep/golang-set">operations</a> (Union, Difference, etc). Items stored within it are unordered and unique.
-            </p>
-            <p>
-                The implementation is based on <a href="https://github.com/deckarep/golang-set">github.com/deckarep/golang-set</a>, with permission. API documentation is available <a href="http://godoc.org/github.com/deckarep/golang-set">here</a>. Parameters and return values that would be <code>interface{}</code> in the @deckarep implementation will instead use <em>your</em> type in the gen implementation.
-            </p>
-
-            <h3 id="List">List</h3>
-
-<pre>
-type ThingList struct
-</pre>
-            <p>
-                Implements a strongly-typed, doubly-linked list, based on <a href="http://golang.org/pkg/container/list/">golang.org/pkg/container/list</a>. API documentation is available at that link. Parameters and return values that would be <code>interface{}</code> in the golang implementation will instead use <em>your</em> type in the gen implementation.
-            </p>
-
-            <h3 id="Ring">Ring</h3>
-<pre>
-type ThingRing struct
-</pre>
-            <p>
-                Implements strongly-typed operations on circular lists, based on <a href="http://golang.org/pkg/container/ring/">golang.org/pkg/container/ring</a>. API documentation is available at that link. Parameters and return values that would be <code>interface{}</code> in the golang implementation will instead use <em>your</em> type in the gen implementation.
-            </p>
-
-            <h2 id="Tips">Tips</h2>
-
-            <h4>Start with buildable code</h4>
-            <p>gen parses your source and evaluates types. If your code doesn’t parse or build, gen’s ability to reason about it is nearly zero. It will return errors at the command line.</p>
-
-            <h2 id="FAQ">FAQ</h2>
-
-            <h4>Why?</h4>
-            <p>Go doesn't (yet) offer generic types, and we are accustomed to many of their use cases. Perhaps you are similarly accustomed, or would find them useful.</p>
-
-            <h4>Code generation, really?</h4>
-            <p>Yes. We do it to ensure compile-time safety, and to minimize magic. It’s just code, and you can read it.</p>
-            <p>Codegen is not without its risks, we understand. But keep in mind that languages which do support generics are in fact doing <a href="http://msdn.microsoft.com/en-us/library/vstudio/f4a6ta2h(v=vs.110).aspx">something like code generation</a>, so perhaps gen’s approach is not that far out.</p>
-
-            <h4>What’s that <a href="#Concepts">plural type</a> business?</h4>
-            <p>gen creates a new slice type to serve as method receivers. It’s clearer and less verbose to type myThings.Where(fn) than package.Where(myThings, fn). Not to mention, the latter wouldn’t work for multiple types without the use of reflection.</p>
-
-            <h4>gen returns a new slice for many operations</h4>
-            <p>This is by design, so that there is no question about whether you are mutating a slice in place or not.</p>
-
-            <p>Slices are <a href="http://blog.golang.org/go-slices-usage-and-internals">cheap</a>. You can reduce potential allocations by operating on pointer types, as well, by <a href="#Usage">using</a> the <code>*</code> directive in your gen tag.</p>
-
-            <h4>You re-implemented sort?</h4>
-            <p>Yes. Go’s <a href="http://godoc.org/sort">sort package</a> requires the fulfillment of three <a href="http://golang.org/pkg/sort/#Interface">interface members</a>, two of which are usually boilerplate. If you want to sort by different criteria, you need to implement multiple ‘alias’ types.</p>
-
-            <p>gen’s <a href="#SortBy">SortBy</a> requires a single argument defining ‘less’, and no interface implementation. You can call ad-hoc sorts simply by passing a different func.</p>
-
-            <p>gen’s implementation is a strongly-typed port of Go’s <a href="http://golang.org/src/pkg/sort/sort.go">implementation</a>. Performance characteristics should be similar.</p>
-
-            <p>We’ve also implemented a simpler <a href="#Sort">Sort</a> which requires no ‘less’ func for certain types.</p>
-
-            <h4>Could some of this be achieved using reflection or interfaces + type assertions?</h4>
-            <p>Perhaps! It’s early days and the focus is on the API and compile-time safety. We’ve no doubt that more idiomatic approaches will reveal themselves.</p>
-
-            <h4>Not all projection methods are generated for every type.</h4>
-            <p>gen only generates methods that are meaningful for a type. It won’t generate an average of strings, for example, and it won’t key a map with any type that doesn’t support equality.</p>
-
-            <h4>What about imported types?</h4>
-            <p>gen doesn’t support imported types, not least because one can’t define methods on them. You might instead create a local ‘alias’ type, something like:</p>
-
-<pre>
-type MyType otherPackage.Type
-
-// or...
-
-type MyType struct {
-    otherPackage.Type
-}
-</pre>
-
-            <h4>Why didn’t you implement X method?</h4>
-            <p>Most likely:</p>
-            <ul>
-                <li>We haven’t gotten to it yet, or</li>
-                <li>We haven’t found an idiomatic way to do it, or</li>
-                <li>It doesn’t save you any code, or</li>
-                <li>It duplicates something that Go does well.</li>
-            </ul>
-
-            <p>Here are some <a href="https://github.com/clipperhouse/gen#design-principles-for-contributors">design criteria</a>.</p>
-
-            <h4>Can I use it?</h4>
-            <p>We’d be thrilled if you would test it out and offer feedback. It’s still early bits, caveat emptor for production use. The API will likely be volatile prior to 1.0.</p>
-
-            <p>Please let us know what you think via <a href="https://github.com/clipperhouse/gen/issues">GitHub issues</a> or ping Matt on Twitter <a href="https://twitter.com/clipperhouse">@clipperhouse</a>.</p>
-
-            <h4>Can I help?</h4>
-            <p>Sure, the code is <a href="https://github.com/clipperhouse/gen">here</a>.</p>
-
-            <h4>Who is ‘we’?</h4>
-            <p>Matt Sherman, mostly. You can reach him @clipperhouse on <a href="https://github.com/clipperhouse">GitHub</a> or <a href="https://twitter.com/clipperhouse">Twitter</a>. We have are ramping up with <a href="https://github.com/clipperhouse/gen/graphs/contributors">contributors</a> too.</p>
-
-            <h2 id="Changelog">Changelog</h2>
-
-            <p><a href="https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md">github.com/clipperhouse/gen/blob/master/CHANGELOG.md</a>  </p>
-    </div>
-</body>
-</html>
-
+<p>It&rsquo;s a local dev tool, not a platform or (shudder) a framework. Run it locally, test it, and commit the generated code to the repo.</p>

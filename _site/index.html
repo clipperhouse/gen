@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<title>
+		gen &middot; type-driven code generation for Go
+		
+	</title>
+
+	</head>
+	<body>
+		<ul class="nav navbar-nav">
+			
+			
+				
+					
+				
+					
+						
+							<li  class="active" >
+								<a href="/index.html">home</a>
+							</li>
+						
+					
+				
+					
+				
+			
+				
+					
+				
+					
+				
+					
+						
+							<li >
+								<a href="/slice/index.html">slice</a>
+							</li>
+						
+					
+				
+			
+				
+					
+						
+							<li >
+								<a href="/container/index.html">container</a>
+							</li>
+						
+					
+				
+					
+				
+					
+				
+			
+		</ul>
+		<div class="container">
+			<div class="row">
+	<div class="col-sm-12">
+		
+			<h1 class="page-title">home</h1>
+		
+		<h1 id="gen">gen</h1>
+
+<h3 id="type-driven-code-generation-for-go">Type-driven code generation for Go</h3>
+
+<p><strong>gen</strong> is an attempt to bring some generics-like functionality to Go. It uses type annotations to add “of &lt;T&gt;” functionality to your packages.</p>
+
+<p>gen generates code for your types, at development time, using the command line. It is not an import; the generated source becomes part of your package and takes no external dependencies.</p>
+
+<h2 id="quick-start">Quick start</h2>
+
+<p>Of course, start by installing Go, <a href="http://golang.org/doc/code.html">setting up paths</a>, etc. Then:</p>
+
+<pre><code>go get github.com/clipperhouse/gen
+</code></pre>
+
+<p>Create a new Go project, and <code>cd</code> into it. Create a <code>main.go</code> file and define a type.</p>
+
+<p>Now, mark it up with a <code>+gen</code> annotation in an adjacent comment like so:</p>
+
+<pre><code>// +gen slice:"Where,Count,GroupBy[string]"
+type MyType struct {}
+</code></pre>
+
+<p>And at the command line, simply type:</p>
+
+<pre><code>gen
+</code></pre>
+
+<p>You should see a new file, named <code>mytype_slice.go</code>. Have a look around.</p>
+
+<p>(The annotation syntax will look familiar to Go users, it is modeled after struct tags.)</p>
+
+<h2 id="typewriters">TypeWriters</h2>
+
+<p>gen is driven by “type writers” – packages which are responsible for interpreting the annotated tags and turning them into generated code.</p>
+
+<p>gen includes two built-in TypeWriters.</p>
+
+<h3 id="slice"><code>slice</code></h3>
+
+<p>The <code>slice</code> typewriter generates functional convenience methods that will look familiar to users of C#’s LINQ or JavaScript’s Array methods. It is intended to save you some loops, using a “pass a function” pattern. It offers grouping, filtering, ad-hoc sorts and projections. <a href="slice">Details and docs…</a></p>
+
+<h3 id="container"><code>container</code></h3>
+
+<p>The <code>container</code> typewriter implements strongly-typed versions of the List and Ring containers from the Go standard library, as well as a simple Set implementation. <a href="container">Details and docs…</a></p>
+
+<h3 id="using-third-party-typewriters">Using third-party TypeWriters</h3>
+
+<p>TypeWriters can be implemented by third-parties and used at “gen time”. To use a third-party typewriter, <code>cd</code> into the root of your package and type:</p>
+
+<pre><code>gen custom
+</code></pre>
+
+<p>This will create a <code>_gen.go</code> file. Have a look at it – it contains the two built-in typewriters (above) as imports.</p>
+
+<p>You’ll note that typewriters are imported similarly to <a href="http://golang.org/pkg/image/png/">codecs</a> in the image package, or <a href="http://golang.org/pkg/database/sql/driver/">drivers</a> in the sql package. If you know the import path of a third-party typewriter, add the import:</p>
+
+<pre><code>. "gitplace.com/kimye/bling"
+</code></pre>
+
+<p>Now, make sure to type:</p>
+
+<pre><code>gen get
+</code></pre>
+
+<p>Add the third-party tag to your type annotation:</p>
+
+<pre><code>// +gen slice:"Where,Count,GroupBy[string]" bling:"Diamonds,Bentleys"
+type MyType struct {}
+</code></pre>
+
+<p>And gen it again:</p>
+
+<pre><code>gen
+</code></pre>
+
+<p>You should have a new file <code>mytype_bling.go</code> (assuming the author followed naming conventions). Refer to the third-party’s documentation to understand what their tags do, of course.</p>
+
+<h3 id="implementing-typewriters">Implementing TypeWriters</h3>
+
+<p>You can create your own type writer by implementing the <a href="godoc">TypeWriter interface</a>.</p>
+
+<p>As mentioned above, typewriters follow the pattern of codecs in the image package of Go’s standard library. They are registered via an <code>init()</code> method.</p>
+
+<p>The best thing to do is have a look at an existing implementation, <a href="https://github.com/clipperhouse/typewriters/container">List</a> is straightforward.</p>
+
+<p>The <a href="https://github.com/clipperhouse/typewriter">typewriter package</a> handles tag parsing and type evaluation, and passes this information to your typewriter. It offers some conveniences for text templating, as well.</p>
+
+<p>There aren’t many third-party packages as of this writing, so don’t hesistate to ask me (Matt) for help. We want to make it easy, and maybe even build an ecosystem.</p>
+
+<p>We’d love to see a typewriter for strongly-typed json serialization, for example.</p>
+
+<h2 id="faq">FAQ</h2>
+
+<p><strong>Codegen, really?</strong></p>
+
+<p>Yes! It felt a bit dirty to us at the beginning, too. But it turns out that a lot of actual generics implementations look a lot like code generation – you just don’t see it. (Compilers and JITs do it for you.)</p>
+
+<p>Code generation removes mystery. It’s just code, right there in your package. Read it. The history goes in your repo like everything else.</p>
+
+<p>You get all the usual compiler checks and optimizations, of course, so gen won’t introduce surprises in production.</p>
+
+<p>gen is a <em>tool</em> that helps the developer produce code on their local workstation, alongside their text editor and utilities.</p>
+
+<p><strong>Wait, is this <code>go generate</code>?</strong></p>
+
+<p>No, <a href="https://docs.google.com/document/d/1V03LUfjSADDooDMhe-_K59EgpTEm3V8uvQRuNMAEnjg/edit">that’s</a> different (and very cool). <code>go generate</code> will run any command and is intended to obviate <code>make</code> files and such. <code>gen</code> is specifically about codegen for types.</p>
+
+<p>The two tools are complementary.</p>
+
+<p><strong>Can I run gen on the server?</strong></p>
+
+<p>Like as part of the build? Sure, but that’s not what it’s designed around so we don’t recommend it.</p>
+
+<p>It’s a local dev tool, not a platform or (shudder) a framework. Run it locally, test it, and commit the generated code to the repo.</p>
+
+	</div>
+</div>
+
+		</div>
+	</body>
+</html>
