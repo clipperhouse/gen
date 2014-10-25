@@ -1,10 +1,9 @@
 ---
-layout: page
-title: "home"
+layout: default
+title: "gen"
+path: "/"
 order: 1
 ---
-
-# gen
 
 ### Type-driven code generation for Go
 

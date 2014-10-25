@@ -1,6 +1,7 @@
 ---
-layout: page
+layout: default
 title: "container"
+path: "/container"
 order: 3
 ---
 
