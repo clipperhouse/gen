@@ -10,3 +10,11 @@ td {
 code {
 	color: inherit;
 }
+
+a:hover{
+	text-decoration: none;
+}
+
+h1 > a {
+	color: inherit;
+}

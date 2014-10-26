@@ -59,8 +59,8 @@
 						
 					</td>
 					<td>
-						<h1>gen</h1>
-						<h1 id="the-slice-typewriter">The <code>slice</code> typewriter</h1>
+						<h1><a href="/">gen</a></h1>
+						<h2 id="the-slice-typewriter">The <code>slice</code> typewriter</h2>
 
 <p>The <code>slice</code> typewriter is built into <a href="../"><code>gen</code></a> by default. It generates functional convenience methods that will look familiar to users of C#’s LINQ or JavaScript’s Array. It is intended to save you some loops, using a “pass a function” pattern. It offers easier ad-hoc sorts.</p>
 
@@ -104,10 +104,22 @@
 
 <h3 id="where">Where</h3>
 
+<p>Returns a new slice whose elements return true for passed func. Comparable to LINQ’s <a href="http://msdn.microsoft.com/en-us/library/bb534803(v=vs.110).aspx">Where</a> and JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">filter</a>.</p>
+
+<pre><code>func (rcv ExampleSlice) Where(fn func(Example) bool) ExampleSlice
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code>shiny := func(p Product) bool {
+	return p.Manufacturer == "Apple"
+}
+wishlist := products.Where(shiny)
+</code></pre>
 
 					</td>
 				</tr>
 			</tbody>
-		</table>
+		</table><br />
 	</body>
 </html>
