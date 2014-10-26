@@ -1,3 +1,7 @@
+h1, h2, h3, h4 {
+	font-weight: normal;
+}
+
 td {
 	vertical-align: top;
 	padding: 0 2em;
