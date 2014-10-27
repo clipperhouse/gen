@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="/bootstrap.min.css">
 	<link rel="stylesheet" href="/gen.css">
-
+	<link rel="icon" type="image/png" href="/gopher.png">
 	<title>
 		gen &middot; type-driven code generation for Go
 		{% if page.title != "home" %}
@@ -18,17 +18,8 @@
 		<table>
 			<tbody>
 				<tr>
-					<td class="nav">
-						{% assign pages_list = site.pages %}
-						{% for order in (1..site.pages.size) %}
-							{% for node in pages_list %}
-								{% if node.title != null and node.order == order %}
-									<h4 {% if page.url == node.url %} class="active" {% endif %}>
-										<a href="{{ node.path }}">{{ node.title }}</a>
-									</h4>
-								{% endif %}
-							{% endfor %}
-						{% endfor %}
+					<td>
+						<div class="nav">{% include nav.html %}</div>
 					</td>
 					<td>
 						<h1><a href="/">gen</a></h1>

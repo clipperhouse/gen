@@ -1,0 +1,78 @@
+<hr />
+
+<p>layout: default
+title: &ldquo;slice&rdquo;
+path: &ldquo;/slice&rdquo;</p>
+
+<h2>order: 2</h2>
+
+<h2>The <code>slice</code> typewriter</h2>
+
+<p>The <code>slice</code> typewriter is built into <a href="../"><code>gen</code></a> by default. It generates functional convenience methods that will look familiar to users of C#&rsquo;s LINQ or JavaScript&rsquo;s Array. It is intended to save you some loops, using a &ldquo;pass a function&rdquo; pattern. It offers easier ad-hoc sorts.</p>
+
+<h3>Aggregate[T]</h3>
+
+<p>Iterates over a slice, operating on each element while maintaining ‘state’. Comparable to Linq’s Aggregate or underscore’s reduce.</p>
+
+<p>Example:</p>
+
+<pre><code>var join = func(state string, value Employee) string {
+    if state != "" {
+        state += ", "
+    }
+    return state + value.Department
+}
+list := people.AggregateString(join)
+// =&gt; "Sales, Marketing, Finance"
+</code></pre>
+
+<h3>All</h3>
+
+<h3>Any</h3>
+
+<h3>Average</h3>
+
+<h3>Average[T]</h3>
+
+<h3>Count</h3>
+
+<h3>Distinct</h3>
+
+<h3>DistinctBy</h3>
+
+<h3>First</h3>
+
+<h3>GroupBy[T]</h3>
+
+<h3>Max</h3>
+
+<h3>Max[T]</h3>
+
+<h3>MaxBy</h3>
+
+<h3>Min</h3>
+
+<h3>Min[T]</h3>
+
+<h3>MinBy</h3>
+
+<h3>Select</h3>
+
+<h3>Sort</h3>
+
+<h3>SortBy</h3>
+
+<h3>Where</h3>
+
+<p>Returns a new slice whose elements return true for passed func. Comparable to LINQ’s <a href="http://msdn.microsoft.com/en-us/library/bb534803(v=vs.110">Where</a>.aspx) and JavaScript’s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">filter</a>.</p>
+
+<pre><code>func (rcv ExampleSlice) Where(fn func(Example) bool) ExampleSlice
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code>shiny := func(p Product) bool {
+    return p.Manufacturer == "Apple"
+}
+wishlist := products.Where(shiny)
+</code></pre>

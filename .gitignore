@@ -5,3 +5,5 @@ coverage.out
 *_foo.go
 *_container.go
 *_gen.go
+
+_site/container/index.html
