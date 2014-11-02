@@ -2,5 +2,5 @@ package main
 
 import (
 	_ "github.com/clipperhouse/gen/typewriters/container"
-	_ "github.com/clipperhouse/gen/typewriters/slice"
+	_ "github.com/clipperhouse/slicewriter"
 )
