@@ -6,4 +6,4 @@ coverage.out
 *_container.go
 *_gen.go
 
-_site/container/index.html
+_site/*
