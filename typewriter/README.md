@@ -9,7 +9,7 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
     	“github.com/clipperhouse/gen/typewriter”
     	
     	// any number of typewriters 
-    	_ “github.com/clipperhouse/gen/typewriters/container”
+    	_ “github.com/clipperhouse/containerwriter”
     	_ “github.com/clipperhouse/gen/typewriters/genwriter”
     )
     
