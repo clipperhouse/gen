@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/clipperhouse/gen/typewriter"
+	"github.com/clipperhouse/typewriter"
 )
 
 func run() error {
 	imports := []string{
 		`"fmt"`,
 		`"os"`,
-		`"github.com/clipperhouse/gen/typewriter"`,
+		`"github.com/clipperhouse/typewriter"`,
 	}
 
 	return execute(runStandard, imports, runBody)

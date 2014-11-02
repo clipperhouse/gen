@@ -13,7 +13,7 @@ package main
 
 import (
 	_ "github.com/clipperhouse/containerwriter"
-	_ "github.com/clipperhouse/gen/typewriters/genwriter"
+	_ "github.com/clipperhouse/typewriters/genwriter"
 )
 ```
 

@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	"github.com/clipperhouse/gen/typewriter"
+	"github.com/clipperhouse/typewriter"
 )
 
 func list() error {
 	imports := []string{
 		`"fmt"`,
 		`"os"`,
-		`"github.com/clipperhouse/gen/typewriter"`,
+		`"github.com/clipperhouse/typewriter"`,
 	}
 
 	return execute(listStandard, imports, listBody)
