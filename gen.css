@@ -9,10 +9,12 @@ td {
 
 td:first-child {
 	white-space: nowrap;
+	width: 160px;
 }
 
 .nav {
 	padding-top: 1.4em;
+	position: fixed;
 }
 
 .nav > h4 {
