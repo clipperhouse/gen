@@ -8,13 +8,13 @@ import (
 	"strings"
 
 	"github.com/clipperhouse/gen/typewriter"
-	_ "github.com/clipperhouse/gen/typewriters/slice" // make sure typewriters folder is at top of GOPATH/src
+	_ "github.com/clipperhouse/gen/typewriters/slice"
 )
 
 func main() {
 	// don't let bad test or gen files get us stuck
 	filter := func(f os.FileInfo) bool {
-		return !strings.HasSuffix(f.Name(), "_slice.go")
+		return !strings.HasSuffix(f.Name(), "_slice.go") && !strings.HasSuffix(f.Name(), "_test.go")
 	}
 
 	a, err := typewriter.NewAppFiltered("+test", filter)
@@ -23,7 +23,7 @@ func main() {
 		return
 	}
 
-	if err := a.WriteAll(); err != nil {
+	if _, err := a.WriteAll(); err != nil {
 		fmt.Println(err)
 		return
 	}
