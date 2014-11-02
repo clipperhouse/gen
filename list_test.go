@@ -45,7 +45,7 @@ func TestList(t *testing.T) {
 		Name: "main",
 		Imports: []string{
 			// non-standard typewriter
-			`_ "github.com/clipperhouse/gen/typewriters/foowriter"`,
+			`_ "github.com/clipperhouse/foowriter"`,
 			`_ "github.com/clipperhouse/slicewriter"`,
 			`_ "github.com/clipperhouse/containerwriter"`,
 		},
