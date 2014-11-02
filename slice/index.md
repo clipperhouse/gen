@@ -13,18 +13,63 @@ The `slice` typewriter is built into [`gen`](../) by default. It generates funct
 
 Iterates over a slice, operating on each element while maintaining ‘state’. Comparable to Linq’s Aggregate or underscore’s reduce.
 
+Annotation:
+
+	// +gen slice:"Aggregate[string]"
+	type Foo struct{
+		Name 	   string
+		Department string
+	}
+
+Signature:
+
+	func (rcv FooSlice) AggregateString(func(state string, value Foo) string) bool
+
 Example:
 
-	var join = func(state string, value Employee) string {
+	foos := FooSlice {
+		{"Alice", "Accounting"},
+		{"Bob", "Back Office"},
+		{"Carly", "Containers"},
+	}
+
+	join := func(state string, value Foo) string {
 	    if state != "" {
 	        state += ", "
 	    }
-	    return state + value.Department
+	    return state + value.Name
 	}
-	list := people.AggregateString(join)
-	// => "Sales, Marketing, Finance"
+
+	foos.AggregateString(join) // => "Alice, Bob, Carly"
 
 ### All
+
+Returns true if every element returns true for passed func. Comparable to Linq’s All or underscore’s every.
+
+Annotation:
+
+	// +gen slice:"All"
+	type Foo struct {
+		Age int
+	}
+
+Signature:
+
+	func (rcv FooSlice) All(fn func(Foo) bool) bool
+
+Example:
+
+	foos := FooSlice {
+		{250},
+		{101},
+		{300},
+	}
+
+	over100 := func(value Foo) bool {
+	    return value.Amount > 100
+	}
+
+	foos.All(over100) // => true
 
 ### Any
 
