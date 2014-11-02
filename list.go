@@ -40,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Installed typewriters (custom):")
+	fmt.Println("Imported typewriters (_gen.go):")
 	for _, tw := range app.TypeWriters {
 		fmt.Println("  " + tw.Name())
 	}
