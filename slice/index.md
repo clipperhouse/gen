@@ -185,8 +185,6 @@ Returns a new slice representing unique elements. Comparable to LINQ’s Distinc
 
 	func (ExampleSlice) Distinct() ExampleSlice
 
-*Constraint: Example must support [equality](https://golang.org/doc/go1#equality).*
-
 Example:
 
 	// +gen slice:"Distinct"
@@ -205,7 +203,7 @@ Example:
 
 	hipsters.Distinct() // => [{"Neutral Milk Hotel", true, true}]
 
-Keep in mind that pointers and values have different notions of equality, and therefore distinctness.
+Distinct is supported only for types that support [equality](https://golang.org/doc/go1#equality). Bear in mind that pointers and values have different notions of equality, and therefore distinctness.
 
 ### DistinctBy
 
