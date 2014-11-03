@@ -53,8 +53,6 @@ Example:
 
 Returns true if every element returns true for passed func. Comparable to LINQ’s All or underscore’s every.
 
-Annotation:
-
 Signature:
 
 	func (ExampleSlice) All(func(Example) bool) bool
@@ -108,7 +106,7 @@ Example:
 
 ### Average
 
-Sums over all elements of the slice and divides by len. Comparable to LINQ’s Average.
+Sums over all elements of the slice and divides by len. Returns an error on an empty slice. Comparable to LINQ’s Average.
 
 Signature:
 
@@ -119,21 +117,17 @@ Example:
 	// +gen slice:"Average"
 	type Celsius float64
 
-	temps := CelsiusSlice {
-		Celsius(15.1),
-		Celsius(-2),
-		Celsius(3.6),
-	}
+	temps := CelsiusSlice{15.1, -2, 3.6}
 
-	temps.Average() // => 5.567
+	temps.Average() // => 5.567, nil
 
 ### Average[T]
 
-Sums over all projected values of a numeric type, and divides by len.
+Returns the average **projected** value of a slice, where the projection is defined by a passed func. Returns an error on an empty slice.
 
 Signature:
 
-	func (ExampleSlice) AverageT() T  // T must be a numeric type
+	func (ExampleSlice) AverageT() (T, error)  // T must be a numeric type
 
 Example:
 
@@ -149,11 +143,11 @@ Example:
 		{"Carly", 200},
 	}
 
-	points := func(f Example) int {
-		return f.Points
+	points := func(p Player) int {
+		return p.Points
 	}
 
-	players.AverageInt(points) // => 250
+	players.AverageInt(points) // => 250, nil
 
 ### Count
 
@@ -215,37 +209,339 @@ Keep in mind that pointers and values have different notions of equality, and th
 
 ### DistinctBy
 
-Returns a new slice (plural type) representing unique elements, where equality is defined by a passed func.
+Returns a new slice representing unique elements, where equality is defined by a passed func.
 
-func (rcv Things) DistinctBy(func(*Thing, *Thing) bool) Things
+Signature:
+
+	func (ExampleSlice) DistinctBy(func(Example, Example) bool) ExampleSlice
+
 Example:
+	
+	// +gen slice:"DistinctBy"
+	type Hipster struct {
+		FavoriteBand string
+		Mustachioed  bool
+	}
 
-hairstyle := func(a *Fashionista, b *Fashionista) bool {
-    a.Hairstyle == b.Hairstyle
-}
-trendsetters := fashionistas.DistinctBy(hairstyle)
+	hipsters := HipsterSlice {
+		{"Neutral Milk Hotel", true},
+		{"Death Cab for Cutie", true},
+		{"You Probably Haven’t Heard of Them", true},
+		{"Neutral Milk Hotel", false},
+	}
+
+	band := func(a Hipster, b Hipster) bool {
+	    a.FavoriteBand == b.FavoriteBand
+	}
+
+	hipsters.DistinctBy(band) // => [{"Neutral Milk Hotel", true}, {"Death Cab for Cutie", true}, {"You Probably Haven’t Heard of Them", true}]
 
 ### First
 
+Returns first element which returns true for passed func. Returns error if no elements satisfy the func. Comparable to LINQ’s First or underscore’s find.
+
+Signature:
+
+	func (ExampleSlice) First(func(Example) bool) (Example, error)
+
+Example:
+
+	// +gen slice:"First"
+	type Customer struct {
+		Name string
+		Here bool
+	}
+
+	customers := CustomerSlice {
+		{"Alice", false},
+		{"Bob", true},
+		{"Carly", true},
+	}
+
+	come := func(c Customer) bool {
+	    return c.Here
+	}
+
+	served, err := customers.First(come) // => {"Bob", true}, nil
+
 ### GroupBy[T]
+
+Groups elements into a map keyed by T. Comparable to LINQ’s GroupBy or underscore’s groupBy.
+
+Signature:
+
+	func (ExampleSlice) GroupByT (func(Example) T) map[T]ExampleSlice // => T must support equality
+
+Example:
+
+	// +gen slice:"GroupBy[int]"
+	type Movie struct {
+		Title string
+		Year  int
+	}
+
+	movies := MovieSlice {
+		{"Independence Day", 1996},
+		{"Iron Man", 2008},
+		{"Fargo", 1996},
+		{"Django Unchained", 2012},
+		{"WALL-E", 2008},
+	}
+
+	year := func(m Movie) int {
+		return m.Year
+	}
+
+	movies.GroupByInt(year) // => { 1996: [{"Independence Day", 1996}, {"Fargo", 1996}], 2008: [{"Iron Man", 2008}, {"WALL-E", 2008}], 2012: [{"Django Unchained", 2012}] }
 
 ### Max
 
+Returns the maximum value of a slice. Returns an error when invoked on an empty slice, an invalid operation. Comparable to LINQ’s Max.
+
+Signature:
+
+	func (ExampleSlice) Max() (Example, error) // => Example must be an ordered type
+
+Example:
+
+	// +gen slice:"Max"
+	type Price float64
+
+	prices := PriceSlice{12.34, 43.21, 23.45}
+
+	prices.Max() // => 43.21
+
+`Max` is only supported for ‘[ordered](http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo)’ types, i.e. those that support less than/greater than.
+
 ### Max[T]
+
+Returns the maximum projected value of a slice, where the projection is defined by a passed func. Returns an error when invoked on an empty slice, an invalid operation. Comparable to LINQ’s Max.
+
+Signature:
+
+	func (ExampleSlice) MaxT(func(Example) T) (T, error) // => T must be an ordered type
+
+Example:
+
+	// +gen slice:"Max[Dollars]"
+	type Movie struct {
+		Title     string
+		BoxOffice Dollars
+	}
+
+	type Dollars int
+
+	movies := MovieSlice {
+		{"Independence Day", 1000000},
+		{"Iron Man", 5000000},
+		{"Fargo", 3000000},
+		{"Django Unchained", 9000000},
+		{"WALL-E", 4000000},
+	}
+
+	box := func(e Employee) Dollars {
+		return e.BoxOffice
+	}
+
+	movies.MaxDollars(box) // => 9000000
 
 ### MaxBy
 
+Returns the element containing the maximum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.
+
+Signature:
+
+	func (ExampleSlice) MaxBy(func(Example, Example) bool) (Example, error)
+
+Example:
+
+	// +gen slice:"MaxBy"
+	type Rectangle struct {
+		Width, Height int
+	}
+
+	func (r Rectangle) Area() int {
+		return r.Width * r.Height
+	}
+
+	rectangles := RectangleSlice{
+		{5, 4},
+		{6, 7},
+		{2, 3},
+	}
+
+	area := func(a, b Rectangle) bool {
+	    return a.Area() < b.Area()
+	}
+
+	rectangles.MaxBy(area) // => {6, 7}
+
 ### Min
+
+Returns the minimum value of a slice. Returns an error when invoked on an empty slice, an invalid operation. Comparable to LINQ’s Min.
+
+Signature:
+
+	func (ExampleSlice) Min() (Example, error) // => Example must be an ordered type
+
+Example:
+
+	// +gen slice:"Min"
+	type Price float64
+
+	prices := PriceSlice{12.34, 43.21, 23.45}
+
+	prices.Min() // => 12.34
+
+`Min` is only supported for ‘[ordered](http://godoc.org/code.google.com/p/go.tools/go/types#BasicInfo)’ types, i.e. those that support less than/greater than.
 
 ### Min[T]
 
+Returns the minimum projected value of a slice, where the projection is defined by a passed func. Returns an error when invoked on an empty slice, an invalid operation. Comparable to LINQ’s Min.
+
+Signature:
+
+	func (ExampleSlice) MinT(func(Example) T) (T, error) // => T must be an ordered type
+
+Example:
+
+	// +gen slice:"Min[Dollars]"
+	type Movie struct {
+		Title     string
+		BoxOffice Dollars
+	}
+
+	type Dollars int
+
+	movies := MovieSlice {
+		{"Independence Day", 1000000},
+		{"Iron Man", 5000000},
+		{"Fargo", 3000000},
+		{"Django Unchained", 9000000},
+		{"WALL-E", 4000000},
+	}
+
+	box := func(e Employee) Dollars {
+		return e.BoxOffice
+	}
+
+	movies.MinDollars(box) // => 1000000
+
 ### MinBy
 
-### Select
+Returns the element containing the minimum value, when compared to other elements using a passed func defining ‘less’. Returns an error when invoked on an empty slice, considered an invalid operation.
+
+Signature:
+
+	func (ExampleSlice) MinBy(func(Example, Example) bool) (Example, error)
+
+Example:
+
+	// +gen slice:"MinBy"
+	type Rectangle struct {
+		Width, Height int
+	}
+
+	func (r Rectangle) Area() int {
+		return r.Width * r.Height
+	}
+
+	rectangles := RectangleSlice{
+		{5, 4},
+		{6, 7},
+		{2, 3},
+	}
+
+	area := func(a, b Rectangle) bool {
+	    return a.Area() < b.Area()
+	}
+
+	rectangles.MinBy(area) // => {2, 3}
+
+### Select[T]
+
+Returns a projected slice given a func which maps Example to T. Comparable to LINQ’s Select or underscore’s map.
+
+Signature:
+
+	func (ExampleSlice) Select(func(Example) T) ([]T, error)
+
+Example:
+
+	// +gen slice:"Select[int]"
+	type Player struct {
+		Name   string
+		Points int
+	}
+
+	players := PlayerSlice {
+		{"Alice", 450},
+		{"Bob", 100},
+		{"Carly", 200},
+	}
+
+	points := func(p Player) int {
+		return p.Points
+	}
+
+	players.SelectInt(points) // => [450, 100, 200]
 
 ### Sort
 
+Returns a new slice whose elements are sorted.
+
+Signature:
+
+	func (ExampleSlice) Sort() ExampleSlice
+
+Example:
+
+	// +gen slice:"Sort,SortDesc"
+	type Rating int
+
+	ratings := RatingSlice{5, 7, 2, 1, 9, 2}
+
+	ratings.Sort() // => {1, 2, 2, 5, 7, 9}
+	ratings.SortDesc() // => {9, 7, 5, 2, 2, 1}
+
+`SortDesc` and `IsSorted(Desc)` are also available, and should be self-explanatory.
+
+Sort uses Go’s sort package by implementing the interface required to use it. It is only supported for types that can be compared greater than or less than one another (‘ordered’ in Go terminology).
+
 ### SortBy
+
+Returns a new slice whose elements are sorted based on a func defining ‘less’. The less func takes two elements, and returns true if the first element is less than the second element.
+
+Signature:
+
+	func (ExampleSlice) SortBy(func(Example, Example) bool) ExampleSlice
+
+Example:
+
+	// +gen slice:"SortBy"
+	type Movie struct {
+		Title string
+		Year  int
+	}
+
+	movies := MovieSlice {
+		{"Independence Day", 1996},
+		{"Iron Man", 2008},
+		{"Fargo", 1996},
+		{"Django Unchained", 2012},
+		{"WALL-E", 2008},
+	}
+
+	yearThenTitle := func(a, b Movie) bool {
+		if a.Year == b.Year {
+			return a.Title < b.Title
+		}
+		return a.Year < b.Year
+	}
+
+	movies.SortBy(yearThenTitle) // => [{{"Fargo", 1996}, "Independence Day", 1996}, {"Iron Man", 2008}, {"WALL-E", 2008}, {"Django Unchained", 2012}]
+
+`SortByDesc` and `IsSortedBy(Desc)` are also available, and should be self-explanatory.
 
 ### Where
 

@@ -32,15 +32,20 @@ td:first-child {
 pre {
 	padding: 9.5px;
 	background-color: #f8f8f8;
+	font-size: 100%;
 }
 
 code {
 	color: inherit;
+	background-color: transparent;
+	padding: 0;
+	font-size: 100%;
 }
 
 pre code { 
 	display: block;
 	padding: 0.5em;
+	font-size: 100%;
 }
 
 h2 > code, h3 > code {

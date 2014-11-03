@@ -6,7 +6,7 @@
 
 [FAQ](/#faq)
 
-#### [slice](/slice)
+#### [slice](/slice#)
 
 [Aggregate[T]](/slice/#aggregatet)
 
@@ -40,7 +40,7 @@
 
 [MinBy](/slice/#minby)
 
-[Select](/slice/#select)
+[Select[T]](/slice/#selectt)
 
 [Sort](/slice/#sort)
 
@@ -48,4 +48,4 @@
 
 [Where](/slice/#where)
 
-#### [container](/container)
+#### [container](/container#)
