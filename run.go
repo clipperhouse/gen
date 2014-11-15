@@ -17,7 +17,7 @@ func run() error {
 	return execute(runStandard, imports, runBody)
 }
 
-func runStandard() error {
+func runStandard() (err error) {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
