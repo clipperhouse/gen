@@ -17,7 +17,7 @@ func run() error {
 	return execute(runStandard, imports, runBody)
 }
 
-func runStandard() error {
+func runStandard() (err error) {
 	app, err := typewriter.NewApp("+gen")
 
 	if err != nil {
@@ -32,7 +32,9 @@ func runStandard() error {
 		return fmt.Errorf("No typewriters were imported. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
-	if err := app.WriteAll(); err != nil {
+	err = app.WriteAll()
+
+	if err != nil {
 		return err
 	}
 
