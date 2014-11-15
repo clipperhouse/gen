@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"code.google.com/p/go.tools/imports"
+	"golang.org/x/tools/imports"
 )
 
 // +test foo:"Bar" baz:"qux,thing"
