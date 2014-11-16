@@ -24,7 +24,17 @@ func runStandard() (err error) {
 		return err
 	}
 
-	if len(app.Types) == 0 {
+	if len(app.Packages) == 0 {
+		return fmt.Errorf("No packages were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
+	}
+
+	found := false
+
+	for _, p := range app.Packages {
+		found = found || len(p.Types) > 0
+	}
+
+	if !found {
 		return fmt.Errorf("No types marked with +gen were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
@@ -54,7 +64,17 @@ func gen() error {
 		return err
 	}
 
-	if len(app.Types) == 0 {
+	if len(app.Packages) == 0 {
+		return fmt.Errorf("No packages were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
+	}
+
+	found := false
+
+	for _, p := range app.Packages {
+		found = found || len(p.Types) > 0
+	}
+
+	if !found {
 		return fmt.Errorf("No types marked with +gen were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
