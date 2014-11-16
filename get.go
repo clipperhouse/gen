@@ -32,7 +32,7 @@ func get(args []string) error {
 }
 
 func getTypewriterImports() ([]string, error) {
-	imports := make([]string, 0)
+	var imports []string
 
 	// check for existence of custom file
 	if src, err := os.Open(customName); err == nil {

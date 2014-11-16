@@ -20,10 +20,10 @@ func execute(standard func() error, imports []string, body string) error {
 
 		// custom imports file exists, use it
 		return executeCustom(src, imports, body)
-	} else {
-		// do it the regular way
-		return standard()
 	}
+
+	// do it the regular way
+	return standard()
 }
 
 // executeCustom creates a temp directory, copies src into it and generates a main() using the passed imports and body.
