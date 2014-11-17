@@ -1,3 +1,4 @@
+// gen is a tool for type-driven code generation for Go. Details and docs are available at https://clipperhouse.github.io/gen.
 package main
 
 import "os"
