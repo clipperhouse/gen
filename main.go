@@ -1,20 +1,27 @@
 // gen is a tool for type-driven code generation for Go. Details and docs are available at https://clipperhouse.github.io/gen.
 package main
 
-import "os"
+import (
+	"os"
+	"regexp"
+)
 
 func main() {
 	var err error
 
 	defer func() {
 		if err != nil {
-			os.Stderr.WriteString(err.Error() + "\n")
+			if !exitStatusMsg.MatchString(err.Error()) {
+				os.Stderr.WriteString(err.Error() + "\n")
+			}
 			os.Exit(1)
 		}
 	}()
 
 	err = runMain(os.Args)
 }
+
+var exitStatusMsg = regexp.MustCompile(`^exit status \d+$`)
 
 func runMain(args []string) error {
 	if len(args) == 1 {

@@ -33,7 +33,7 @@ func get(args []string) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return nil
+		return err
 	}
 
 	return nil
