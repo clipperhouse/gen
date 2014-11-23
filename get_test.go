@@ -31,8 +31,8 @@ func TestGetImports(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(imps) != 2 {
-		t.Errorf("should return 2 imports, got %v", len(imps))
+	if len(imps) != 1 {
+		t.Errorf("should return 1 import, got %v", len(imps))
 	}
 
 	// create a custom typewriter import file
@@ -50,7 +50,7 @@ func TestGetImports(t *testing.T) {
 			// non-standard typewriter
 			`_ "github.com/clipperhouse/foowriter"`,
 			`_ "github.com/clipperhouse/slicewriter"`,
-			`_ "github.com/clipperhouse/containerwriter"`,
+			`_ "github.com/clipperhouse/setwriter"`,
 		},
 	}
 

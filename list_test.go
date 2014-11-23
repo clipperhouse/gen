@@ -25,8 +25,8 @@ func TestList(t *testing.T) {
 	}
 
 	// one line for title, 2 standard typewriters
-	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 3 {
-		t.Errorf("standard list should output 3 lines, got %v", lines)
+	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 2 {
+		t.Errorf("standard list should output 2 lines, got %v", lines)
 	}
 
 	// clear out the output buffer
@@ -47,7 +47,6 @@ func TestList(t *testing.T) {
 			// non-standard typewriter
 			`_ "github.com/clipperhouse/foowriter"`,
 			`_ "github.com/clipperhouse/slicewriter"`,
-			`_ "github.com/clipperhouse/containerwriter"`,
 		},
 	}
 
@@ -61,7 +60,7 @@ func TestList(t *testing.T) {
 	}
 
 	// one line for title, 3 custom typewriters
-	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 4 {
-		t.Errorf("standard list should output 4 lines, got %v", lines)
+	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 3 {
+		t.Errorf("standard list should output 3 lines, got %v", lines)
 	}
 }
