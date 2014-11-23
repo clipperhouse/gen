@@ -19,9 +19,10 @@ func get(args []string) error {
 	}
 
 	// we just want the paths
-	imps := imports.SelectString(func(imp typewriter.ImportSpec) string {
-		return imp.Path
-	})
+	var imps []string
+	for imp := range imports {
+		imps = append(imps, imp.Path)
+	}
 
 	get := []string{"get"}
 	get = append(get, args...)
@@ -38,8 +39,8 @@ func get(args []string) error {
 	return nil
 }
 
-func getTypewriterImports() (typewriter.ImportSpecSlice, error) {
-	var imports typewriter.ImportSpecSlice
+func getTypewriterImports() (typewriter.ImportSpecSet, error) {
+	imports := typewriter.NewImportSpecSet()
 
 	// check for existence of custom file
 	if src, err := os.Open(customName); err == nil {
@@ -56,11 +57,11 @@ func getTypewriterImports() (typewriter.ImportSpecSlice, error) {
 				Name: v.Name.Name,
 				Path: strings.Trim(v.Path.Value, `"`), // lose the quotes
 			}
-			imports = append(imports, imp)
+			imports.Add(imp)
 		}
 	} else {
 		// doesn't exist, use standard
-		imports = append(imports, stdImports...)
+		imports = stdImports
 	}
 
 	return imports, nil

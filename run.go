@@ -8,11 +8,11 @@ import (
 )
 
 func run() error {
-	imports := typewriter.ImportSpecSlice{
-		{Path: "fmt"},
-		{Path: "os"},
-		{Path: "github.com/clipperhouse/typewriter"},
-	}
+	imports := typewriter.NewImportSpecSet(
+		typewriter.ImportSpec{Path: "fmt"},
+		typewriter.ImportSpec{Path: "os"},
+		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
+	)
 
 	return execute(runStandard, imports, runBody)
 }

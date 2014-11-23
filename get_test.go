@@ -48,12 +48,11 @@ func TestGetImports(t *testing.T) {
 
 	p := pkg{
 		Name: "main",
-		Imports: typewriter.ImportSpecSlice{
-			// non-standard typewriter
-			{Name: "_", Path: "github.com/clipperhouse/foowriter"},
-			{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
-			{Name: "_", Path: "github.com/clipperhouse/setwriter"},
-		},
+		Imports: typewriter.NewImportSpecSet(
+			typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/foowriter"},
+			typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
+			typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/setwriter"},
+		),
 	}
 
 	if err := tmpl.Execute(w, p); err != nil {

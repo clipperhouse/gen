@@ -50,10 +50,9 @@ func TestRun(t *testing.T) {
 
 	p := pkg{
 		Name: "main",
-		Imports: typewriter.ImportSpecSlice{
-			// non-standard typewriter
-			{Name: "_", Path: "github.com/clipperhouse/foowriter"},
-		},
+		Imports: typewriter.NewImportSpecSet(
+			typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/foowriter"},
+		),
 	}
 
 	if err := tmpl.Execute(w, p); err != nil {
