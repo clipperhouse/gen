@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"os"
 	"testing"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 func TestList(t *testing.T) {
@@ -43,10 +45,10 @@ func TestList(t *testing.T) {
 
 	p := pkg{
 		Name: "main",
-		Imports: []string{
+		Imports: typewriter.ImportSpecSlice{
 			// non-standard typewriter
-			`_ "github.com/clipperhouse/foowriter"`,
-			`_ "github.com/clipperhouse/slicewriter"`,
+			{Name: "_", Path: "github.com/clipperhouse/foowriter"},
+			{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
 		},
 	}
 

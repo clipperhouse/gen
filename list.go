@@ -7,10 +7,10 @@ import (
 )
 
 func list() error {
-	imports := []string{
-		`"fmt"`,
-		`"os"`,
-		`"github.com/clipperhouse/typewriter"`,
+	imports := typewriter.ImportSpecSlice{
+		{Path: "fmt"},
+		{Path: "os"},
+		{Path: "github.com/clipperhouse/typewriter"},
 	}
 
 	return execute(listStandard, imports, listBody)

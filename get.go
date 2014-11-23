@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
@@ -16,9 +18,14 @@ func get(args []string) error {
 		return err
 	}
 
+	// we just want the paths
+	imps := imports.SelectString(func(imp typewriter.ImportSpec) string {
+		return imp.Path
+	})
+
 	get := []string{"get"}
 	get = append(get, args...)
-	get = append(get, imports...)
+	get = append(get, imps...)
 
 	cmd := exec.Command("go", get...)
 	cmd.Stdout = out
@@ -31,8 +38,8 @@ func get(args []string) error {
 	return nil
 }
 
-func getTypewriterImports() ([]string, error) {
-	var imports []string
+func getTypewriterImports() (typewriter.ImportSpecSlice, error) {
+	var imports typewriter.ImportSpecSlice
 
 	// check for existence of custom file
 	if src, err := os.Open(customName); err == nil {
@@ -45,17 +52,15 @@ func getTypewriterImports() ([]string, error) {
 			return imports, err
 		}
 		for _, v := range f.Imports {
-			imports = append(imports, v.Path.Value)
+			imp := typewriter.ImportSpec{
+				Name: v.Name.Name,
+				Path: strings.Trim(v.Path.Value, `"`), // lose the quotes
+			}
+			imports = append(imports, imp)
 		}
 	} else {
 		// doesn't exist, use standard
 		imports = append(imports, stdImports...)
-	}
-
-	// clean `em up
-	// TODO: a better way than strings to express imports
-	for i := range imports {
-		imports[i] = strings.Trim(imports[i], `_ "`)
 	}
 
 	return imports, nil

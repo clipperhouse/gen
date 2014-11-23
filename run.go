@@ -8,10 +8,10 @@ import (
 )
 
 func run() error {
-	imports := []string{
-		`"fmt"`,
-		`"os"`,
-		`"github.com/clipperhouse/typewriter"`,
+	imports := typewriter.ImportSpecSlice{
+		{Path: "fmt"},
+		{Path: "os"},
+		{Path: "github.com/clipperhouse/typewriter"},
 	}
 
 	return execute(runStandard, imports, runBody)

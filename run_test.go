@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"testing"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 // +gen slice:"Where"
@@ -48,9 +50,9 @@ func TestRun(t *testing.T) {
 
 	p := pkg{
 		Name: "main",
-		Imports: []string{
+		Imports: typewriter.ImportSpecSlice{
 			// non-standard typewriter
-			`_ "github.com/clipperhouse/foowriter"`,
+			{Name: "_", Path: "github.com/clipperhouse/foowriter"},
 		},
 	}
 

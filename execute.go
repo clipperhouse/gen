@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"text/template"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 // execute runs a gen command by first determining whether a custom imports file (typically _gen.go) exists
@@ -14,7 +16,7 @@ import (
 // If no custom file exists, it executes the passed 'standard' func.
 //
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
-func execute(standard func() error, imports []string, body string) error {
+func execute(standard func() error, imports typewriter.ImportSpecSlice, body string) error {
 	if src, err := os.Open(customName); err == nil {
 		defer src.Close()
 
@@ -29,7 +31,7 @@ func execute(standard func() error, imports []string, body string) error {
 // executeCustom creates a temp directory, copies src into it and generates a main() using the passed imports and body.
 //
 // `go run` is then called on those files via os.Command.
-func executeCustom(src io.Reader, imports []string, body string) error {
+func executeCustom(src io.Reader, imports typewriter.ImportSpecSlice, body string) error {
 	temp, err := getTempDir()
 	if err != nil {
 		return err
@@ -90,6 +92,6 @@ func getTempDir() (string, error) {
 var tmpl = template.Must(template.New("package").Parse(`package {{.Name}}
 {{if gt (len .Imports) 0}}
 import ({{range .Imports}}
-	{{.}}{{end}}
+	{{.Name}} "{{.Path}}"{{end}}
 )
 {{end}}`))

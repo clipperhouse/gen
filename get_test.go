@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"testing"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 func TestGet(t *testing.T) {
@@ -46,11 +48,11 @@ func TestGetImports(t *testing.T) {
 
 	p := pkg{
 		Name: "main",
-		Imports: []string{
+		Imports: typewriter.ImportSpecSlice{
 			// non-standard typewriter
-			`_ "github.com/clipperhouse/foowriter"`,
-			`_ "github.com/clipperhouse/slicewriter"`,
-			`_ "github.com/clipperhouse/setwriter"`,
+			{Name: "_", Path: "github.com/clipperhouse/foowriter"},
+			{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
+			{Name: "_", Path: "github.com/clipperhouse/setwriter"},
 		},
 	}
 

@@ -1,10 +1,12 @@
 package main
 
-var stdImports = []string{
-	`_ "github.com/clipperhouse/slicewriter"`,
+import "github.com/clipperhouse/typewriter"
+
+var stdImports = typewriter.ImportSpecSlice{
+	{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
 }
 
 type pkg struct {
 	Name    string
-	Imports []string
+	Imports typewriter.ImportSpecSlice
 }
