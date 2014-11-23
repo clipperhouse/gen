@@ -18,6 +18,30 @@ import (
 // Things is a slice of type Thing. Use it where you would use []Thing.
 type Things []Thing
 
+// ThingPredicate is a function that accepts a Thing and returns a bool.  Used with gen methods below. Use this type where you would use func(Thing) bool.
+type ThingPredicate func(item Thing) bool
+
+// And combines two predicates into a new predicate that is satisfied if both of the original predicates are satisfied
+func (rcv ThingPredicate) And(other ThingPredicate) ThingPredicate {
+	return func(item Thing) bool {
+		return rcv(item) && other(item)
+	}
+}
+
+// Or combines two predicates into a new predicate that is satisfied if either of the original predicates is satisfied
+func (rcv ThingPredicate) Or(other ThingPredicate) ThingPredicate {
+	return func(item Thing) bool {
+		return rcv(item) || other(item)
+	}
+}
+
+// Not inverts a predicate that is satisfied if the original predicates is not satisfied
+func (rcv ThingPredicate) Not() ThingPredicate {
+	return func(item Thing) bool {
+		return !rcv(item)
+	}
+}
+
 // All verifies that all elements of Things return true for the passed func. See: http://clipperhouse.github.io/gen/#All
 func (rcv Things) All(fn func(Thing) bool) bool {
 	for _, v := range rcv {

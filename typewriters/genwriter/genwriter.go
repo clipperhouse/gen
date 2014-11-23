@@ -43,6 +43,11 @@ func (m model) Plural() (result string) {
 	return
 }
 
+func (m model) Predicate() (result string) {
+	result = m.Name + "Predicate"
+	return
+}
+
 // genwriter prepares models for later use in the .Validate() method. It must be called prior.
 func (g *GenWriter) ensureValidation(t typewriter.Type) error {
 	if !g.validated[t.String()] {
@@ -224,6 +229,11 @@ func (g *GenWriter) WriteBody(w io.Writer, t typewriter.Type) {
 	}
 
 	tmpl, _ := standardTemplates.Get("plural")
+	if err := tmpl.Execute(w, m); err != nil {
+		panic(err)
+	}
+
+	tmpl, _ = standardTemplates.Get("predicates")
 	if err := tmpl.Execute(w, m); err != nil {
 		panic(err)
 	}
