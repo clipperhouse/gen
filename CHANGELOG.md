@@ -1,3 +1,67 @@
+###24 Nov 2014
+
+To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
+
+This release has several substantial changes.
+
+####Explcitness
+
+Previous versions of gen would generate a dozen or so LINQ-style slice methods simply by marking up:
+
+	// +gen
+	// type MyType struct{}
+	
+We’ve opted for explicitness moving forward – in the case of slices, you’ll write this instead:
+
+	// +gen slice:"Where, SortBy, Any"
+	// type MyType struct{}
+
+In other words, only the methods you want.
+
+####Projections
+
+Certain methods, such as Select and GroupBy require an additional type parameter. I won’t bore you with the convoluted old way. Now it’s:
+
+	// +gen slice:"GroupBy[string], Select[Foo]"
+	// type MyType struct{}
+
+Those type parameters are properly evaluated, and typewriters get full type information on them.
+
+####Only slice is built-in
+
+We’ve deprecated the built-in container typewriter, instead splitting it into optional Set, List and Ring typewriters. How to add optional typewriters, you ask?
+
+####gen add
+
+Third-party typewriters are added to your package using a new command, `add`. It looks like this:
+
+	gen add github.com/clipperhouse/setwriter
+	
+That’s a plain old Go import path.
+
+After adding, you can mark up a type like:
+
+	// +gen set slice:"GroupBy[string], Select[Foo]"
+	// type MyType struct{}
+
+As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” set tag is enough.
+
+We deprecated the unintuitive `gen custom` command, `add` replaces it.
+
+####Smaller interface
+
+The `TypeWriter` interface got smaller. It’s now:
+
+	type TypeWriter interface {
+		Name() string
+		Imports(t Type) []ImportSpec
+		Write(w io.Writer, t Type) error
+	}
+
+`Validate` is gone, it was awkward. The easy fix there was to allow Write to return an error. `WriteHeader` is gone, little use for it in practice. `WriteBody` is now simply `Write`.
+
+Let me (@clipperhouse) know if any questions.
+
 ###28 Jun 2014
 
 To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
