@@ -1,4 +1,4 @@
-###24 Nov 2014
+###24 Nov 2014 (v4)
 
 To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
 
@@ -62,7 +62,7 @@ The `TypeWriter` interface got smaller. It’s now:
 
 Let me (@clipperhouse) know if any questions.
 
-###28 Jun 2014
+###28 Jun 2014 (v3)
 
 To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
 
