@@ -3,40 +3,21 @@ package main
 import (
 	"io"
 	"os"
-	"sync"
+
+	"github.com/clipperhouse/typewriter"
 )
 
-// lock for changing configs below
-var mu = &sync.Mutex{}
+type config struct {
+	out        io.Writer
+	customName string
+}
 
-// global state for output; useful with testing
-var (
-	defaultOut io.Writer = os.Stdout
-	out                  = defaultOut
+var defaultConfig = config{
+	out:        os.Stdout,
+	customName: "_gen.go",
+}
+
+// keep in sync with imports.go
+var stdImports = typewriter.NewImportSpecSet(
+	typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
 )
-
-// with inspiration from http://golang.org/src/pkg/log/log.go?s=7258:7285#L229
-func setOutput(w io.Writer) {
-	mu.Lock()
-	defer mu.Unlock()
-	out = w
-}
-
-func revertOutput() {
-	setOutput(defaultOut)
-}
-
-// global state for custom imports file name; useful with testing
-const defaultCustomName string = "_gen.go"
-
-var customName = defaultCustomName
-
-func setCustomName(s string) {
-	mu.Lock()
-	defer mu.Unlock()
-	customName = s
-}
-
-func revertCustomName() {
-	setCustomName(defaultCustomName)
-}

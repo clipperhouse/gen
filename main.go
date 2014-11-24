@@ -24,25 +24,28 @@ func main() {
 var exitStatusMsg = regexp.MustCompile(`^exit status \d+$`)
 
 func runMain(args []string) error {
+	c := defaultConfig
+
 	if len(args) == 1 {
 		// simply typed 'gen'; run is the default command
-		return run()
+		return run(c)
 	}
 
 	cmd := args[1]
 
+	var tail []string
+	if len(args) > 2 {
+		tail = args[2:]
+	}
+
 	switch cmd {
-	case "custom":
-		return custom()
+	case "add":
+		return add(c, tail...)
 	case "get":
-		var tail []string
-		if len(args) > 2 {
-			tail = args[2:]
-		}
-		return get(tail)
+		return get(c, tail...)
 	case "list":
-		return list()
+		return list(c)
 	default:
-		return help()
+		return help(c)
 	}
 }

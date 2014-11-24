@@ -11,8 +11,8 @@ import (
 )
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
-func get(args []string) error {
-	imports, err := getTypewriterImports()
+func get(c config, args ...string) error {
+	imports, err := getTypewriterImports(c)
 
 	if err != nil {
 		return err
@@ -29,8 +29,8 @@ func get(args []string) error {
 	get = append(get, imps...)
 
 	cmd := exec.Command("go", get...)
-	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = c.out
+	cmd.Stderr = c.out
 
 	if err := cmd.Run(); err != nil {
 		return err
@@ -39,11 +39,11 @@ func get(args []string) error {
 	return nil
 }
 
-func getTypewriterImports() (typewriter.ImportSpecSet, error) {
+func getTypewriterImports(c config) (typewriter.ImportSpecSet, error) {
 	imports := typewriter.NewImportSpecSet()
 
 	// check for existence of custom file
-	if src, err := os.Open(customName); err == nil {
+	if src, err := os.Open(c.customName); err == nil {
 		defer src.Close()
 
 		// custom file exists, parse its imports
@@ -52,6 +52,8 @@ func getTypewriterImports() (typewriter.ImportSpecSet, error) {
 		if err != nil {
 			return imports, err
 		}
+
+		// convert ast imports into ImportSpecs
 		for _, v := range f.Imports {
 			imp := typewriter.ImportSpec{
 				Name: v.Name.Name,
@@ -60,8 +62,8 @@ func getTypewriterImports() (typewriter.ImportSpecSet, error) {
 			imports.Add(imp)
 		}
 	} else {
-		// doesn't exist, use standard
-		imports = stdImports
+		// doesn't exist, use standard (clone it)
+		imports = stdImports.Clone()
 	}
 
 	return imports, nil

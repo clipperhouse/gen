@@ -12,14 +12,14 @@ type dummy int
 
 func TestRun(t *testing.T) {
 	// use custom name so test won't interfere with a real _gen.go
-	setCustomName("_gen_test.go")
-	defer revertCustomName()
+	c := defaultConfig
+	c.customName = "_gen_run_test.go"
 
 	sliceName := "dummy_slice_test.go"
 	fooName := "dummy_foo_test.go"
 
 	// remove existing files, start fresh
-	os.Remove(customName)
+	os.Remove(c.customName)
 	os.Remove(sliceName)
 	os.Remove(fooName)
 
@@ -42,7 +42,7 @@ func TestRun(t *testing.T) {
 	os.Remove(sliceName)
 
 	// create a custom typewriter import file
-	w, err := os.Create(customName)
+	w, err := os.Create(c.customName)
 
 	if err != nil {
 		t.Error(err)
@@ -60,7 +60,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// custom run
-	if err := runMain([]string{"gen"}); err != nil {
+	if err := run(c); err != nil {
 		t.Error(err)
 	}
 
@@ -78,5 +78,5 @@ func TestRun(t *testing.T) {
 	os.Remove(fooName)
 
 	// remove custom file
-	os.Remove(customName)
+	os.Remove(c.customName)
 }

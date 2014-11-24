@@ -7,17 +7,17 @@ import (
 	"text/template"
 )
 
-func help() error {
+func help(c config) error {
 	cmd := filepath.Base(os.Args[0])
 	spacer := strings.Repeat(" ", len(cmd))
 
 	info := helpInfo{
 		Name:       cmd,
-		CustomName: customName,
+		CustomName: c.customName,
 		Spacer:     spacer,
 	}
 
-	if err := helpTmpl.Execute(out, info); err != nil {
+	if err := helpTmpl.Execute(c.out, info); err != nil {
 		return err
 	}
 

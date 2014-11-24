@@ -7,14 +7,14 @@ import (
 	"github.com/clipperhouse/typewriter"
 )
 
-func run() error {
+func run(c config) error {
 	imports := typewriter.NewImportSpecSet(
 		typewriter.ImportSpec{Path: "fmt"},
 		typewriter.ImportSpec{Path: "os"},
 		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
 	)
 
-	return execute(runStandard, imports, runBody)
+	return execute(runStandard, c, imports, runBody)
 }
 
 func runStandard() (err error) {
