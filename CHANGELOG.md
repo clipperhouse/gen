@@ -27,9 +27,13 @@ Certain methods, such as Select and GroupBy require an additional type parameter
 
 Those type parameters are properly evaluated, and typewriters get full type information on them.
 
-####Only slice is built-in
+####slicewriter
 
-We’ve deprecated the built-in container typewriter, instead splitting it into optional Set, List and Ring typewriters. How to add optional typewriters, you ask?
+The main built-in typewriter used to be called `genwriter`, it is now called `slicewriter`. Instead of the generated slice type being called Things, it’s now called ThingSlice.
+
+[slicewriter](https://github.com/clipperhouse/slicewriter) is now the only built-in typewriter.
+
+We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlistwriter) and [Ring](https://github.com/clipperhouse/ringwriter) typewriters. How to add optional typewriters, you ask?
 
 ####gen add
 
@@ -44,13 +48,13 @@ After adding, you can mark up a type like:
 	// +gen set slice:"GroupBy[string], Select[Foo]"
 	// type MyType struct{}
 
-As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” set tag is enough.
+As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” `set` tag is enough.
 
 We deprecated the unintuitive `gen custom` command, `add` replaces it.
 
 ####Smaller interface
 
-The `TypeWriter` interface got smaller. It’s now:
+For those developing their own typewriters: the [`TypeWriter` interface](https://github.com/clipperhouse/typewriter/blob/master/typewriter.go) got smaller. It’s now:
 
 	type TypeWriter interface {
 		Name() string
@@ -58,7 +62,7 @@ The `TypeWriter` interface got smaller. It’s now:
 		Write(w io.Writer, t Type) error
 	}
 
-`Validate` is gone, it was awkward. The easy fix there was to allow Write to return an error. `WriteHeader` is gone, little use for it in practice. `WriteBody` is now simply `Write`.
+`Validate` is gone, it was awkward. The easy fix there was to allow Write to return an error. `WriteHeader` is gone, there was little use for it in practice. `WriteBody` is now simply `Write`.
 
 Let me (@clipperhouse) know if any questions.
 
