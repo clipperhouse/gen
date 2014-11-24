@@ -7,7 +7,7 @@ order: 1
 
 ### Type-driven code generation for Go
 
-**gen** is an attempt to bring some generics-like functionality to Go. It uses type annotations to add "of &lt;T&gt;" functionality to your packages.
+**gen** is an attempt to bring some generics-like functionality to Go. It uses type annotations to add "of T" functionality to your packages.
 
 gen generates code for your types, at development time, using the command line. It is not an import; the generated source becomes part of your package and takes no external dependencies.
 
@@ -37,6 +37,12 @@ You should see a new file, named `mytype_slice.go`. Have a look around.
 gen is driven by “type writers” – packages which are responsible for interpreting the annotated tags and turning them into generated code. [Learn more...](/typewriters/)
 
 ## FAQ
+
+**Why?**
+
+The goal of gen is not just to offer conveniences, but stronger typing. By generating strongly-typed methods and containers, we avoid having to use `interface{}`s, type assertions and reflection.
+
+We gain compile-time safety and (perhaps) performance.
 
 **Codegen, really?**
 

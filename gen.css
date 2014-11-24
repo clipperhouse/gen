@@ -60,3 +60,8 @@ a:hover{
 h1 > a {
 	color: inherit;
 }
+
+#links {
+	padding-top: 26px;
+	float: right;
+}
