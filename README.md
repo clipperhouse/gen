@@ -14,7 +14,7 @@ There are three big parts of `gen`.
 
 ####gen
 
-This repository. The gen package is primarily the command-line interface. Most of the work is done by the typewriter package, and individual typwriters.
+This repository. The gen package is primarily the command-line interface. Most of the work is done by the typewriter package, and individual typewriters.
 
 ####typewriter
 
