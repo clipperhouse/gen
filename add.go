@@ -35,6 +35,14 @@ func add(c config, args ...string) error {
 		imports.Add(imp)
 	}
 
+	if createCustomFile(c, imports); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createCustomFile(c config, imports typewriter.ImportSpecSet) error {
 	w, err := os.Create(c.customName)
 
 	if err != nil {

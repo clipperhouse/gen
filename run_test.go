@@ -39,24 +39,11 @@ func TestRun(t *testing.T) {
 	}
 
 	// create a custom typewriter import file
-	w, err := os.Create(c.customName)
+	imports := typewriter.NewImportSpecSet(
+		typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/foowriter"},
+	)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := pkg{
-		Name: "main",
-		Imports: typewriter.NewImportSpecSet(
-			typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/foowriter"},
-		),
-	}
-
-	if err := tmpl.Execute(w, p); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := w.Close(); err != nil {
+	if err := createCustomFile(c, imports); err != nil {
 		t.Fatal(err)
 	}
 
