@@ -19,7 +19,7 @@ func TestRun(t *testing.T) {
 	fooName := "dummy_foo_test.go"
 
 	// standard run
-	if err := runMain([]string{"gen"}); err != nil {
+	if err := run(c); err != nil {
 		t.Error(err)
 	}
 
