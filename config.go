@@ -19,5 +19,5 @@ var defaultConfig = config{
 
 // keep in sync with imports.go
 var stdImports = typewriter.NewImportSpecSet(
-	typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/slicewriter"},
+	typewriter.ImportSpec{Name: "_", Path: "github.com/clipperhouse/slice"},
 )

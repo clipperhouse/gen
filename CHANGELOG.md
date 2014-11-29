@@ -27,13 +27,13 @@ Certain methods, such as Select and GroupBy require an additional type parameter
 
 Those type parameters are properly evaluated, and typewriters get full type information on them.
 
-####slicewriter
+####slice
 
-The main built-in typewriter used to be called `genwriter`, it is now called `slicewriter`. Instead of the generated slice type being called Things, it’s now called ThingSlice.
+The main built-in typewriter used to be called `genwriter`, it is now called `slice`. Instead of the generated slice type being called Things, it’s now called ThingSlice.
 
-[slicewriter](https://github.com/clipperhouse/slicewriter) is now the only built-in typewriter.
+[slice](https://github.com/clipperhouse/slice) is now the only built-in typewriter.
 
-We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlistwriter) and [Ring](https://github.com/clipperhouse/ringwriter) typewriters. How to add optional typewriters, you ask?
+We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ringwriter) typewriters. How to add optional typewriters, you ask?
 
 ####gen add
 
