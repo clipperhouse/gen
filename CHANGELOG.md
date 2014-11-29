@@ -33,7 +33,7 @@ The main built-in typewriter used to be called `genwriter`, it is now called `sl
 
 [slice](https://github.com/clipperhouse/slice) is now the only built-in typewriter.
 
-We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ringwriter) typewriters. How to add optional typewriters, you ask?
+We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ring) typewriters. How to add optional typewriters, you ask?
 
 ####gen add
 
