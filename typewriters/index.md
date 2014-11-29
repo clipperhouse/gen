@@ -25,9 +25,9 @@ To view the currently-available typewriters, `cd` into your package and type:
 
 TypeWriters can be implemented by third-parties and used at "gen time". To use a third-party typewriter, `cd` into the root of your package and type (for example):
 
-	gen add github.com/clipperhouse/setwriter
+	gen add github.com/clipperhouse/set
 
-This will create a `_gen.go` file. Have a look at it -- it should contain imports for the built-in slicewriter (above) and your new typewriter.
+This will create a `_gen.go` file. Have a look at it -- it should contain imports for the built-in slice (above) and your new typewriter.
 
 Confirm it by typing:
 
@@ -64,7 +64,7 @@ You can create your own typewriter by implementing the [TypeWriter interface](ht
 
 Typewriters follow the pattern of formats in the [image package](http://blog.golang.org/go-image-package#TOC_5.) of Go's standard library. They are registered via an `init()` method.
 
-The best thing to do is have a look at an existing implementation, [Set](https://github.com/clipperhouse/setwriter) is straightforward.
+The best thing to do is have a look at an existing implementation, [Set](https://github.com/clipperhouse/set) is straightforward.
 
 By convention, the name of the typewriter is the name of the tag that it uses. Type `gen list` to see the name of the typewriters available in your current package.
 

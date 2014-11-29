@@ -13,7 +13,7 @@ Here are a few optional typewriters I've created. They are not built into `gen`,
 
 To add:
 
-	gen add github.com/clipperhouse/setwriter
+	gen add github.com/clipperhouse/set
 
 To use:
 
@@ -28,7 +28,7 @@ The implementation is based on [github.com/deckarep/golang-set](https://github.c
 
 To add:
 
-	gen add github.com/clipperhouse/listwriter
+	gen add github.com/clipperhouse/linkedlist
 
 To use:
 
@@ -41,7 +41,7 @@ Implements a strongly-typed, doubly-linked list, based on [golang.org/pkg/contai
 
 To add:
 
-	gen add github.com/clipperhouse/ringwriter
+	gen add github.com/clipperhouse/ring
 
 To use:
 
