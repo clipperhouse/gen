@@ -1,8 +1,40 @@
-###24 Nov 2014 (v4)
+###30 Nov 2014 (v4)
 
 To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
 
 This release has several substantial changes.
+
+####Type parameters
+
+Tags now have support for type parameters, for example:
+
+	// +gen foo:"Bar[qux], Qaz[thing, stuff]"
+	// type MyType struct{}
+	
+Those type paramters (qux, thing, stuff) are properly evaluated as types. Which not only increases safety, but gives more information to typewriters.
+
+####Type constraints
+
+Speaking of above, types are evaluated for Numeric, Ordered and Comparable. Templates, in turn, can have type constraints.
+
+So, you can declare your Sum template only to be applicable to Numeric types, and your Set to Comparable types.
+
+####gen add
+
+Third-party typewriters are added to your package using a new command, `add`. It looks like this:
+
+	gen add github.com/clipperhouse/setwriter
+	
+That’s a plain old Go import path.
+
+After adding, you can mark up a type like:
+
+	// +gen set slice:"GroupBy[string], Select[Foo]"
+	// type MyType struct{}
+
+As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” `set` tag is enough.
+
+We deprecated the unintuitive `gen custom` command, `add` replaces it.
 
 ####Explcitness
 
@@ -33,24 +65,7 @@ The main built-in typewriter used to be called `genwriter`, it is now called `sl
 
 [slice](https://github.com/clipperhouse/slice) is now the only built-in typewriter.
 
-We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/setwriter), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ring) typewriters. How to add optional typewriters, you ask?
-
-####gen add
-
-Third-party typewriters are added to your package using a new command, `add`. It looks like this:
-
-	gen add github.com/clipperhouse/setwriter
-	
-That’s a plain old Go import path.
-
-After adding, you can mark up a type like:
-
-	// +gen set slice:"GroupBy[string], Select[Foo]"
-	// type MyType struct{}
-
-As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” `set` tag is enough.
-
-We deprecated the unintuitive `gen custom` command, `add` replaces it.
+We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/set), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ring) typewriters. How to add optional typewriters, you ask?
 
 ####Smaller interface
 
