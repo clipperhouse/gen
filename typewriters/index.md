@@ -13,7 +13,7 @@ gen includes one built-in TypeWriter:
 
 #### `slice`
 
-The `slice` typewriter generates functional convenience methods that will look familiar to users of C#'s LINQ or JavaScript's Array methods. It is intended to save you some loops, using a "pass a function" pattern. It offers grouping, filtering, ad-hoc sorts and projections. [Details and docs...](/slice)
+The `slice` typewriter generates functional convenience methods that will look familiar to users of C#'s LINQ or JavaScript's Array methods. It is intended to save you some loops, using a "pass a function" pattern. It offers grouping, filtering, ad-hoc sorts and projections. [Details and docs...](../slice)
 
 ### Listing typewriters
 

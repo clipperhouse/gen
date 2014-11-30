@@ -34,7 +34,7 @@ You should see a new file, named `mytype_slice.go`. Have a look around.
 
 ## TypeWriters
 
-gen is driven by “type writers” – packages which are responsible for interpreting the annotated tags and turning them into generated code. [Learn more...](/typewriters/)
+gen is driven by “type writers” – packages which are responsible for interpreting the annotated tags and turning them into generated code. [Learn more...](typewriters)
 
 ## FAQ
 
