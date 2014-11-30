@@ -7,17 +7,17 @@ import (
 	"text/template"
 )
 
-func help() error {
+func help(c config) error {
 	cmd := filepath.Base(os.Args[0])
 	spacer := strings.Repeat(" ", len(cmd))
 
 	info := helpInfo{
 		Name:       cmd,
-		CustomName: customName,
+		CustomName: c.customName,
 		Spacer:     spacer,
 	}
 
-	if err := helpTmpl.Execute(out, info); err != nil {
+	if err := helpTmpl.Execute(c.out, info); err != nil {
 		return err
 	}
 
@@ -34,8 +34,7 @@ Usage:
   {{.Name}} get       Download and install typewriters (standard or custom). 
   {{.Spacer}}           Optional flags from go get: [-d] [-fix] [-t] [-u].
   {{.Name}} list      List available typewriters (standard or custom).
-  {{.Name}} custom    Create a standard {{.CustomName}} file for importing
-  {{.Spacer}}           custom typewriters.
+  {{.Name}} add       Add a third-party typewriter to the current package.
   {{.Name}} help      Print usage.
 
 Further details are available at http://clipperhouse.github.io/gen

@@ -1,6 +1,4 @@
 package main
 
-import (
-	_ "github.com/clipperhouse/gen/typewriters/container"
-	_ "github.com/clipperhouse/gen/typewriters/genwriter"
-)
+// represents the default "built-in" typewriters
+import _ "github.com/clipperhouse/slice"

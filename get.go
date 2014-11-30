@@ -6,36 +6,44 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 // get runs `go get` for required typewriters, either default or specified in _gen.go
-func get(args []string) error {
-	imports, err := getTypewriterImports()
+func get(c config, args ...string) error {
+	imports, err := getTypewriterImports(c)
 
 	if err != nil {
 		return err
 	}
 
+	// we just want the paths
+	var imps []string
+	for imp := range imports {
+		imps = append(imps, imp.Path)
+	}
+
 	get := []string{"get"}
 	get = append(get, args...)
-	get = append(get, imports...)
+	get = append(get, imps...)
 
 	cmd := exec.Command("go", get...)
-	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = c.out
+	cmd.Stderr = c.out
 
 	if err := cmd.Run(); err != nil {
-		return nil
+		return err
 	}
 
 	return nil
 }
 
-func getTypewriterImports() ([]string, error) {
-	imports := make([]string, 0)
+func getTypewriterImports(c config) (typewriter.ImportSpecSet, error) {
+	imports := typewriter.NewImportSpecSet()
 
 	// check for existence of custom file
-	if src, err := os.Open(customName); err == nil {
+	if src, err := os.Open(c.customName); err == nil {
 		defer src.Close()
 
 		// custom file exists, parse its imports
@@ -44,18 +52,18 @@ func getTypewriterImports() ([]string, error) {
 		if err != nil {
 			return imports, err
 		}
+
+		// convert ast imports into ImportSpecs
 		for _, v := range f.Imports {
-			imports = append(imports, v.Path.Value)
+			imp := typewriter.ImportSpec{
+				Name: v.Name.Name,
+				Path: strings.Trim(v.Path.Value, `"`), // lose the quotes
+			}
+			imports.Add(imp)
 		}
 	} else {
-		// doesn't exist, use standard
-		imports = append(imports, stdImports...)
-	}
-
-	// clean `em up
-	// TODO: a better way than strings to express imports
-	for i := range imports {
-		imports[i] = strings.Trim(imports[i], `_ "`)
+		// doesn't exist, use standard (clone it)
+		imports = stdImports.Clone()
 	}
 
 	return imports, nil

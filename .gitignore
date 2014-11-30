@@ -5,3 +5,5 @@ coverage.out
 *_bar_test.go
 *_foo.go
 *_foo_test.go
+
+_site/*

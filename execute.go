@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"text/template"
+
+	"github.com/clipperhouse/typewriter"
 )
 
 // execute runs a gen command by first determining whether a custom imports file (typically _gen.go) exists
@@ -14,22 +16,22 @@ import (
 // If no custom file exists, it executes the passed 'standard' func.
 //
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
-func execute(standard func() error, imports []string, body string) error {
-	if src, err := os.Open(customName); err == nil {
-		defer src.Close()
+func execute(standard func() error, c config, imports typewriter.ImportSpecSet, body string) error {
+	if importsSrc, err := os.Open(c.customName); err == nil {
+		defer importsSrc.Close()
 
 		// custom imports file exists, use it
-		return executeCustom(src, imports, body)
-	} else {
-		// do it the regular way
-		return standard()
+		return executeCustom(importsSrc, c, imports, body)
 	}
+
+	// do it the regular way
+	return standard()
 }
 
-// executeCustom creates a temp directory, copies src into it and generates a main() using the passed imports and body.
+// executeCustom creates a temp directory, copies importsSrc into it and generates a main() using the passed imports and body.
 //
 // `go run` is then called on those files via os.Command.
-func executeCustom(src io.Reader, imports []string, body string) error {
+func executeCustom(importsSrc io.Reader, c config, imports typewriter.ImportSpecSet, body string) error {
 	temp, err := getTempDir()
 	if err != nil {
 		return err
@@ -37,13 +39,13 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	defer os.RemoveAll(temp)
 
 	// set up imports file containing the custom typewriters (from _gen.go)
-	imps, err := os.Create(filepath.Join(temp, "imports.go"))
+	importsDst, err := os.Create(filepath.Join(temp, "imports.go"))
 	if err != nil {
 		return err
 	}
-	defer imps.Close()
+	defer importsDst.Close()
 
-	io.Copy(imps, src)
+	io.Copy(importsDst, importsSrc)
 
 	// set up main to be run
 	main, err := os.Create(filepath.Join(temp, "main.go"))
@@ -68,9 +70,9 @@ func executeCustom(src io.Reader, imports []string, body string) error {
 	}
 
 	// call `go run` on these files & send back output/err
-	cmd := exec.Command("go", "run", main.Name(), imps.Name())
-	cmd.Stdout = out
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command("go", "run", main.Name(), importsDst.Name())
+	cmd.Stdout = c.out
+	cmd.Stderr = c.out
 
 	if err := cmd.Run(); err != nil {
 		return err
@@ -89,7 +91,7 @@ func getTempDir() (string, error) {
 
 var tmpl = template.Must(template.New("package").Parse(`package {{.Name}}
 {{if gt (len .Imports) 0}}
-import ({{range .Imports}}
-	{{.}}{{end}}
+import ({{range .Imports.ToSlice}}
+	{{.Name}} "{{.Path}}"{{end}}
 )
 {{end}}`))

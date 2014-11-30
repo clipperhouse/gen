@@ -1,11 +1,8 @@
 package main
 
-var stdImports = []string{
-	`_ "github.com/clipperhouse/gen/typewriters/container"`,
-	`_ "github.com/clipperhouse/gen/typewriters/genwriter"`,
-}
+import "github.com/clipperhouse/typewriter"
 
 type pkg struct {
 	Name    string
-	Imports []string
+	Imports typewriter.ImportSpecSet
 }

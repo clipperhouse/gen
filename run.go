@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/clipperhouse/gen/typewriter"
+	"github.com/clipperhouse/typewriter"
 )
 
-func run() error {
-	imports := []string{
-		`"fmt"`,
-		`"os"`,
-		`"github.com/clipperhouse/gen/typewriter"`,
-	}
+func run(c config) error {
+	imports := typewriter.NewImportSpecSet(
+		typewriter.ImportSpec{Path: "fmt"},
+		typewriter.ImportSpec{Path: "os"},
+		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
+	)
 
-	return execute(runStandard, imports, runBody)
+	return execute(runStandard, c, imports, runBody)
 }
 
 func runStandard() (err error) {
@@ -24,7 +24,17 @@ func runStandard() (err error) {
 		return err
 	}
 
-	if len(app.Types) == 0 {
+	if len(app.Packages) == 0 {
+		return fmt.Errorf("No packages were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
+	}
+
+	found := false
+
+	for _, p := range app.Packages {
+		found = found || len(p.Types) > 0
+	}
+
+	if !found {
 		return fmt.Errorf("No types marked with +gen were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
@@ -32,9 +42,7 @@ func runStandard() (err error) {
 		return fmt.Errorf("No typewriters were imported. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
-	err = app.WriteAll()
-
-	if err != nil {
+	if _, err := app.WriteAll(); err != nil {
 		return err
 	}
 
@@ -56,7 +64,17 @@ func gen() error {
 		return err
 	}
 
-	if len(app.Types) == 0 {
+	if len(app.Packages) == 0 {
+		return fmt.Errorf("No packages were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
+	}
+
+	found := false
+
+	for _, p := range app.Packages {
+		found = found || len(p.Types) > 0
+	}
+
+	if !found {
 		return fmt.Errorf("No types marked with +gen were found. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
@@ -64,7 +82,7 @@ func gen() error {
 		return fmt.Errorf("No typewriters were imported. See http://clipperhouse.github.io/gen to get started, or type %s help.", os.Args[0])
 	}
 
-	if err := app.WriteAll(); err != nil {
+	if _, err := app.WriteAll(); err != nil {
 		return err
 	}
 
