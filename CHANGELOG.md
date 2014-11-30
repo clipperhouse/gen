@@ -1,6 +1,6 @@
 ###30 Nov 2014 (v4)
 
-To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
+To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see usage.
 
 This release has several substantial changes.
 
@@ -65,7 +65,11 @@ The main built-in typewriter used to be called `genwriter`, it is now called `sl
 
 [slice](https://github.com/clipperhouse/slice) is now the only built-in typewriter.
 
-We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/set), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ring) typewriters. How to add optional typewriters, you ask?
+We’ve deprecated the built-in container typewriter, instead splitting it into optional [Set](https://github.com/clipperhouse/set), [List](https://github.com/clipperhouse/linkedlist) and [Ring](https://github.com/clipperhouse/ring) typewriters.
+
+You can add them using the `add` command described above:
+
+	gen add github.com/clipperhouse/linkedlist
 
 ####Smaller interface
 
@@ -78,6 +82,8 @@ For those developing their own typewriters: the [`TypeWriter` interface](https:/
 	}
 
 `Validate` is gone, it was awkward. The easy fix there was to allow Write to return an error. `WriteHeader` is gone, there was little use for it in practice. `WriteBody` is now simply `Write`.
+
+We also run [goimports](https://godoc.org/golang.org/x/tools/imports) on generated code, so if your typewriter only uses the standard library, you might not need to specify anything for Imports() -- they’ll automagically be added to the generated source.
 
 Let me (@clipperhouse) know if any questions.
 
