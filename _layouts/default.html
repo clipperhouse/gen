@@ -22,7 +22,72 @@
 			<tbody>
 				<tr>
 					<td>
-						<div class="nav">{% include nav.html %}</div>
+						<div class="nav">
+							<h4><a href="{{ relative }}#">home</a></h4>
+
+							<p><a href="{{ relative }}#quick-start">Quick start</a></p>
+
+							<p><a href="{{ relative }}#faq">FAQ</a></p>
+
+							<h4><a href="{{ relative }}typewriters/#">typewriters</a></h4>
+
+							<p><a href="{{ relative }}typewriters/#listing-typewriters">Listing</a></p>
+
+							<p><a href="{{ relative }}typewriters/#adding-third-party-typewriters">Adding</a></p>
+
+							<p><a href="{{ relative }}typewriters/#implementing-typewriters">Implementing</a></p>
+
+							<h4><a href="{{ relative }}slice/#">slice</a></h4>
+
+							<p><a href="{{ relative }}slice/#aggregatet">Aggregate[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#all">All</a></p>
+
+							<p><a href="{{ relative }}slice/#any">Any</a></p>
+
+							<p><a href="{{ relative }}slice/#average">Average</a></p>
+
+							<p><a href="{{ relative }}slice/#averaget">Average[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#count">Count</a></p>
+
+							<p><a href="{{ relative }}slice/#distinct">Distinct</a></p>
+
+							<p><a href="{{ relative }}slice/#distinctby">DistinctBy</a></p>
+
+							<p><a href="{{ relative }}slice/#first">First</a></p>
+
+							<p><a href="{{ relative }}slice/#groupbyt">GroupBy[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#max">Max</a></p>
+
+							<p><a href="{{ relative }}slice/#maxt">Max[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#maxby">MaxBy</a></p>
+
+							<p><a href="{{ relative }}slice/#min">Min</a></p>
+
+							<p><a href="{{ relative }}slice/#mint">Min[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#minby">MinBy</a></p>
+
+							<p><a href="{{ relative }}slice/#selectt">Select[T]</a></p>
+
+							<p><a href="{{ relative }}slice/#sort">Sort</a></p>
+
+							<p><a href="{{ relative }}slice/#sortby">SortBy</a></p>
+
+							<p><a href="{{ relative }}slice/#where">Where</a></p>
+
+							<h4><a href="{{ relative }}optional/#">optional</a></h4>
+
+							<p><a href="{{ relative }}optional/#set">Set</a></p>
+
+							<p><a href="{{ relative }}optional/#list">List</a></p>
+
+							<p><a href="{{ relative }}optional/#ring">Ring</a></p>
+
+						</div>
 					</td>
 					<td>
 						<p id="links">
@@ -30,7 +95,7 @@
 							·
 							<a href="https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md">changelog</a>
 						</p>
-						<h1><a href="/">gen</a></h1>
+						<h1><a href="{{ relative }}">gen</a></h1>
 						{{ content }}
 					</td>
 				</tr>
