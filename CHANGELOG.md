@@ -11,13 +11,13 @@ Tags now have support for type parameters, for example:
 	// +gen foo:"Bar[qux], Qaz[thing, stuff]"
 	type MyType struct{}
 	
-Those type paramters (qux, thing, stuff) are properly evaluated as types. Which not only increases safety, but gives more information to typewriters.
+Those type parameters (qux, thing, stuff) are properly evaluated as types, and passed to your typewriters.
 
 ####Type constraints
 
 Speaking of above, types are evaluated for Numeric, Ordered and Comparable. Templates, in turn, can have type constraints.
 
-So, you can declare your Sum template only to be applicable to Numeric types, and your Set to Comparable types.
+For example, you can declare your Sum template only to be applicable to Numeric types, and your Set to Comparable types.
 
 ####gen add
 
