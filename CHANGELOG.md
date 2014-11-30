@@ -9,7 +9,7 @@ This release has several substantial changes.
 Tags now have support for type parameters, for example:
 
 	// +gen foo:"Bar[qux], Qaz[thing, stuff]"
-	// type MyType struct{}
+	type MyType struct{}
 	
 Those type paramters (qux, thing, stuff) are properly evaluated as types. Which not only increases safety, but gives more information to typewriters.
 
@@ -30,7 +30,7 @@ That’s a plain old Go import path.
 After adding, you can mark up a type like:
 
 	// +gen set slice:"GroupBy[string], Select[Foo]"
-	// type MyType struct{}
+	type MyType struct{}
 
 As always, it’s up to the third-party typewriter to determine behavior. In this case, a “naked” `set` tag is enough.
 
@@ -41,12 +41,12 @@ We deprecated the unintuitive `gen custom` command, `add` replaces it.
 Previous versions of gen would generate a dozen or so LINQ-style slice methods simply by marking up:
 
 	// +gen
-	// type MyType struct{}
+	type MyType struct{}
 	
 We’ve opted for explicitness moving forward – in the case of slices, you’ll write this instead:
 
 	// +gen slice:"Where, SortBy, Any"
-	// type MyType struct{}
+	type MyType struct{}
 
 In other words, only the methods you want.
 
@@ -55,7 +55,7 @@ In other words, only the methods you want.
 Certain methods, such as Select and GroupBy require an additional type parameter. I won’t bore you with the convoluted old way. Now it’s:
 
 	// +gen slice:"GroupBy[string], Select[Foo]"
-	// type MyType struct{}
+	type MyType struct{}
 
 Those type parameters are properly evaluated, and typewriters get full type information on them.
 
