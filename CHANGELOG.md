@@ -23,7 +23,7 @@ So, you can declare your Sum template only to be applicable to Numeric types, an
 
 Third-party typewriters are added to your package using a new command, `add`. It looks like this:
 
-	gen add github.com/clipperhouse/setwriter
+	gen add github.com/clipperhouse/set
 	
 That’s a plain old Go import path.
 
