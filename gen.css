@@ -15,10 +15,6 @@ td:first-child {
 .nav {
 	padding-top: 1.4em;
 	padding-bottom: 2em;
-	position: fixed;
-	overflow: scroll;
-	height: 100%;
-	width: 100%;
 }
 
 .nav > h4 {
