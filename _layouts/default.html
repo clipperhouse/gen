@@ -3,9 +3,12 @@
 	<head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=600, initial-scale=.5">
-	<link rel="stylesheet" href="/bootstrap.min.css">
-	<link rel="stylesheet" href="/gen.css">
-	<link rel="icon" type="image/png" href="/gopher.png">
+	{% assign lvl = page.url | append:'X' | split:'/' | size %}
+	{% capture relative %}{% for i in (3..lvl) %}../{% endfor %}{% endcapture %}
+
+	<link rel="stylesheet" href="{{ relative }}bootstrap.min.css">
+	<link rel="stylesheet" href="{{ relative }}gen.css">
+	<link rel="icon" type="image/png" href="{{ relative }}gopher.png">
 	<title>
 		gen · type-driven code generation for Go
 		{% if page.title != "home" %}
