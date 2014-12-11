@@ -1,6 +1,6 @@
 ###30 Nov 2014 (v4)
 
-To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see usage.
+To get the latest: `go get github.com/clipperhouse/gen`. Type `gen help` to see usage.
 
 This release has several substantial changes.
 
