@@ -2,7 +2,7 @@
 
 To get the latest: `go get github.com/clipperhouse/gen`. Type `gen help` to see usage.
 
-(Because the go.tools package path has changed, you may need to delete the code.google.com folder from your $GOPATH/src folder.)
+(Because the go.tools import path has changed, you may see import errors. You may wish to delete the code.google.com folder from your $GOPATH/src and maybe from /pkg too. Heck, go ahead delete your $GOPATH/src/github.com/clipperhouse folder to start clean.)
 
 This release has several substantial changes.
 
