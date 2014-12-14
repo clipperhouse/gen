@@ -106,7 +106,13 @@
 		<link rel="stylesheet" href="{{ relative }}github.css">
 		<script type="text/javascript">
 			$(function() {
-				$("code").addClass("go");
+				$("pre > code").each(function(){
+					var el = $(this);
+					var text = el.text();
+					var isGo = text.indexOf('//') > -1 || text.indexOf('func') > -1;
+					var cls = isGo ? 'go' : 'nohighlight';
+					el.addClass(cls);
+				});
 				hljs.initHighlightingOnLoad();
 			});
 		</script>
