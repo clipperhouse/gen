@@ -39,7 +39,6 @@ func watch(c config) error {
 				}
 			case loopErr = <-watcher.Errors:
 				done <- struct{}{}
-				break Loop
 			case <-tick:
 				if len(events) == 0 {
 					continue
