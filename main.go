@@ -45,6 +45,8 @@ func runMain(args []string) error {
 		return get(c, tail...)
 	case "list":
 		return list(c)
+	case "watch":
+		return watch(c)
 	default:
 		return help(c)
 	}
