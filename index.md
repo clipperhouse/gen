@@ -36,6 +36,19 @@ You should see a new file, named `mytype_slice.go`. Have a look around.
 
 gen is driven by “type writers” – packages which are responsible for interpreting the annotated tags and turning them into generated code. [Learn more...](typewriters)
 
+## Usage
+
+Type `gen help`:
+
+	gen           Generate files for types marked with +gen.
+	gen list      List available typewriters.
+	gen add       Add a third-party typewriter to the current package.
+	gen get       Download and install imported typewriters. 
+	              Optional flags from go get: [-d] [-fix] [-t] [-u].
+	gen watch     Watch the current directory for file changes, run gen
+	              when detected. 
+	gen help      Print usage.
+
 ## FAQ
 
 **Why?**
