@@ -16,7 +16,10 @@ func watch(c config) error {
 	defer watcher.Close()
 
 	const dir = "./"
-	watcher.Add(dir)
+
+	if err := watcher.Add(dir); err != nil {
+		return err
+	}
 
 	interval := 1 * time.Second
 	tick := time.Tick(interval)
@@ -43,14 +46,30 @@ func watch(c config) error {
 				if len(events) == 0 {
 					continue
 				}
+
 				// stop watching while gen'ing files
-				watcher.Remove(dir)
+				loopErr = watcher.Remove(dir)
+				if loopErr != nil {
+					done <- struct{}{}
+					break Loop
+				}
+
 				// gen the files
-				run(c)
+				loopErr = run(c)
+				if loopErr != nil {
+					done <- struct{}{}
+					break Loop
+				}
+
 				// clear the buffer
 				events = make([]fsnotify.Event, 0)
+
 				// resume watching
-				watcher.Add(dir)
+				loopErr = watcher.Add(dir)
+				if loopErr != nil {
+					done <- struct{}{}
+					break Loop
+				}
 			case <-done:
 				break Loop
 			}
