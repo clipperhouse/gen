@@ -13,10 +13,10 @@ func watch(c config) error {
 	if err != nil {
 		return err
 	}
+	defer watcher.Close()
 
 	const dir = "./"
 	watcher.Add(dir)
-	defer watcher.Close()
 
 	interval := 1 * time.Second
 	tick := time.Tick(interval)
