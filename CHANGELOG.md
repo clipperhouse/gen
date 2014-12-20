@@ -38,6 +38,10 @@ As always, it’s up to the third-party typewriter to determine behavior. In thi
 
 We deprecated the unintuitive `gen custom` command, `add` replaces it.
 
+####gen watch
+
+...will watch the current directory and `gen` on file changes.
+
 ####Explcitness
 
 Previous versions of gen would generate a dozen or so LINQ-style slice methods simply by marking up:
