@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-fsnotify/fsnotify"
+	"github.com/clipperhouse/fsnotify"
 )
 
 func watch(c config) error {
@@ -41,7 +41,7 @@ func watch(c config) error {
 					events = append(events, event)
 				}
 			case loopErr = <-watcher.Errors:
-				done <- struct{}{}
+				break Loop
 			case <-tick:
 				if len(events) == 0 {
 					continue
@@ -50,14 +50,12 @@ func watch(c config) error {
 				// stop watching while gen'ing files
 				loopErr = watcher.Remove(dir)
 				if loopErr != nil {
-					done <- struct{}{}
 					break Loop
 				}
 
 				// gen the files
 				loopErr = run(c)
 				if loopErr != nil {
-					done <- struct{}{}
 					break Loop
 				}
 
@@ -67,13 +65,11 @@ func watch(c config) error {
 				// resume watching
 				loopErr = watcher.Add(dir)
 				if loopErr != nil {
-					done <- struct{}{}
 					break Loop
 				}
-			case <-done:
-				break Loop
 			}
 		}
+		done <- struct{}{}
 	}()
 
 	<-done
