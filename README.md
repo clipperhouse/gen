@@ -24,6 +24,6 @@ The [typewriter package](https://github.com/clipperhouse/typewriter) is where mo
 
 Typewriters are where templates and logic live for generating code. Here’s [set](https://github.com/clipperhouse/set), which will make a lovely Set container for your type. Here’s [slice](https://github.com/clipperhouse/slice), which provides the built-in LINQ-like functionality.
 
-Third-party typewriters are added easily by the end user. You publish them as Go packages for import. [Learn more].
+Third-party typewriters are added easily by the end user. You publish them as Go packages for import. [Learn more...](https://clipperhouse.github.io/gen/typewriters/)
 
 We’d love to see typewriter packages for things like strongly-typed JSON serialization, `Queue`s, `Pool`s or other containers. Anything “of T” is a candidate for a typewriter.
