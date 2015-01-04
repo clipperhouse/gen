@@ -52,9 +52,9 @@ To **remove** a typewriter, simply remove the import from the `_gen.go` file.
 
 ### Implementing TypeWriters
 
-You can create your own typewriter by implementing the [TypeWriter interface](http://godoc.org/github.com/clipperhouse/typewriter#TypeWriter).
+You can create your own typewriter by implementing [typewriter.Interface](http://godoc.org/github.com/clipperhouse/typewriter#Interface).
 
-	type TypeWriter interface {
+	type Interface interface {
 		Name() string
 		// Imports is a slice of imports required for the type; each will be written into the imports declaration.
 		Imports(t Type) []ImportSpec
