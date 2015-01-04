@@ -21,8 +21,8 @@ func TestList(t *testing.T) {
 		t.Error(err)
 	}
 
-	// 1 line for title + 1 standard typewriter (see imports.go)
-	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 2 {
+	// 1 line for title + 2 standard typewriters (see imports.go)
+	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 3 {
 		t.Errorf("standard list should output 2 lines, got %v", lines)
 	}
 
