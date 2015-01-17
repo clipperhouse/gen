@@ -8,6 +8,8 @@ It also offers third-party, runtime extensibility via [typewriters](https://gith
 
 [Changelog](https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md)
 
+[Hey, a video](https://www.youtube.com/watch?v=KY8OXFi3CDU)
+
 ###Contributing
 
 There are three big parts of `gen`.
