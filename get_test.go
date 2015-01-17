@@ -20,8 +20,8 @@ func TestGet(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(imps) != 1 {
-		t.Errorf("should return 1 import, got %v", len(imps))
+	if len(imps) != 2 {
+		t.Errorf("should return 2 imports, got %v", len(imps))
 	}
 
 	if err := add(c, "github.com/clipperhouse/foowriter", "github.com/clipperhouse/setwriter"); err != nil {
@@ -35,8 +35,8 @@ func TestGet(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(imps2) != 3 {
-		t.Errorf("should return 3 custom imports, got %v", len(imps2))
+	if len(imps2) != 4 {
+		t.Errorf("should return 4 custom imports, got %v", len(imps2))
 	}
 
 	// custom get
