@@ -484,6 +484,23 @@ Example:
 
 	players.SelectInt(points) // => [450, 100, 200]
 
+### Shuffle
+
+Returns a new slice with the elements in a random order. Comparable to underscore’s shuffle.
+
+Signature:
+
+	func (ExampleSlice) Shuffle() ExampleSlice
+
+Example:
+
+	// +gen slice:"Shuffle"
+	type Rating int
+
+	ratings := RatingSlice{1, 2, 3, 4, 5, 6}
+
+	ratings.Shuffle() // => {3, 6, 1, 2, 4, 5}
+
 ### Sort
 
 Returns a new slice whose elements are sorted.
@@ -540,23 +557,6 @@ Example:
 	movies.SortBy(yearThenTitle) // => [{"Fargo", 1996}, "Independence Day", 1996}, {"Iron Man", 2008}, {"WALL-E", 2008}, {"Django Unchained", 2012}]
 
 `SortByDesc` and `IsSortedBy(Desc)` are also available, and should be self-explanatory.
-
-### Shuffle
-
-Returns a new slice with the elements in a random order.
-
-Signature:
-
-	func (ExampleSlice) Shuffle() ExampleSlice
-
-Example:
-
-	// +gen slice:"Shuffle"
-	type Rating int
-
-	ratings := RatingSlice{1, 2, 3, 4, 5, 6}
-
-	ratings.Shuffle() // => {3, 6, 1, 2, 4, 5}
 
 ### Where
 
