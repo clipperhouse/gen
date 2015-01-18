@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -56,7 +57,7 @@ func watch(c config) error {
 				// gen the files
 				loopErr = run(c)
 				if loopErr != nil {
-					break Loop
+					fmt.Fprintln(c.out, loopErr)
 				}
 
 				// clear the buffer
