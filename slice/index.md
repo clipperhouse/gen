@@ -541,6 +541,23 @@ Example:
 
 `SortByDesc` and `IsSortedBy(Desc)` are also available, and should be self-explanatory.
 
+### Shuffle
+
+Returns a new slice with the elements in a random order.
+
+Signature:
+
+	func (ExampleSlice) Shuffle() ExampleSlice
+
+Example:
+
+	// +gen slice:"Shuffle"
+	type Rating int
+
+	ratings := RatingSlice{1, 2, 3, 4, 5, 6}
+
+	ratings.Shuffle() // => {3, 6, 1, 2, 4, 5}
+
 ### Where
 
 Returns a new slice whose elements return true for passed func. Comparable to LINQ’s [Where](http://msdn.microsoft.com/en-us/library/bb534803(v=vs.110).aspx) and JavaScript’s [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter).
