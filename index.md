@@ -67,6 +67,10 @@ You get all the usual compiler checks and optimizations, of course, so gen won't
 
 gen is a *tool* that helps the developer produce code on their local workstation, alongside their text editor and utilities.
 
+**Is there a video?**
+
+[Glad you asked, yes.](https://www.youtube.com/watch?v=KY8OXFi3CDU)
+
 **Wait, is this `go generate`?**
 
 No, [that's](https://docs.google.com/document/d/1V03LUfjSADDooDMhe-_K59EgpTEm3V8uvQRuNMAEnjg/edit) different (and very cool). `go generate` will run any command and is intended to obviate `make` files and such. `gen` is specifically about codegen for types.
