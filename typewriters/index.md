@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "typewriter"
+title: "typewriters"
 path: "/typewriter"
 order: 2
 ---
