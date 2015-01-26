@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "gen"
+title: "home"
 path: "/"
 order: 1
 ---
