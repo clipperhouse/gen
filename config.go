@@ -10,11 +10,13 @@ import (
 type config struct {
 	out        io.Writer
 	customName string
+	*typewriter.Config
 }
 
 var defaultConfig = config{
 	out:        os.Stdout,
 	customName: "_gen.go",
+	Config:     &typewriter.Config{},
 }
 
 // keep in sync with imports.go

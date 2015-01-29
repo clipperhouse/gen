@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 )
@@ -26,16 +27,17 @@ var exitStatusMsg = regexp.MustCompile(`^exit status \d+$`)
 func runMain(args []string) error {
 	c := defaultConfig
 
-	if len(args) == 1 {
-		// simply typed 'gen'; run is the default command
-		return run(c)
+	cmd, force, tail, err := parseArgs(args)
+
+	if err != nil {
+		return err
 	}
 
-	cmd := args[1]
+	c.IgnoreTypeCheckErrors = force
 
-	var tail []string
-	if len(args) > 2 {
-		tail = args[2:]
+	if len(cmd) == 0 {
+		// simply typed 'gen'; run is the default command
+		return run(c)
 	}
 
 	switch cmd {
@@ -50,4 +52,45 @@ func runMain(args []string) error {
 	default:
 		return help(c)
 	}
+}
+
+var s = struct{}{}
+
+var cmds = map[string]struct{}{
+	"add":   s,
+	"get":   s,
+	"help":  s,
+	"list":  s,
+	"watch": s,
+}
+
+func parseArgs(args []string) (cmd string, force bool, tail []string, err error) {
+	for _, a := range args[1:] { // arg[0] is 'gen'
+		if _, ok := cmds[a]; ok {
+			if len(cmd) > 0 {
+				err = fmt.Errorf("more than one command specified; type gen help for usage")
+				break
+			}
+			cmd = a
+			continue
+		}
+		if a == "-f" {
+			force = true
+			continue
+		}
+		tail = append(tail, a)
+	}
+
+	// tail is only valid on add & get; otherwise an error
+	if len(tail) > 0 && cmd != "add" && cmd != "get" {
+		err = fmt.Errorf("unknown command(s) %v", tail)
+		tail = []string{}
+	}
+
+	// force flag is only valid with run & watch
+	if force && cmd != "" && cmd != "watch" {
+		err = fmt.Errorf("-f flag is not valid with %q", cmd)
+	}
+
+	return cmd, force, tail, err
 }
