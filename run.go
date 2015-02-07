@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/clipperhouse/typewriter"
 )
@@ -11,14 +12,15 @@ func run(c config) error {
 	imports := typewriter.NewImportSpecSet(
 		typewriter.ImportSpec{Path: "fmt"},
 		typewriter.ImportSpec{Path: "os"},
+		typewriter.ImportSpec{Path: "regexp"},
 		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
 	)
 
-	return execute(runStandard, c, imports, runBody)
+	return execute(runStandard, c, imports, runTmpl)
 }
 
-func runStandard() (err error) {
-	app, err := typewriter.NewApp("+gen")
+func runStandard(c config) (err error) {
+	app, err := c.Config.NewApp("+gen")
 
 	if err != nil {
 		return err
@@ -49,16 +51,28 @@ func runStandard() (err error) {
 	return nil
 }
 
-const runBody string = `
+var runTmpl = template.Must(template.New("run").Parse(`
+
+var exitStatusMsg = regexp.MustCompile("^exit status \\d+$")
+
 func main() {
-	if err := gen(); err != nil {
-		os.Stderr.WriteString(err.Error() + "\n")
-		os.Exit(1)
-	}
+	var err error
+
+	defer func() {
+		if err != nil {
+			if !exitStatusMsg.MatchString(err.Error()) {
+				os.Stderr.WriteString(err.Error() + "\n")
+			}
+			os.Exit(1)
+		}
+	}()
+
+	err = run()
 }
 
-func gen() error {
-	app, err := typewriter.NewApp("+gen")
+func run() error {
+	config := {{ printf "%#v" .Config }}
+	app, err := config.NewApp("+gen")
 
 	if err != nil {
 		return err
@@ -88,4 +102,4 @@ func gen() error {
 
 	return nil
 }
-`
+`))

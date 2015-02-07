@@ -16,7 +16,7 @@ import (
 // If no custom file exists, it executes the passed 'standard' func.
 //
 // If the custom file exists, new files are written to a temp directory and executed via `go run` in the shell.
-func execute(standard func() error, c config, imports typewriter.ImportSpecSet, body string) error {
+func execute(standard func(c config) error, c config, imports typewriter.ImportSpecSet, body *template.Template) error {
 	if importsSrc, err := os.Open(c.customName); err == nil {
 		defer importsSrc.Close()
 
@@ -25,13 +25,13 @@ func execute(standard func() error, c config, imports typewriter.ImportSpecSet, 
 	}
 
 	// do it the regular way
-	return standard()
+	return standard(c)
 }
 
 // executeCustom creates a temp directory, copies importsSrc into it and generates a main() using the passed imports and body.
 //
 // `go run` is then called on those files via os.Command.
-func executeCustom(importsSrc io.Reader, c config, imports typewriter.ImportSpecSet, body string) error {
+func executeCustom(importsSrc io.Reader, c config, imports typewriter.ImportSpecSet, body *template.Template) error {
 	temp, err := getTempDir()
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func executeCustom(importsSrc io.Reader, c config, imports typewriter.ImportSpec
 	}
 
 	// write the body, usually a main()
-	if _, err := main.WriteString(body); err != nil {
+	if err := body.Execute(main, c); err != nil {
 		return err
 	}
 

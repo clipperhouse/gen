@@ -22,7 +22,7 @@ func main() {
 	err = runMain(os.Args)
 }
 
-var exitStatusMsg = regexp.MustCompile(`^exit status \d+$`)
+var exitStatusMsg = regexp.MustCompile("^exit status \\d+$")
 
 func runMain(args []string) error {
 	c := defaultConfig

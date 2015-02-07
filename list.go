@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"text/template"
 
 	"github.com/clipperhouse/typewriter"
 )
@@ -13,7 +14,7 @@ func list(c config) error {
 		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
 	)
 
-	listFunc := func() error {
+	listFunc := func(c config) error {
 		app, err := typewriter.NewApp("+gen")
 
 		if err != nil {
@@ -28,10 +29,10 @@ func list(c config) error {
 		return nil
 	}
 
-	return execute(listFunc, c, imports, listBody)
+	return execute(listFunc, c, imports, listTmpl)
 }
 
-const listBody string = `
+var listTmpl = template.Must(template.New("list").Parse(`
 func main() {
 	app, err := typewriter.NewApp("+gen")
 
@@ -45,4 +46,4 @@ func main() {
 		fmt.Println("  " + tw.Name())
 	}
 }
-`
+`))
