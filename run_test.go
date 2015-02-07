@@ -20,7 +20,7 @@ func TestRun(t *testing.T) {
 
 	// standard run
 	if err := run(c); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// gen file should exist

@@ -18,7 +18,7 @@ func TestList(t *testing.T) {
 
 	// standard
 	if err := list(c); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// 1 line for title + 2 standard typewriters (see imports.go)
