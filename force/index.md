@@ -18,7 +18,7 @@ There are classes of errors that gen can tolerate while maintaining correctness.
 
 	var Bar DoesntExist
 
-Here, the code is syntactally correct and the `Foo` is fully valid. However, `DoesntExist` is an unknown type, and the code won't build.
+Here, the code is syntactally correct and the `Foo` type is fully valid. However, `DoesntExist` is an unknown type, and the code won't build.
 
 Under normal circumstances, gen will stop in the presence of any type error such as the one above. However, one can imagine that gen *should* logically be able to operate here, since it only cares about `Foo`.
 
