@@ -88,4 +88,4 @@ It's a local dev tool, not a platform or (shudder) a framework. Run it locally, 
 
 gen parses and type-checks your source code. So, having correct source code before you use gen is important.
 
-That said, there are classes of errors that gen can optionally tolerate, via the `-f` (force) flag. [Learn more...](/force/)
+That said, there are classes of errors that gen can optionally tolerate, via the `-f` (force) flag. [Learn more...](force/)
