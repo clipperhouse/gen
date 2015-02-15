@@ -127,7 +127,7 @@ Returns the average **projected** value of a slice, where the projection is defi
 
 Signature:
 
-	func (ExampleSlice) AverageT() (T, error)  // T must be a numeric type
+	func (ExampleSlice) AverageT(func(Example) T) (T, error)  // T must be a numeric type
 
 Example:
 
