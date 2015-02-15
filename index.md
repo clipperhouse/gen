@@ -41,6 +41,7 @@ gen is driven by “type writers” – packages which are responsible for inter
 Type `gen help`:
 
 	gen           Generate files for types marked with +gen.
+	              Optional -f flag (force) to ignore type-check errors
 	gen list      List available typewriters.
 	gen add       Add a third-party typewriter to the current package.
 	gen get       Download and install imported typewriters. 
@@ -82,3 +83,9 @@ The two tools are complementary.
 Like as part of the build? Sure, but that's not what it's designed around so we don't recommend it.
 
 It's a local dev tool, not a platform or (shudder) a framework. Run it locally, test it, and commit the generated code to the repo.
+
+**What if my code is incorrect?**
+
+gen parses and type-checks your source code. So, having correct source code before you use gen is important.
+
+That said, there are classes of errors that gen can optionally tolerate, via the `-f` (force) flag. [Learn more...](/force/)
