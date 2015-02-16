@@ -27,3 +27,5 @@ The solution to this is the `-f` flag, which means "force". In this mode, type-c
 Officially gen considers "force" mode to be undefined behavior. There are many classes of errors and we can't guarantee the correct behavior for all of them.
 
 However, for certain classes of type-check errors, `-f` is a good way to get yourself out of a jam.
+
+*Here's a bit of [background discussion](https://github.com/clipperhouse/gen/issues/77).*
