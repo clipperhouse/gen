@@ -9,7 +9,7 @@ order: 1
 
 `gen` operates by parsing and type-checking your source code. The correctness of your code will affect gen's ability to operate.
 
-There are scenarios where one can get a bit stuck, however. For example, if you generate incorrect code, your codebase is now incorrect -- to which gen will object and refuse to generate new code! (Most users won't experience this, but if you are writing your own typewriter, this will sound familiar.)
+There are scenarios where one can get a bit stuck, however. For example, if you generate incorrect code, your codebase is now incorrect -- which will cause gen to refuse to generate new code! (Most users won't experience this, but if you are writing your own typewriter, it will sound familiar.)
 
 There are classes of errors that gen can tolerate while maintaining correctness. For example:
 
