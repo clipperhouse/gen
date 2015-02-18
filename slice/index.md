@@ -229,7 +229,7 @@ Example:
 	}
 
 	band := func(a Hipster, b Hipster) bool {
-	    a.FavoriteBand == b.FavoriteBand
+	    return a.FavoriteBand == b.FavoriteBand
 	}
 
 	hipsters.DistinctBy(band) // => [{"Neutral Milk Hotel", true}, {"Death Cab for Cutie", true}, {"You Probably Haven’t Heard of Them", true}]
