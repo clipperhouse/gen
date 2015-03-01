@@ -30,7 +30,15 @@ And at the command line, simply type:
 
 You should see a new file, named `mytype_slice.go`. Have a look around.
 
-(The annotation syntax will look familiar to Go users, it is modeled after struct tags.)
+## Annotations
+
+The annotation syntax will look familiar to Go users, it is modeled after struct tags.
+
+	// +gen [*] tag:"Value, Value[T,T]" anothertag
+
+The annotation is a comment that begins with the `+gen` directive. It is optionally followed by a `*`, indicating that the generated type should be a pointer. Then, struct-style tags which include any number of values. In turn, each value can have optional type parameters. Tags can be "naked" (without values), as in `anothertag` above.
+
+The tags & values are interpreted by TypeWriters.
 
 ## TypeWriters
 
