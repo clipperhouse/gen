@@ -12,20 +12,20 @@ td:first-child {
 	width: 150px;
 }
 
-.nav {
+nav {
 	padding-top: 1.4em;
 	padding-bottom: 2em;
 }
 
-.nav > h4 {
+nav > h4 {
 	margin-bottom: .5em;
 }
 
-.nav > p {
+nav > p {
 	margin: 0 0 0 1em;
 }
 
-.nav > p + h4 {
+nav > p + h4 {
 	margin-top: .6em;
 }
 
