@@ -94,6 +94,6 @@ It's a local dev tool, not a platform or (shudder) a framework. Run it locally, 
 
 **What if my code is incorrect?**
 
-gen parses and type-checks your source code. So, having correct source code before you use gen is important.
+gen parses and type-checks your source code. Having correct, buildable source code before you begin is important.
 
 That said, there are classes of errors that gen can optionally tolerate, via the `-f` (force) flag. [Learn more...](force/)
