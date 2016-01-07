@@ -35,3 +35,21 @@ type MyType struct{}
 ```
 Implements a strongly-typed unordered set with unique values, based on [github.com/deckarep/golang-set](https://github.com/deckarep/golang-set).
 
+
+#### Stringer [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/stringer?status.svg)](https://godoc.org/golang.org/x/tools/cmd/stringer)
+`github.com/clipperhouse/stringer` `built-in typewriter, no need to install`  
+
+```go
+// +gen stringer
+type Pill int
+
+const (
+    Placebo Pill = iota
+    Aspirin
+    Ibuprofen
+    Paracetamol
+    Acetaminophen = Paracetamol
+)
+```
+Generates an implementation of the Stringer interface from const variable names, for pretty-printing, based on  [golang.org/x/tools/cmd/stringer](https://golang.org/x/tools/cmd/stringer).
+
