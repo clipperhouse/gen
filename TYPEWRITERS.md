@@ -120,10 +120,31 @@ Implements a queue.
 
 
 
-### Hard-to-install and unfinished typewriters
-Feel free to improve these, making installation easier, improving documentation or writing tests.
+### Improvable typewriters
+Feel free to help these typewriters by making installation easier, improving documentation, writing tests or improving the implementation.
 
-##### Slice extension *
+
+##### Flags [![GoDoc](https://godoc.org/github.com/michaelsmanley/flags?status.svg)](https://godoc.org/github.com/michaelsmanley/flags)
+`gen add github.com/michaelsmanley/flags`  
+
+```go
+// +gen flags"
+type MyType struct{}
+```
+Convenience functions for manipulating flags, in the bitset sense. 
+
+
+##### Sequences [![GoDoc](https://godoc.org/github.com/fernandokm/sequences?status.svg)](https://godoc.org/github.com/fernandokm/sequences)
+`gen add github.com/fernandokm/sequences`  
+
+```go
+// +gen sequenceGenerator:"Iterator[int64,uint64,*bigInt]"
+type MyType struct{}
+```
+Generates an implementation of a generator of primes, fibonacci or triangular numbers using a given type.
+
+
+##### Slice extension [![GoDoc](https://godoc.org/github.com/remz/golang-sdk/gen_extras?status.svg)](https://godoc.org/github.com/remz/golang-sdk/gen_extras)
 `github.com/remz/golang-sdk/gen_extras` `extends the built-in slice implementation, adding new functions`  
 
 ```go
