@@ -10,6 +10,9 @@ It also offers third-party, runtime extensibility via [typewriters](https://gith
 
 [Hey, a video](https://www.youtube.com/watch?v=KY8OXFi3CDU)
 
+###Typewriters
+There is a list of open-source typewriters in [TYPEWRITERS.md](https://github.com/clipperhouse/gen/blob/master/TYPEWRITERS.md). Please add your own.
+
 ###Contributing
 
 There are three big parts of `gen`.
