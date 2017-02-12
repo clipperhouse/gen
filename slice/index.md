@@ -554,7 +554,7 @@ Example:
 		return a.Year < b.Year
 	}
 
-	movies.SortBy(yearThenTitle) // => [{"Fargo", 1996}, "Independence Day", 1996}, {"Iron Man", 2008}, {"WALL-E", 2008}, {"Django Unchained", 2012}]
+	movies.SortBy(yearThenTitle) // => [{"Fargo", 1996}, {"Independence Day", 1996}, {"Iron Man", 2008}, {"WALL-E", 2008}, {"Django Unchained", 2012}]
 
 `SortByDesc` and `IsSortedBy(Desc)` are also available, and should be self-explanatory.
 
