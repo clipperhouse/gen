@@ -1,4 +1,4 @@
-##Typewriters
+## Typewriters
 
 This is a list of known open-source typewriters in alphabetical order. 
 GoDoc links are to the original implementation that might use `interface{}` instead of a gen type.
