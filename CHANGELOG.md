@@ -1,8 +1,8 @@
-###3 Jan 2015
+### 3 Jan 2015
 
 Added [stringer](https://github.com/clipperhouse/stringer) as a built-in typewriter.
 
-###30 Nov 2014 (v4)
+### 30 Nov 2014 (v4)
 
 To get the latest: `go get github.com/clipperhouse/gen`. Type `gen help` to see usage.
 
@@ -10,7 +10,7 @@ To get the latest: `go get github.com/clipperhouse/gen`. Type `gen help` to see 
 
 This release has several substantial changes.
 
-####Type parameters
+#### Type parameters
 
 Tags now have support for type parameters, for example:
 
@@ -19,13 +19,13 @@ Tags now have support for type parameters, for example:
 	
 Those type parameters (qux, thing, stuff) are properly evaluated as types, and passed to your typewriters.
 
-####Type constraints
+#### Type constraints
 
 Speaking of above, types are evaluated for Numeric, Ordered and Comparable. Templates, in turn, can have type constraints.
 
 For example, you can declare your Sum template only to be applicable to Numeric types, and your Set to Comparable types.
 
-####gen add
+#### gen add
 
 Third-party typewriters are added to your package using a new command, `add`. It looks like this:
 
@@ -42,11 +42,11 @@ As always, it’s up to the third-party typewriter to determine behavior. In thi
 
 We deprecated the unintuitive `gen custom` command, `add` replaces it.
 
-####gen watch
+#### gen watch
 
 ...will watch the current directory and `gen` on file changes.
 
-####Explcitness
+#### Explcitness
 
 Previous versions of gen would generate a dozen or so LINQ-style slice methods simply by marking up:
 
@@ -60,7 +60,7 @@ We’ve opted for explicitness moving forward – in the case of slices, you’l
 
 In other words, only the methods you want.
 
-####Projections
+#### Projections
 
 Certain methods, such as Select and GroupBy require an additional type parameter. I won’t bore you with the convoluted old way. Now it’s:
 
@@ -69,7 +69,7 @@ Certain methods, such as Select and GroupBy require an additional type parameter
 
 Those type parameters are properly evaluated, and typewriters get full type information on them.
 
-####slice
+#### slice
 
 The main built-in typewriter used to be called `genwriter`, it is now called `slice`. Instead of the generated slice type being called Things, it’s now called ThingSlice.
 
@@ -81,7 +81,7 @@ You can add them using the `add` command described above:
 
 	gen add github.com/clipperhouse/linkedlist
 
-####Smaller interface
+#### Smaller interface
 
 For those developing their own typewriters: the [`TypeWriter` interface](https://github.com/clipperhouse/typewriter/blob/master/typewriter.go) got smaller. It’s now:
 
@@ -97,7 +97,7 @@ We also run [goimports](https://godoc.org/golang.org/x/tools/imports) on generat
 
 Let me (@clipperhouse) know if any questions.
 
-###28 Jun 2014 (v3)
+### 28 Jun 2014 (v3)
 
 To get the latest: `go get -u github.com/clipperhouse/gen`. Type `gen help` to see commands.
 
@@ -120,7 +120,7 @@ Change those import paths to other, third-party typewriters. Then call `gen get`
 
 Docs on how to create a typewriter are coming soon. In the meantime, have a look at the [container](https://github.com/clipperhouse/gen/tree/master/typewriters/container) typewriter for a decent example.
 
-###12 Jun 2014
+### 12 Jun 2014
 
 A new architecture based on ‘typewriters’. Ideally you should see little change, but…
 
@@ -139,11 +139,11 @@ We are going to exploit this architecture to do some ~~evil~~ interesting things
 
 Any trouble, please let me know via a GitHub issue, or [Twitter](http://twitter.com/clipperhouse), or…
 
-###9 Mar 2014
+### 9 Mar 2014
 
 Preliminary support for containers, starting with Set, List and Ring. The use case is to generate a strongly-typed container, to avoid the overhead of casting (type assertions), and to add compile-time safety.
 
-###1 Feb 2014
+### 1 Feb 2014
 
 gen will now delete `*_gen.go` files in the case that a previously-gen’d type has been removed, per #34. Confirms with the user for safety. And of course you are using version control, right?
 
@@ -151,7 +151,7 @@ Added new `Max` and `Min` (alongside the existing respective *By). The differenc
 
 MaxBy(less) and MinBy(less) are still the way to go for structs or ad-hoc ordering.
 
-###30 Jan 2014
+### 30 Jan 2014
 
 Added new `Sort` (alongside the existing `SortBy`). The difference is that Sort works on types that are known sortable such as `type MySortable int`. It requires no passed ‘less’ func because we already know what ‘less’ is for such types. :)
 
@@ -161,7 +161,7 @@ The ‘integration tests’ (those which test the gen’d code) have been rewrit
 
 Generated code is now passed through the go/format package (gofmt) on output, so you don’t have to.
 
-###26 Jan 2014
+### 26 Jan 2014
 
 This release includes breaking changes. To update:
 
