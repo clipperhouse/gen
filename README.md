@@ -4,28 +4,28 @@
 
 It also offers third-party, runtime extensibility via [typewriters](https://github.com/clipperhouse/typewriter).
 
-####[Introduction and docs…](http://clipperhouse.github.io/gen/)
+#### [Introduction and docs…](http://clipperhouse.github.io/gen/)
 
 [Changelog](https://github.com/clipperhouse/gen/blob/master/CHANGELOG.md)
 
 [Hey, a video](https://www.youtube.com/watch?v=KY8OXFi3CDU)
 
-###Typewriters
+### Typewriters
 There is a list of open-source typewriters in [TYPEWRITERS.md](https://github.com/clipperhouse/gen/blob/master/TYPEWRITERS.md). Please add your own.
 
-###Contributing
+### Contributing
 
 There are three big parts of `gen`.
 
-####gen
+#### gen
 
 This repository. The gen package is primarily the command-line interface. Most of the work is done by the typewriter package, and individual typewriters.
 
-####typewriter
+#### typewriter
 
 The [typewriter package](https://github.com/clipperhouse/typewriter) is where most of the parsing, type evaluation and code generation architecture lives.
 
-####typewriters
+#### typewriters
 
 Typewriters are where templates and logic live for generating code. Here’s [set](https://github.com/clipperhouse/set), which will make a lovely Set container for your type. Here’s [slice](https://github.com/clipperhouse/slice), which provides the built-in LINQ-like functionality. Here’s [stringer](https://github.com/clipperhouse/stringer), a fork of Rob Pike’s [tool](https://godoc.org/golang.org/x/tools/cmd/stringer).
 
