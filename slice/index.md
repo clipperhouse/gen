@@ -3,6 +3,7 @@ layout: default
 title: "slice"
 path: "/slice"
 order: 2
+redirect_to: "http://clipperhouse.com/gen/slice/"
 ---
 
 ## The `slice` typewriter

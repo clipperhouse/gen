@@ -3,6 +3,7 @@ layout: default
 title: "others"
 path: "/optional"
 order: 3
+redirect_to: "http://clipperhouse.com/gen/optional/"
 ---
 
 ## Optional typewriters

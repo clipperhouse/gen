@@ -3,6 +3,7 @@ layout: default
 title: "stringer"
 path: "/stringer"
 order: 2
+redirect_to: "http://clipperhouse.com/gen/stringer/"
 ---
 
 ## The `stringer` typewriter

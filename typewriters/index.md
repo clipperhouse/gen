@@ -3,6 +3,7 @@ layout: default
 title: "typewriters"
 path: "/typewriter"
 order: 2
+redirect_to: "http://clipperhouse.com/gen/typewriters/"
 ---
 
 ## TypeWriters

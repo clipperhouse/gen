@@ -3,6 +3,7 @@ layout: default
 title: "home"
 path: "/"
 order: 1
+redirect_to: "http://clipperhouse.com/gen/"
 ---
 
 ### Type-driven code generation for Go

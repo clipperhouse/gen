@@ -3,6 +3,7 @@ layout: default
 title: "force flag"
 path: "/force"
 order: 1
+redirect_to: "http://clipperhouse.com/gen/force/"
 ---
 
 ### Tolerating type errors
