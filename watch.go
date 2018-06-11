@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/clipperhouse/fsnotify"
+	"github.com/fsnotify/fsnotify"
 )
 
 func watch(c config) error {
