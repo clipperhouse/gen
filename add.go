@@ -26,7 +26,6 @@ func add(c config, args ...string) error {
 		// try to go get it
 		cmd := exec.Command("go", "get", imp.Path)
 		cmd.Stdout = c.out
-		cmd.Stderr = c.out
 
 		if err := cmd.Run(); err != nil {
 			return err

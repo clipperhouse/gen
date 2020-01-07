@@ -41,6 +41,6 @@ func TestList(t *testing.T) {
 
 	// 1 line for title + 2 custom typewriters
 	if lines := bytes.Count(b.Bytes(), []byte("\n")); lines != 4 {
-		t.Errorf("standard list should output 4 lines, got %v", lines)
+		t.Errorf("standard list should output 4 lines, got %v:\n%s", lines, b.String())
 	}
 }
