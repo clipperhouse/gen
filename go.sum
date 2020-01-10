@@ -1,12 +1,7 @@
-github.com/clipperhouse/foowriter v0.0.0-20200107164955-cd4f8e15a993 h1:Bpfo9m2KrzoytP6jlhMGGtkHInA5cWH5YJTri2PBCBo=
-github.com/clipperhouse/foowriter v0.0.0-20200107164955-cd4f8e15a993/go.mod h1:jkWZpd2f6D9wjuVyDg2IBTMjQiuxwJWe7xC3cpczeKM=
-github.com/clipperhouse/setwriter v0.0.0-20150304204547-c425a638bbb3 h1:xsR3eWq0LVk88R0Gh3dXb4n51XbxPz7RQX/yDn7H9i8=
-github.com/clipperhouse/setwriter v0.0.0-20150304204547-c425a638bbb3/go.mod h1:C3IGg3lQCw4gQa5BVf4Wa5LYQx3QewprHCS0SsBFKqY=
-github.com/clipperhouse/slice v0.0.0-20200107163911-d3664498de44 h1:SRHOVOMYZLcJtxhq/g3SP2ir/4u4P5j3mnqfZCgBja8=
-github.com/clipperhouse/slice v0.0.0-20200107163911-d3664498de44/go.mod h1:mFiY7Qu9Fm80fwgrIaXSNjYyVvdk3xHV9hw+SqYBeYs=
-github.com/clipperhouse/stringer v0.0.0-20180611194455-0659715a8d9b h1:B4CWvDAacFdxU++A8HTPtLKUdOwyr+/uF25LXXGN/vI=
-github.com/clipperhouse/stringer v0.0.0-20180611194455-0659715a8d9b/go.mod h1:8KO6Pue+XQLrtjzOaHVVB7RTMjfML3m/0oWMp6fqEMw=
-github.com/clipperhouse/typewriter v0.0.0-20180611194931-86cb4c0175cc/go.mod h1:22kCkEqgk8mZZLKxg8OE81J/HZLI81vW5cuSEE3p0KY=
+github.com/clipperhouse/slice v0.0.0-20200107170738-a74fc3888fd9 h1:98FuFIacIB6rKfxodqagVhwLsrKEjve2T8l6O0oYjsM=
+github.com/clipperhouse/slice v0.0.0-20200107170738-a74fc3888fd9/go.mod h1:SYNbTtqlzmDAa8k/IZo8rBZrLHdB19cwOtJ6ySOwQZ4=
+github.com/clipperhouse/stringer v0.0.0-20200107165315-e8ef8175ba3b h1:YnvS5xvtmKSUlkH91qF6HKRlSK27qI8U+1Kl1EsiRKY=
+github.com/clipperhouse/stringer v0.0.0-20200107165315-e8ef8175ba3b/go.mod h1:dKiI12fHMknvyIFKvze6MRYQJCYOZ8Onjsvpw5byYrc=
 github.com/clipperhouse/typewriter v0.0.0-20200107164453-d21420026310 h1:IC0Ywh01N6qQ+jT87vS4zhVsrE1q3829nVMQwz7PF3o=
 github.com/clipperhouse/typewriter v0.0.0-20200107164453-d21420026310/go.mod h1:GbdR1VEFLckXDXyXO3pn/lERXrQLVOI9j1Fly05g32I=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
@@ -25,4 +20,6 @@ golang.org/x/sys v0.0.0-20200107162124-548cf772de50/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20200107050322-53017a39ae36 h1:+eY+U4SdIdum+uGmzG+Y7oP2YWTOsFRElVIBD6K3Wgo=
 golang.org/x/tools v0.0.0-20200107050322-53017a39ae36/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
+golang.org/x/tools v0.0.0-20200110213125-a7a6caa82ab2 h1:V9r/14uGBqLgNlHRYWdVqjMdWkcOHnE2KG8DwVqQSEc=
+golang.org/x/tools v0.0.0-20200110213125-a7a6caa82ab2/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
