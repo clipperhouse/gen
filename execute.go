@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -21,6 +22,7 @@ func execute(standard func(c config) error, c config, imports typewriter.ImportS
 		defer importsSrc.Close()
 
 		// custom imports file exists, use it
+		fmt.Printf("Found custom imports file %s. Using it.\n", c.customName)
 		return executeCustom(importsSrc, c, imports, body)
 	}
 
