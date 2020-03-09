@@ -154,3 +154,21 @@ type MyType struct{}
 ```
 Extends the Slice implementation by adding some more functions. Current implementation requires copying files into the Slice implementation folder and rebuilding gen. 
 
+##### Slice extension [![GoDoc](https://godoc.org/github.com/chewxy/smallset?status.svg)](https://godoc.org/github.com/chewxy/smallset)
+`gen add github.com/chewxy/smallset` 
+
+```go
+// +gen smallset
+type MyStruct struct{}
+```
+This will generate a set where the `Contains()` method uses the standard comparator (`==`). If you want to use a custom equality method, you can do so as below:
+
+
+```go
+// +gen smallset:"eq_Equals
+type MyStruct struct{}
+```
+
+This will generate a set where the `Contains()` method usese `Equals()`. You can use any name after `eq_`, as this is a dumb template based generator.
+
+Generates a slice based set. It is useful for sets where there are fewer than 100 elements, as it is quicker than the traditional `map` based set.
