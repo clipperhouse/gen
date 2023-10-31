@@ -10,6 +10,10 @@ It also offers third-party, runtime extensibility via [typewriters](https://gith
 
 [Hey, a video](https://www.youtube.com/watch?v=KY8OXFi3CDU)
 
+#### ‼️ 
+
+This project is deprecated. It won't work with recent versions of Go, and...Go now has proper generics! Treat this project as a historical curiosity.
+
 ### Typewriters
 There is a list of open-source typewriters in [TYPEWRITERS.md](https://github.com/clipperhouse/gen/blob/master/TYPEWRITERS.md). Please add your own.
 
